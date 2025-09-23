@@ -1,6 +1,13 @@
 import { useState } from "react";
 const maxCharsAllowed = 30;
-const validInput=["a","b","c","d","e","f","h","i","l","w","2000","3000"];
+const copiedtxt=`A1884
+A1885
+A1886
+A1900
+A1920`;
+
+const validInput = copiedtxt.split(/\r?\n/).map(s => s.trim().toLowerCase());
+//const validInput=["a","b","c","d","e","f","h","i","l","w","2000","3000"];
 
 
 export default function Find() {

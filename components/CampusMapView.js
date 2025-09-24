@@ -9,23 +9,6 @@ import ZoomPan from './ZoomPan';
 import PageContainer from './PageContainer';
 import buildings from '../data/buildings.json';
 
-// Color map synced with your legend
-const colorMap = {
-  "Academic Building": "#0f5132",
-  "Student Housing": "#6b21a8",   // violet
-  "Faculty/Staff": "#e874be",
-  "Residents": "#e8bf74",
-  "Students": "#86efac",
-  "Handicap": "#93c5fd",
-  "Restricted Area": "#9ca3af"
-};
-
-const slugifyLabel = (label = '') =>
-  label
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
 // CampusMapView component displays the campus map with interactive elements
 export default function CampusMapView({
   src = '/BuildingMaps/(Campus)/Campus.svg', // Default path to the campus map SVG
@@ -50,9 +33,9 @@ export default function CampusMapView({
     }
   };
 
-  // Apply the violet palette to housing buildings once the SVG exists
+  // Ensure student housing groups carry a helper class for interactivity
 
-  const applyStudentHousingColors = useCallback(() => {
+  const ensureStudentHousingClasses = useCallback(() => {
     const svgRoot = document.querySelector('.map-wrap svg');
     if (!svgRoot) return;
 
@@ -78,37 +61,15 @@ export default function CampusMapView({
         }
       });
     });
-
-    Object.entries(colorMap).forEach(([label, color]) => {
-      const cls = slugifyLabel(label); // normalize label into a safe CSS class name
-      if (!cls) return;
-      svgRoot.querySelectorAll(`.${cls}`).forEach((el) => {
-        if (el.classList.contains('building')) {
-          el.style.fill = color;
-          el.style.stroke = color;
-          return;
-        }
-
-        if (el.classList.contains('building-group')) {
-          el.querySelectorAll('.building').forEach((shape) => {
-            shape.style.fill = color;
-            shape.style.stroke = color;
-          });
-          return;
-        }
-
-        el.style.fill = color;
-      });
-    });
   }, []);
 
   useEffect(() => {
-    applyStudentHousingColors();
-  }, [applyStudentHousingColors, src]);
+    ensureStudentHousingClasses();
+  }, [ensureStudentHousingClasses, src]);
 
   const handleSvgReady = useCallback(() => {
-    applyStudentHousingColors();
-  }, [applyStudentHousingColors]);
+    ensureStudentHousingClasses();
+  }, [ensureStudentHousingClasses]);
 
   // Content for the header, providing user instructions
   const headerContent = (

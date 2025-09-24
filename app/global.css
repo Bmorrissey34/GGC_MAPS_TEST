@@ -256,3 +256,12 @@ main {
   overflow: hidden;
 }
 
+.floor-content svg .active-room .room,
+.floor-content svg .room.active-room,
+.floor-content svg .active-room {
+  fill: #f5e100;
+}
+.floor-content svg .active-room .label {
+  fill: #000000;
+  font-weight: 700;
+}

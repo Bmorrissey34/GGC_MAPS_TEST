@@ -3,14 +3,15 @@ import Find from "../components/Find";
 import Links from "../components/Links";
 
 // PageContainer component serves as a layout wrapper for pages
-export default function PageContainer({ title, headerContent, children, className }) {
-  // Combine default classes with any custom classes passed in as props
-  const containerClasses = `container py-3 ${className || ''}`;
-
+export default function PageContainer({
+  children,
+  title,
+  headerContent,
+  fluid = false // Add a fluid prop, default to false
+}) {
   return (
-    <main className={containerClasses}>
-      {/* Header section with title, Find component, and optional header content */}
-      <div className="d-flex align-items-center justify-content-between mb-2">
+    <div className={fluid ? "container-fluid" : "container mt-3"}>
+      <div className="d-flex justify-content-between align-items-center mb-2">
         <h1
           className="h4 mb-0"
           style={{
@@ -35,6 +36,6 @@ export default function PageContainer({ title, headerContent, children, classNam
 
       {/* Footer section with Links component */}
       <Links /> {/* Navigation links */}
-    </main>
+    </div>
   );
 }

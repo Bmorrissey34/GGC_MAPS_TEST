@@ -20,7 +20,7 @@ export default function ZoomPan({
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
   // Set scale at a specific point
-  const setScaleAt = useCallback(
+    const setScaleAt = useCallback(
     (next, cx, cy) => {
       const vp = viewportRef.current;
       if (!vp) return;
@@ -31,12 +31,18 @@ export default function ZoomPan({
       const prev = scale;
       next = clamp(next, minScale, maxScale);
 
-      const dx = px / prev - px / next;
-      const dy = py / prev - py / next;
-      setPos((p) => ({ x: p.x + dx, y: p.y + dy }));
+      // The point on the content that is under the cursor
+      const contentX = (px / prev) - pos.x;
+      const contentY = (py / prev) - pos.y;
+
+      // The new position of that point after scaling
+      const newPosX = (px / next) - contentX;
+      const newPosY = (py / next) - contentY;
+
+      setPos({ x: newPosX, y: newPosY });
       setScale(next);
     },
-    [scale, minScale, maxScale]
+    [scale, pos.x, pos.y, minScale, maxScale]
   );
 
   // ----- Pointer drag pan -----

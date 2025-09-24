@@ -77,7 +77,7 @@ export default function CampusMapView({
   );
 
   return (
-    <PageContainer title="Campus Map" headerContent={headerContent}>
+    <PageContainer title="Campus Map" headerContent={headerContent} fluid={true}>
       {/* Container for the map and its interactive elements */}
       <div className="map-wrap">
         <ZoomPan

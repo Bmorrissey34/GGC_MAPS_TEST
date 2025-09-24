@@ -123,7 +123,7 @@ export default function FloorMapView({ src, interactiveSelector = '.room-group, 
   return (
     // Render the floor map viewer with zoom/pan functionality and selection handling
     <>
-      <PageContainer title="Floor Map" headerContent={headerContent}>
+      <PageContainer title="Floor Map" headerContent={headerContent} fluid={true}>
         <ZoomPan
           initialScale={1}
           minScale={0.4}

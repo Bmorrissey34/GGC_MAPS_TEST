@@ -22,7 +22,7 @@ export default function PageContainer({
         >
           {title}
         </h1>
-        <Find /> {/* Search component */}
+         {/* Search component old spot for the find*/}
         {headerContent} {/* Optional additional header content */}
       </div>
 

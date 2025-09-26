@@ -1,6 +1,10 @@
 // components/Header.js
+"use client";
+import { useState } from "react";
 import Link from 'next/link';
 import Image from 'next/image';
+import Find from "../components/Find";
+
 
 export default function Header() {
   return (
@@ -17,6 +21,7 @@ export default function Header() {
           />
           <span className="header-title">GGC Maps</span>
         </Link>
+        <Find></Find>
         {/* You can add navigation links here if needed */}
       </div>
     </header>

@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 const maxCharsAllowed = 30;
 const copiedtxt=`A1884
 A1885
@@ -38,10 +40,12 @@ export default function Find() {
   return (
     <>
       <div className="d-flex align-items-center" style={{ gap: "var(--justin-globe-gap)" }}>        
-        <label htmlFor="findlabel" className="h4 mb-0" style={{fontFamily: "var(--justin-globe1)",color: "var(--justin-globe1-color)"}}>Find:</label>
+        <label htmlFor="findlabel" className="h4 mb-0" style={{fontFamily: "var(--justin-globe1)",color: "white"}}>Find:</label>
 
         <input
           id="findInput"
+          type="text"
+          size={"50"}
           className="form-control w-100"
           placeholder="AEC, gameroom, library"
           maxLength={maxCharsAllowed}

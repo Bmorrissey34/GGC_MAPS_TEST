@@ -4,6 +4,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styles from "./Legend.module.css";
 
+const HOVER_TARGETS = {
+  academicBuilding: { selector: ".building-group:not(.student-housing)" },
+  studentHousing: { selector: ".building-group.student-housing" },
+  parkingFacultyStaff: { selector: ".staff-parking" },
+  parkingResidents: { selector: ".resident-parking" },
+  parkingStudents: { selector: ".student-parking" },
+  parkingHandicap: { selector: ".handicap-parking" },
+  restrictedArea: { selector: ".restricted-area" },
+};
+
 const TRANSLATIONS = {
   en: {
     legendTitle: "Legend",
@@ -39,7 +49,6 @@ const TRANSLATIONS = {
   },
 };
 
-
 const FALLBACK_LOCALE = "en";
 const SUPPORTED_LOCALES = ["en", "es"];
 
@@ -68,25 +77,57 @@ const getStoredLocale = () => {
 };
 
 /** Reusable row with color square + label */
-function SwatchItem({ color, label, className = "" }) {
+function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
+  const handleEnter = () => onEnter?.();
+  const handleLeave = () => onLeave?.();
+
   return (
-    <li className={`${styles.item} ${className}`}>
+    <li
+      className={`${styles.item} ${className}`}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+    >
       <span className={styles.swatch} style={{ background: color }} />
       <span>{label}</span>
     </li>
   );
 }
 
-export default function Legend({ locale = FALLBACK_LOCALE }) {
+export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
+  void mapScopeSelector;
+
   const [open, setOpen] = useState(true);
   const [userOverride, setUserOverride] = useState(() => getStoredLocale() !== null);
   const [currentLocale, setCurrentLocale] = useState(() =>
     getStoredLocale() ?? normalizeLocale(locale) ?? FALLBACK_LOCALE
   );
 
-  const messages = useMemo(() => TRANSLATIONS[currentLocale] ?? TRANSLATIONS[FALLBACK_LOCALE], [currentLocale]);
+  const messages = useMemo(
+    () => TRANSLATIONS[currentLocale] ?? TRANSLATIONS[FALLBACK_LOCALE],
+    [currentLocale]
+  );
   const fallbackMessages = TRANSLATIONS[FALLBACK_LOCALE];
   const t = (key) => messages[key] ?? fallbackMessages[key] ?? key;
+
+  const sendHover = (source, detail) => {
+    if (typeof window === "undefined" || !detail) return;
+    window.dispatchEvent(new CustomEvent("ggcmap-hover", { detail: { source, ...detail } }));
+  };
+
+  const clearHover = (source) => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(new CustomEvent("ggcmap-hover-clear", { detail: { source } }));
+  };
+
+  const getHoverHandlers = (key) => {
+    const detail = HOVER_TARGETS[key];
+    if (!detail) return {};
+    const source = `legend:${key}`;
+    return {
+      onEnter: () => sendHover(source, detail),
+      onLeave: () => clearHover(source),
+    };
+  };
 
   // remember panel open state between sessions
   useEffect(() => {
@@ -165,7 +206,12 @@ export default function Legend({ locale = FALLBACK_LOCALE }) {
         <div id="legend-body" hidden={!open} className={styles.legendBody}>
           <ul className={styles.list}>
             {BASE_ITEMS.map((item) => (
-              <SwatchItem key={item.labelKey} color={item.color} label={t(item.labelKey)} />
+              <SwatchItem
+                key={item.labelKey}
+                color={item.color}
+                label={t(item.labelKey)}
+                {...getHoverHandlers(item.labelKey)}
+              />
             ))}
 
             {/* Section: Parking */}
@@ -173,10 +219,13 @@ export default function Legend({ locale = FALLBACK_LOCALE }) {
               <span>{t("parking")}</span>
               <ul className={styles.sublist}>
                 {PARKING_ITEMS.map((item) => (
-                  <li key={item.labelKey} className={styles.subitem}>
-                    <span className={styles.swatch} style={{ background: item.color }} />
-                    <span>{t(item.labelKey)}</span>
-                  </li>
+                  <SwatchItem
+                    key={item.labelKey}
+                    color={item.color}
+                    label={t(item.labelKey)}
+                    className={styles.subitem}
+                    {...getHoverHandlers(item.labelKey)}
+                  />
                 ))}
               </ul>
             </li>
@@ -185,6 +234,7 @@ export default function Legend({ locale = FALLBACK_LOCALE }) {
               color="#9ca3af"
               label={t("restrictedArea")}
               className={styles.sectionLabel}
+              {...getHoverHandlers("restrictedArea")}
             />
           </ul>
         </div>
@@ -192,5 +242,3 @@ export default function Legend({ locale = FALLBACK_LOCALE }) {
     </div>
   );
 }
-
-

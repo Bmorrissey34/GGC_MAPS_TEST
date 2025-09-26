@@ -258,10 +258,35 @@ main {
 
 .floor-content svg .active-room .room,
 .floor-content svg .room.active-room,
-.floor-content svg .active-room {
+.floor-content svg .active-room,
+.floor-content svg .hover-highlight .room,
+.floor-content svg .room.hover-highlight,
+.floor-content svg .hover-highlight {
   fill: #f5e100;
 }
-.floor-content svg .active-room .label {
+.floor-content svg .active-room .label,
+.floor-content svg .hover-highlight .label {
   fill: #000000;
+  font-weight: 700;
+}
+
+.map-wrap svg .hover-highlight,
+.map-wrap svg .hover-highlight .building,
+.map-wrap svg .hover-highlight .student-parking,
+.map-wrap svg .hover-highlight .staff-parking,
+.map-wrap svg .hover-highlight .resident-parking,
+.map-wrap svg .hover-highlight .visitor-parking,
+.map-wrap svg .hover-highlight .open-parking,
+.map-wrap svg .hover-highlight .reserved-parking,
+.map-wrap svg .hover-highlight .handicap-parking,
+.map-wrap svg .hover-highlight .campus {
+  fill: #f5e100 !important;
+  transition: fill 120ms ease, stroke 120ms ease;
+}
+
+.map-wrap svg .hover-highlight text,
+.map-wrap svg .hover-highlight .building-label,
+.map-wrap svg text.hover-highlight {
+  fill: #000000 !important;
   font-weight: 700;
 }

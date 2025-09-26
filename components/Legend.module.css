@@ -4,18 +4,19 @@
 .legendContainer {
   position: absolute;
   top: clamp(16px, 2vw, 24px);   /* keeps it a bit below the navbar */
-  right: clamp(8px, 2vw, 16px);
+  right: clamp(8px, 2vw, 24px);
   z-index: 1000;                 /* above the SVG/map */
   pointer-events: auto;
+  max-width: 100%;
 }
 
 /* ===== The legend panel box ===== */
 .legend {
-  display: inline-block;              /* shrink to fit content */
-  width: fit-content;
-  min-width: 160px;                   /* don't get too small */
-  max-width: min(320px, 90vw);        /* expand as needed */
-  max-height: min(65vh, 520px);       /* prevent growing off-screen */
+  display: block;
+  width: clamp(180px, 22vw, 360px);  /* scale with viewport but stay manageable */
+  min-width: 0;                      /* allow shrinking on very narrow screens */
+  max-width: min(88vw, 360px);       /* never spill over edge */
+  max-height: clamp(210px, 48vh, 420px);
   overflow: auto;
 
   background: rgba(255, 255, 255, 0.96);
@@ -26,7 +27,7 @@
   padding: 12px 14px;
   color: #0f172a;
   line-height: 1.35;
-  font-size: 0.95rem;
+  font-size: clamp(0.86rem, 0.9vw, 0.95rem);
 }
 
 /* ===== Header ===== */
@@ -128,14 +129,59 @@
 }
 
 /* ===== Responsive tweaks ===== */
-@media (max-width: 640px) {
+@media (max-width: 1024px) {
   .legend {
-    font-size: 0.92rem;
-    min-width: 150px;
-    max-width: min(280px, 92vw);
-    padding: 10px 12px;
+    width: clamp(170px, 28vw, 340px);
+    max-width: min(84vw, 340px);
   }
 }
+
+@media (max-width: 640px) {
+  .legendContainer {
+    top: clamp(10px, 6vh, 18px);
+    right: clamp(4px, 6vw, 12px);
+  }
+
+  .legend {
+    width: clamp(110px, 38vw, 176px);
+    max-width: min(58vw, 182px);
+    max-height: clamp(150px, 34vh, 260px);
+    padding: 8px;
+    font-size: clamp(0.74rem, 2.4vw, 0.84rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .legendContainer {
+    top: clamp(8px, 5vh, 14px);
+    right: clamp(4px, 8vw, 10px);
+  }
+
+  .legend {
+    width: clamp(96px, 40vw, 154px);
+    max-width: min(54vw, 158px);
+    max-height: clamp(130px, 32vh, 220px);
+    padding: 6px 8px;
+    font-size: clamp(0.7rem, 2.6vw, 0.8rem);
+  }
+}
+
+@media (max-width: 375px) {
+  .legendContainer {
+    top: clamp(6px, 5vh, 12px);
+    right: clamp(4px, 8vw, 10px);
+  }
+
+  .legend {
+    width: clamp(88px, 52vw, 128px);
+    max-width: min(56vw, 128px);
+    max-height: clamp(120px, 30vh, 200px);
+    padding: 6px;
+    font-size: clamp(0.68rem, 3vw, 0.78rem);
+  }
+}
+
+
 .legendControls {
   display: flex;
   align-items: center;
@@ -181,3 +227,4 @@
   outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
+

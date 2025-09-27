@@ -64,15 +64,15 @@ const PARKING_ITEMS = [
 ];
 
 const LEGEND_CONTAINER_STYLE = {
-  top: "clamp(80px, 15vh, 250px)", //   scales with height
-  right: "clamp(40px, 6vw, 200px)",  // pushes it left as screen gets wider
+  top: "clamp(80px, 15vh, 250px)",
+  right: "clamp(40px, 6vw, 200px)",
   zIndex: 1000,
   pointerEvents: "auto",
 };
 
 const LEGEND_PANEL_STYLE = {
-  width: "clamp(180px, 22vw, 360px)",
-  maxWidth: "min(88vw, 360px)",
+  width: "clamp(160px, 18vw, 280px)",   // narrower
+  maxWidth: "min(80vw, 240px)",         // cap at 280px
   maxHeight: "clamp(210px, 48vh, 420px)",
   overflowY: "auto",
   backgroundColor: "rgba(255, 255, 255, 0.96)",
@@ -81,9 +81,9 @@ const LEGEND_PANEL_STYLE = {
   color: "#0f172a",
   lineHeight: 1.35,
   fontSize: "clamp(0.86rem, 0.9vw, 0.95rem)",
-  border: "1px solid rgba(0,0,0,0.25)",    // subtle border
-  borderRadius: "0.75rem",                 // rounded corners
-  boxShadow: "0 6px 16px rgba(0,0,0,0.35)" // stronger shadow
+  border: "1px solid rgba(0,0,0,0.25)",
+  borderRadius: "0.75rem",
+  boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
 };
 
 const normalizeLocale = (value) => {
@@ -100,15 +100,12 @@ const getStoredLocale = () => {
 
 /** Reusable row with color square + label */
 function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
-  const handleEnter = () => onEnter?.();
-  const handleLeave = () => onLeave?.();
   const classes = ["d-flex align-items-center gap-2", className].filter(Boolean).join(" ");
-
   return (
     <li
       className={classes}
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
+      onMouseEnter={() => onEnter?.()}
+      onMouseLeave={() => onLeave?.()}
       style={{ wordBreak: "break-word" }}
     >
       <span
@@ -120,14 +117,13 @@ function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
   );
 }
 
-
 export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
   void mapScopeSelector;
 
   const [open, setOpen] = useState(true);
   const [userOverride, setUserOverride] = useState(() => getStoredLocale() !== null);
-  const [currentLocale, setCurrentLocale] = useState(() =>
-    getStoredLocale() ?? normalizeLocale(locale) ?? FALLBACK_LOCALE
+  const [currentLocale, setCurrentLocale] = useState(
+    () => getStoredLocale() ?? normalizeLocale(locale) ?? FALLBACK_LOCALE
   );
 
   const messages = useMemo(
@@ -195,41 +191,40 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
   return (
     <div className="position-absolute" style={LEGEND_CONTAINER_STYLE}>
       <aside
-        className="shadow rounded-3 p-3"
+        className="shadow rounded-3 py-3 px-4"
         role="region"
         aria-label={t("legendTitle")}
         style={LEGEND_PANEL_STYLE}
       >
-        <div className="d-flex align-items-center justify-content-between mb-2">
+        {/* Header row: title + EN/ES cluster close together, collapse button floats right */}
+        <div className="d-flex align-items-center gap-2 mb-2">
           <div className="fw-bold">{t("legendTitle")}</div>
 
-          <div className="d-flex align-items-center gap-2">
-            <div className="btn-group btn-group-sm" role="group" aria-label={t("languageLabel")}>
-              {SUPPORTED_LOCALES.map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  className={`btn btn-sm ${currentLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
-                  onClick={() => handleLocaleChange(code)}
-                  aria-pressed={currentLocale === code}
-                  aria-label={t(code === "en" ? "languageEnglish" : "languageSpanish")}
-                >
-                  {code.toUpperCase()}
-                </button>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-secondary"
-              onClick={() => setOpen((v) => !v)}
-              aria-expanded={open}
-              aria-controls="legend-body"
-              title={open ? t("toggleHide") : t("toggleShow")}
-            >
-              {open ? <i className="bi bi-dash-lg"></i> : <i className="bi bi-plus-lg"></i>}
-            </button>
+          <div className="btn-group btn-group-sm ms-2" role="group" aria-label={t("languageLabel")}>
+            {SUPPORTED_LOCALES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                className={`btn btn-sm ${currentLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
+                onClick={() => handleLocaleChange(code)}
+                aria-pressed={currentLocale === code}
+                aria-label={t(code === "en" ? "languageEnglish" : "languageSpanish")}
+              >
+                {code.toUpperCase()}
+              </button>
+            ))}
           </div>
+
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-secondary ms-3"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls="legend-body"
+            title={open ? t("toggleHide") : t("toggleShow")}
+          >
+            {open ? <i className="bi bi-dash-lg"></i> : <i className="bi bi-plus-lg"></i>}
+          </button>
         </div>
 
         <div id="legend-body" hidden={!open} className="pt-2">
@@ -245,7 +240,9 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
             ))}
 
             <li className="mt-3">
-              <div className="fw-semibold" style={{ paddingLeft: "22px" }}>{t("parking")}</div>
+              <div className="fw-semibold" style={{ paddingLeft: "22px" }}>
+                {t("parking")}
+              </div>
               <ul className="list-unstyled mb-0 ps-3 mt-2">
                 {PARKING_ITEMS.map((item) => (
                   <SwatchItem

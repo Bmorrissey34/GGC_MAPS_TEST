@@ -1,8 +1,7 @@
-// components/legend.jsx
+﻿// components/legend.jsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import styles from "./Legend.module.css";
 
 const HOVER_TARGETS = {
   academicBuilding: { selector: ".building-group:not(.student-housing)" },
@@ -64,6 +63,29 @@ const PARKING_ITEMS = [
   { color: "#93c5fd", labelKey: "parkingHandicap" },
 ];
 
+const LEGEND_CONTAINER_STYLE = {
+  top: "clamp(80px, 15vh, 250px)", //   scales with height
+  right: "clamp(40px, 6vw, 200px)",  // pushes it left as screen gets wider
+  zIndex: 1000,
+  pointerEvents: "auto",
+};
+
+const LEGEND_PANEL_STYLE = {
+  width: "clamp(180px, 22vw, 360px)",
+  maxWidth: "min(88vw, 360px)",
+  maxHeight: "clamp(210px, 48vh, 420px)",
+  overflowY: "auto",
+  backgroundColor: "rgba(255, 255, 255, 0.96)",
+  backdropFilter: "blur(4px)",
+  WebkitBackdropFilter: "blur(4px)",
+  color: "#0f172a",
+  lineHeight: 1.35,
+  fontSize: "clamp(0.86rem, 0.9vw, 0.95rem)",
+  border: "1px solid rgba(0,0,0,0.25)",    // subtle border
+  borderRadius: "0.75rem",                 // rounded corners
+  boxShadow: "0 6px 16px rgba(0,0,0,0.35)" // stronger shadow
+};
+
 const normalizeLocale = (value) => {
   if (!value) return null;
   const lower = value.toLowerCase();
@@ -80,18 +102,24 @@ const getStoredLocale = () => {
 function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
   const handleEnter = () => onEnter?.();
   const handleLeave = () => onLeave?.();
+  const classes = ["d-flex align-items-center gap-2", className].filter(Boolean).join(" ");
 
   return (
     <li
-      className={`${styles.item} ${className}`}
+      className={classes}
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
+      style={{ wordBreak: "break-word" }}
     >
-      <span className={styles.swatch} style={{ background: color }} />
+      <span
+        className="d-inline-block border rounded"
+        style={{ width: "14px", height: "14px", backgroundColor: color, flexShrink: 0 }}
+      />
       <span>{label}</span>
     </li>
   );
 }
+
 
 export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
   void mapScopeSelector;
@@ -165,21 +193,23 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
   };
 
   return (
-    <div className={styles.legendContainer}>
-      <aside className={styles.legend} role="region" aria-label={t("legendTitle")}>
-        {/* Header with title + toggle button (upper-right) */}
-        <div className={styles.legendHeader}>
-          <div className={styles.legendTitle}>{t("legendTitle")}</div>
+    <div className="position-absolute" style={LEGEND_CONTAINER_STYLE}>
+      <aside
+        className="shadow rounded-3 p-3"
+        role="region"
+        aria-label={t("legendTitle")}
+        style={LEGEND_PANEL_STYLE}
+      >
+        <div className="d-flex align-items-center justify-content-between mb-2">
+          <div className="fw-bold">{t("legendTitle")}</div>
 
-          <div className={styles.legendControls}>
-            <div className={styles.localeToggle} role="group" aria-label={t("languageLabel")}>
+          <div className="d-flex align-items-center gap-2">
+            <div className="btn-group btn-group-sm" role="group" aria-label={t("languageLabel")}>
               {SUPPORTED_LOCALES.map((code) => (
                 <button
                   key={code}
                   type="button"
-                  className={`${styles.localeButton} ${
-                    currentLocale === code ? styles.localeButtonActive : ""
-                  }`}
+                  className={`btn btn-sm ${currentLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
                   onClick={() => handleLocaleChange(code)}
                   aria-pressed={currentLocale === code}
                   aria-label={t(code === "en" ? "languageEnglish" : "languageSpanish")}
@@ -191,39 +221,38 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
 
             <button
               type="button"
-              className={styles.legendToggle}
+              className="btn btn-sm btn-outline-secondary"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-controls="legend-body"
               title={open ? t("toggleHide") : t("toggleShow")}
             >
-              {open ? "\u2212" : "+"}
+              {open ? <i className="bi bi-dash-lg"></i> : <i className="bi bi-plus-lg"></i>}
             </button>
           </div>
         </div>
 
-        {/* Collapsible body */}
-        <div id="legend-body" hidden={!open} className={styles.legendBody}>
-          <ul className={styles.list}>
+        <div id="legend-body" hidden={!open} className="pt-2">
+          <ul className="list-unstyled mb-0">
             {BASE_ITEMS.map((item) => (
               <SwatchItem
                 key={item.labelKey}
                 color={item.color}
                 label={t(item.labelKey)}
+                className="mb-2"
                 {...getHoverHandlers(item.labelKey)}
               />
             ))}
 
-            {/* Section: Parking */}
-            <li className={styles.sectionHeading}>
-              <span>{t("parking")}</span>
-              <ul className={styles.sublist}>
+            <li className="mt-3">
+              <div className="fw-semibold" style={{ paddingLeft: "22px" }}>{t("parking")}</div>
+              <ul className="list-unstyled mb-0 ps-3 mt-2">
                 {PARKING_ITEMS.map((item) => (
                   <SwatchItem
                     key={item.labelKey}
                     color={item.color}
                     label={t(item.labelKey)}
-                    className={styles.subitem}
+                    className="mb-2"
                     {...getHoverHandlers(item.labelKey)}
                   />
                 ))}
@@ -233,7 +262,7 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
             <SwatchItem
               color="#9ca3af"
               label={t("restrictedArea")}
-              className={styles.sectionLabel}
+              className="mt-3 mb-0"
               {...getHoverHandlers("restrictedArea")}
             />
           </ul>

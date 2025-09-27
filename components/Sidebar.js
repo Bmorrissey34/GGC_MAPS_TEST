@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 const NAV_ITEMS = [
-  { key: 'campus', label: 'Campus', hover: { selector: '.building-group' }, active: true },
+  { key: 'campus', label: 'Campus', hover: { selector: '.building-group' }, active: false },
   { key: 'A', label: 'Building A', hover: { ids: ['a'] } },
   { key: 'B', label: 'Building B', hover: { ids: ['b'] } },
   { key: 'C', label: 'Building C', hover: { ids: ['c'] } },
@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { key: 'H', label: 'Building H / Allied Health & Science', hover: { ids: ['h'] } },
   { key: 'I', label: 'Building I', hover: { ids: ['i'] } },
   { key: 'L', label: 'Building L / Library', hover: { ids: ['l'] } },
-  { key: 'P', label: 'Building P', hover: { ids: ['p'] } },
   { key: 'W', label: 'Building W', hover: { ids: ['w'] } },
   { key: '1000', label: 'Building 1000 / Student Housing', hover: { ids: ['b1000'] } },
   { key: '2000', label: 'Building 2000 / Student Housing', hover: { ids: ['2'] } },
@@ -45,11 +44,11 @@ export default function Sidebar() {
   return (
     <nav className={`sidebar bg-light border-end ${collapsed ? 'collapsed' : ''}`}>
       <button
-        className="btn btn-outline-secondary m-2"
+        className="btn btn-outline-secondary"
         onClick={handleToggle}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
-        {collapsed ? '>>' : '<<'}
+      <i className={`bi ${collapsed ? 'bi-list' : 'bi-x'}`}></i>
       </button>
       <ul className="nave flex-colmn">
         {NAV_ITEMS.map((item) => {

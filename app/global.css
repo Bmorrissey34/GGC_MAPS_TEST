@@ -29,10 +29,10 @@
   --justin-globe-inputBarSize: 250px;
 
   /* William Stein's Global Variables*/
-  --sidebar-width: 400px;
-  --sidebar-collapsed-width: 60px;
-  --sidebar-link-color: #006400;
-  --sidebar-hover-color: black;
+  --sidebar-width: 345px;
+  --sidebar-collapsed-width: 67px;
+  --sidebar-link-color: black;
+  --sidebar-hover-color: gold;
 
   /* Brnendan Morrissey's Global Header & Footer Variables*/
   --bm-header-bg: #006400;                  /* Header background (GGC Green) */
@@ -122,11 +122,27 @@ main {
 
 /* ✅ Sidebar styles (incoming changes) */
 .sidebar {
+  position: fixed;
+  top: 2vh;
+  left: 0;
+  height: 66vh;
   width: var(--sidebar-width);
   transition: width 0.2s;
+  z-index: 1000;
+  background-color: #006400 !important;
+  border-color: #006400 !important;
+}
+
+.sidebar:hover {
+  width: var(--sidebar-width);
+}
+
+.sidebar:hover .nav-link {
+  display: block;
 }
 
 .sidebar.collapsed {
+  height: 5.75vh;
   width: var(--sidebar-collapsed-width);
 }
 
@@ -143,12 +159,22 @@ main {
   font-weight: bold;
 }
 
-.sidebar .nav-link:hover {
-  color: var(--sidebar-hover-color);
+.sidebar .btn {
+  margin: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 40px;
+  color: black;
+  font-size: 15pt;
+  font-weight: bold;
+  border-width: 2px;
+  border-color: black;
 }
 
-.sidebar .btn {
-  width: 40px;
+.sidebar ul {
+  padding-left: 10px;
 }
 
 .ggcLinks{

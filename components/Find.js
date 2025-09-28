@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import rooms from "../data/rooms.json";
+import { useRouter } from "next/navigation";
 const maxCharsAllowed = 30;
 const copiedtxt=`A1884
 A1885
@@ -16,6 +18,7 @@ export default function Find() {
   const [showHelp, setShowHelp] = useState(false);
   const [error,setError]=useState("");
   const [findValue, setFindValue] = useState("");
+  const router=useRouter();
 
   const onFindClickButton = () => {
     
@@ -24,13 +27,41 @@ export default function Find() {
     if (userInput === "") {
       setError("You must enter a search term.");
     }
-    else if(!validInput.includes(userInput)){
-      setError(findValue+" is not valid");
+    else{
+     // const match=rooms.find((room) => room.originalId.toLowerCase() === userInput);
+     let match = rooms.find((room) => {
+    (room) => (room.uniqueId || "").toLowerCase() === userInput
+});
+
+      if (!match) {
+    match = rooms.find((room) => {
+      const [building, level, roomNumber] = room.uniqueId.split("-");
+      return (building.toLowerCase() + roomNumber.toLowerCase()) === userInput;
+    });
+  }
+
+      if (!match) {
+      setError(findValue + " is not valid");
+    } else {
+      setError("");
+      console.log("Valid room "+findValue);
+      const building = userInput[0].toUpperCase(); // e.g., "a" -> "A"
+      const floorMatch = userInput.match(/\d/); // first digit in the string
+      if (!floorMatch) {
+        setError("Invalid room format. Example: A1805, B2220");
+        return;
+  }
+      
+      const floor = floorMatch[0]; // "1" or "2" etc.
+      const svgPath = `/building/${building}/L${floor}`;
+
+      setError("");
+
+      router.push(svgPath);
+      
     }
-     else {
-      setError(""); 
-      console.log("Searching for:", findValue);
-    }
+  }
+
   };
 
   const onHelpClick = () => {
@@ -52,6 +83,7 @@ export default function Find() {
           style={{ width: "var(--justin-globe-inputBarSize)" }}
           value={findValue}
           onChange={(e) => setFindValue(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && onFindClickButton()}
         />
         <button id="findInputButton" className="btn btn-primary" onClick={onFindClickButton}>Find</button>
 

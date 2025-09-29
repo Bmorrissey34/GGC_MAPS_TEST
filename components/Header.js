@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from 'next/link';
 import Image from 'next/image';
 import Find from "../components/Find";
-
+import Sidebar from '../components/Sidebar';
 
 export default function Header() {
   return (
@@ -21,6 +21,7 @@ export default function Header() {
           />
           <span className="header-title">GGC Maps</span>
         </Link>
+        <Sidebar />
         <Find></Find>
         {/* You can add navigation links here if needed */}
       </div>

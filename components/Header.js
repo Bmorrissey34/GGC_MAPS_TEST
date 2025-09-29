@@ -20,7 +20,6 @@ export default function Header() {
                 width={40}
                 height={40}
                 priority
-                style={{ border: "var(--justin-globe3-border)" }}
               />
               <span className="header-title">GGC Maps</span>
             </Link>

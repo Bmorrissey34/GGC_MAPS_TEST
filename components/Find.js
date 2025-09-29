@@ -4,14 +4,10 @@ import { useState, useEffect, useMemo } from "react";
 import rooms from "../data/rooms.json";
 import { useRouter } from "next/navigation";
 const maxCharsAllowed = 30;
-const copiedtxt=`A1884
-A1885
-A1886
-A1900
-A1920`;
 
-const validInput = copiedtxt.split(/\r?\n/).map(s => s.trim().toLowerCase());
-//const validInput=["a","b","c","d","e","f","h","i","l","w","2000","3000"];
+//const validInput = copiedtxt.split(/\r?\n/).map(s => s.trim().toLowerCase());
+const validBuildings=["a","b","c","d","e","f","g","h","i","l","w"];
+const validBuildingFloors=["a1","b1","b2","b3","c1","c2","d1","d2","e1","e2","e3","f1","f2","h1","h2","h3","i1","i2","i3","l1","l2","l3","w1","w2","w3"];
 
 
 export default function Find() {
@@ -27,8 +23,25 @@ export default function Find() {
     if (userInput === "") {
       setError("You must enter a search term.");
     }
+
+    else if(validBuildings.includes(userInput)&&userInput.length===1){
+      const building=userInput.toUpperCase();
+      router.push(`/building/${building}/L1`);
+      setError("");
+    }
+
+    else if(validBuildingFloors.includes(userInput)&&userInput.length===2){
+      const building=userInput.slice(0,1).toUpperCase();
+      const floor=userInput.slice(1).toUpperCase();
+      router.push(`/building/${building}/L${floor}`);
+      setError("");
+    }
+
+    else if(userInput==="help"){
+      setShowHelp(true);
+    }
+
     else{
-     // const match=rooms.find((room) => room.originalId.toLowerCase() === userInput);
      let match = rooms.find((room) => {
     (room) => (room.uniqueId || "").toLowerCase() === userInput
 });
@@ -45,14 +58,14 @@ export default function Find() {
     } else {
       setError("");
       console.log("Valid room "+findValue);
-      const building = userInput[0].toUpperCase(); // e.g., "a" -> "A"
-      const floorMatch = userInput.match(/\d/); // first digit in the string
+      const building = userInput[0].toUpperCase(); 
+      const floorMatch = userInput.match(/\d/); 
       if (!floorMatch) {
         setError("Invalid room format. Example: A1805, B2220");
         return;
   }
       
-      const floor = floorMatch[0]; // "1" or "2" etc.
+      const floor = floorMatch[0]; 
       const svgPath = `/building/${building}/L${floor}`;
 
       setError("");
@@ -93,7 +106,7 @@ export default function Find() {
       </div>
 
         {error && (
-        <div style={{ color: "red", marginTop: "0.5rem" }}>
+        <div style={{ color: "hotpink", marginTop: "0.5rem", fontWeight: "bold" }}>
            {error}
         </div>
         )}

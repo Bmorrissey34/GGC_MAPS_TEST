@@ -9,6 +9,44 @@ const maxCharsAllowed = 30;
 const validBuildings=["a","b","c","d","e","f","g","h","i","l","w"];
 const validBuildingFloors=["a1","b1","b2","b3","c1","c2","d1","d2","e1","e2","e3","f1","f2","h1","h2","h3","i1","i2","i3","l1","l2","l3","w1","w2","w3"];
 
+function highlightInPage(roomId) {
+  const host = document.querySelector(".floor-content");
+  if (!host) return false;
+
+  const svg = host.querySelector("svg");
+  if (!svg) return false;
+
+  // clear previous highlights
+  svg.querySelectorAll(".active-room").forEach(el =>
+    el.classList.remove("active-room")
+  );
+
+  // your SVG structure: <g id="1750" class="room-group"> ... <rect class="room" /> <text class="label" />
+  const group =
+    svg.querySelector(`g.room-group[id="${CSS.escape(roomId)}"]`) ||
+    svg.querySelector(`g[id="${CSS.escape(roomId)}"]`);
+  if (!group) return false;
+
+ const shape = group.querySelector(".room") || group.querySelector("rect, polygon, path");
+  const label = group.querySelector(".label") || group.querySelector("text");
+
+  if (shape) shape.classList.add("active-room");  // yellow fill only on the shape
+  if (label) label.classList.add("label--active"); // force black text
+
+  // optional: bring shape forward
+  if (shape?.parentElement) shape.parentElement.appendChild(shape);
+
+  return true; // we highlighted in place
+}
+
+function highlightWithRetry(roomId, attempts = 10, delay = 100) {
+  const ok = highlightInPage(roomId);
+  if (ok) return;
+
+  if (attempts <= 0) return;
+  setTimeout(() => highlightWithRetry(roomId, attempts - 1, delay), delay);
+}
+
 
 export default function Find() {
   const [showHelp, setShowHelp] = useState(false);
@@ -57,22 +95,22 @@ export default function Find() {
       setError(findValue + " is not valid");
     } else {
       setError("");
-      console.log("Valid room "+findValue);
-      const building = userInput[0].toUpperCase(); 
-      const floorMatch = userInput.match(/\d/); 
-      if (!floorMatch) {
-        setError("Invalid room format. Example: A1805, B2220");
-        return;
-  }
-      
-      const floor = floorMatch[0]; 
-      const svgPath = `/building/${building}/L${floor}`;
+  const building = userInput[0].toUpperCase();
+  const m = userInput.match(/^[a-z](\d)/i);
+  if (!m) { setError("Invalid room format."); return; }
+  const floor = m[1];
+  const roomOnly = findValue.trim().replace(/^[a-z]/i, ""); // e.g., "a1805" -> "1805"
+  highlightWithRetry(roomOnly);
 
-      setError("");
+  // Try to highlight in the current page first
+  if (highlightInPage(roomOnly)) return;
 
-      router.push(svgPath);
+  // If SVG isn't on this page, fall back to navigating with the room param
+  router.push(`/building/${building}/L${floor}?room=${encodeURIComponent(roomOnly)}`);
       
     }
+
+
   }
 
   };

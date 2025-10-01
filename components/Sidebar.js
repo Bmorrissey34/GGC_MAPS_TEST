@@ -47,24 +47,26 @@ export default function Sidebar() {
       >
       <i className={`bi ${collapsed ? 'bi-list' : 'bi-x'}`}></i>
       </button>
-      <ul className="nave flex-colmn">
-        {NAV_ITEMS.map((item) => {
-          const handlers = createHandlers(item);
-          const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
-          const linkClass = `nav-link${isActive ? ' active' : ''}`;
-          return (
-            <li key={item.key} className="nav-item">
-              <Link
-                className={linkClass}
-                href={item.path}
-                {...handlers}
-              >
-                {item.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      {!collapsed && (
+        <ul className="nave flex-colmn">
+          {NAV_ITEMS.map((item) => {
+            const handlers = createHandlers(item);
+            const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
+            const linkClass = `nav-link${isActive ? ' active' : ''}`;
+            return (
+              <li key={item.key} className="nav-item">
+                <Link
+                  className={linkClass}
+                  href={item.path}
+                  {...handlers}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </nav>
   );
 };

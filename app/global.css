@@ -338,9 +338,15 @@ main {
 }
 .floor-content svg .active-room .label,
 .floor-content svg .hover-highlight .label {
-  fill: #000000;
+  fill: #000000 !important;
   font-weight: 700;
 }
+
+.floor-content svg .label--active {
+  fill: #000 !important;
+  font-weight: 700;
+}
+
 
 .map-wrap svg .hover-highlight,
 .map-wrap svg .hover-highlight .building,

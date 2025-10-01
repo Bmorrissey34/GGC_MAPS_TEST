@@ -1,4 +1,4 @@
-﻿// components/legend.jsx
+// components/legend.jsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -121,9 +121,9 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
   void mapScopeSelector;
 
   const [open, setOpen] = useState(true);
-  const [userOverride, setUserOverride] = useState(() => getStoredLocale() !== null);
+  const [userOverride, setUserOverride] = useState(false);
   const [currentLocale, setCurrentLocale] = useState(
-    () => getStoredLocale() ?? normalizeLocale(locale) ?? FALLBACK_LOCALE
+    () => normalizeLocale(locale) ?? FALLBACK_LOCALE
   );
 
   const messages = useMemo(
@@ -152,6 +152,15 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
       onLeave: () => clearHover(source),
     };
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedLocale = getStoredLocale();
+    if (storedLocale) {
+      setCurrentLocale(storedLocale);
+      setUserOverride(true);
+    }
+  }, []);
 
   // remember panel open state between sessions
   useEffect(() => {

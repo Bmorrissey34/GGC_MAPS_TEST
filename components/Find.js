@@ -34,7 +34,9 @@ function highlightInPage(roomId) {
   if (label) label.classList.add("label--active"); // force black text
 
   // optional: bring shape forward
-  if (shape?.parentElement) shape.parentElement.appendChild(shape);
+  //if (shape?.parentElement) shape.parentElement.appendChild(shape);
+  if (shape?.parentElement) shape.parentElement.appendChild(shape); // shape on top
+  if (label?.parentElement) label.parentElement.appendChild(label);
 
   return true; // we highlighted in place
 }

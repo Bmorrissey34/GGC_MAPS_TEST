@@ -1,23 +1,19 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { getAllBuildings } from '../lib/campus';
 
+// Get building data and create navigation items
+const buildings = getAllBuildings();
 const NAV_ITEMS = [
-  { key: 'campus', label: 'Campus', hover: { selector: '.building-group' }, active: false },
-  { key: 'A', label: 'Building A', hover: { ids: ['a'] } },
-  { key: 'B', label: 'Building B', hover: { ids: ['b'] } },
-  { key: 'C', label: 'Building C', hover: { ids: ['c'] } },
-  { key: 'CC', label: 'Building CC', hover: { ids: ['cc'] } },
-  { key: 'D', label: 'Building D / Admissions', hover: { ids: ['d'] } },
-  { key: 'E', label: 'Building E / Student Center', hover: { ids: ['e'] } },
-  { key: 'F', label: 'Building F / Wellness & Rec Center', hover: { ids: ['f'] } },
-  { key: 'G', label: 'Building G / Grizzly Athletics', hover: { ids: ['g'] } },
-  { key: 'H', label: 'Building H / Allied Health & Science', hover: { ids: ['h'] } },
-  { key: 'I', label: 'Building I', hover: { ids: ['i'] } },
-  { key: 'L', label: 'Building L / Library', hover: { ids: ['l'] } },
-  { key: 'W', label: 'Building W', hover: { ids: ['w'] } },
-  { key: '1000', label: 'Building 1000 / Student Housing', hover: { ids: ['b1000'] } },
-  { key: '2000', label: 'Building 2000 / Student Housing', hover: { ids: ['2'] } },
-  { key: '3000', label: 'Building 3000 / Student Housing', hover: { ids: ['3'] } },
+  { key: 'campus', label: 'Campus', path: '/', hover: { selector: '.building-group' } },
+  ...buildings.map(building => ({
+    key: building.id,
+    label: building.name,
+    path: `/building/${building.id}`,
+    hover: { ids: [building.id.toLowerCase()] }
+  }))
 ];
 
 const dispatchHoverEvent = (type, source, detail) => {
@@ -28,6 +24,7 @@ const dispatchHoverEvent = (type, source, detail) => {
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(true);
+  const pathname = usePathname();
   const handleToggle = () => setCollapsed(!collapsed);
 
   const createHandlers = (item) => {
@@ -53,20 +50,21 @@ export default function Sidebar() {
       <ul className="nave flex-colmn">
         {NAV_ITEMS.map((item) => {
           const handlers = createHandlers(item);
-          const linkClass = `nav-link${item.active ? ' active' : ''}`;
+          const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
+          const linkClass = `nav-link${isActive ? ' active' : ''}`;
           return (
             <li key={item.key} className="nav-item">
-              <a
+              <Link
                 className={linkClass}
-                href="#"
+                href={item.path}
                 {...handlers}
               >
                 {item.label}
-              </a>
+              </Link>
             </li>
           );
         })}
       </ul>
     </nav>
   );
-}
+};

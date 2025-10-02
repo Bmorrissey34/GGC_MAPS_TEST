@@ -9,6 +9,7 @@ const maxCharsAllowed = 30;
 const validBuildings=["a","b","c","d","e","f","g","h","i","l","w"];
 const validBuildingFloors=["a1","b1","b2","b3","c1","c2","d1","d2","e1","e2","e3","f1","f2","h1","h2","h3","i1","i2","i3","l1","l2","l3","w1","w2","w3"];
 
+
 function highlightInPage(roomId) {
   const host = document.querySelector(".floor-content");
   if (!host) return false;
@@ -55,6 +56,16 @@ export default function Find() {
   const [error,setError]=useState("");
   const [findValue, setFindValue] = useState("");
   const router=useRouter();
+  const ALIASES = {
+  // user input  ->  where to go
+  // always lowercase keys
+  aec: { building: "W", level: "L1", room: "1160" }, 
+  cisco: { building: "C", level: "L1", room: "1260" },
+  park: {building: "D", level: "L1", room: "1125"},
+  // add more:
+  // library: { building: "C", level: "L2", room: "2106" },
+  // gameroom: { building: "A", level: "L1", room: "1805" },
+};
 
   const onFindClickButton = () => {
     
@@ -62,6 +73,16 @@ export default function Find() {
 
     if (userInput === "") {
       setError("You must enter a search term.");
+    }
+
+    const aliasHit = ALIASES[userInput];
+    if (aliasHit) {
+      setError("");
+      const { building, level, room } = aliasHit;
+      router.push(`/building/${building}/${level}?room=${encodeURIComponent(room)}`);
+      //highlightInPage(room);
+      highlightWithRetry(room);
+      return;
     }
 
     else if(validBuildings.includes(userInput)&&userInput.length===1){
@@ -95,6 +116,7 @@ export default function Find() {
 
       if (!match) {
       setError(findValue + " is not valid");
+      return;
     } else {
       setError("");
   const building = userInput[0].toUpperCase();

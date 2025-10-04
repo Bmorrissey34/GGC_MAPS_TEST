@@ -62,6 +62,10 @@ export default function Find() {
   aec: { building: "W", level: "L1", room: "1160" }, 
   cisco: { building: "C", level: "L1", room: "1260" },
   park: {building: "D", level: "L1", room: "1125"},
+  test: {building: "D", level: "L1", room: "1301"},
+  den: {building: "A", level: "L1", room: "1510"},
+  //game: {building: "E", level: "L1", room: "1108"},
+
   // add more:
   // library: { building: "C", level: "L2", room: "2106" },
   // gameroom: { building: "A", level: "L1", room: "1805" },

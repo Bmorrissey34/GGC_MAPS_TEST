@@ -84,7 +84,21 @@ export default function Find() {
       setError("");
       const { building, level, room } = aliasHit;
       router.push(`/building/${building}/${level}?room=${encodeURIComponent(room)}`);
-      //highlightInPage(room);
+
+      const svgHere = document.querySelector(
+    `.floor-content svg[data-building="${building}"][data-level="${level}"]`
+  );
+
+      if (svgHere) {
+    // Stay here and highlight immediately
+    highlightWithRetry(room);
+    //highlightInPage(room);
+  } else {
+    // Navigate; target page should highlight via ?room=
+    router.push(`/building/${building}/${level}?room=${encodeURIComponent(room)}`);
+  
+  }
+      highlightInPage(room);
       highlightWithRetry(room);
       return;
     }

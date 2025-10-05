@@ -73,7 +73,7 @@ export default function CampusMapView({
 
   // Content for the header, providing user instructions
   const headerContent = (
-    <span className="text-muted small">Scroll/pinch to zoom, drag to pan</span>
+    <span className="text-muted small">Use +/- buttons or scroll/pinch to zoom; drag to pan</span>
   );
 
   return (

@@ -28,7 +28,7 @@ export default function FloorMapView({ src, interactiveSelector = '.room-group, 
   };
 
   // Content for the header providing user instructions
-  const headerContent = <span className="text-muted small">Scroll/pinch to zoom • drag to pan</span>;
+  const headerContent = <span className="text-muted small">Use +/- buttons or scroll/pinch to zoom; drag to pan</span>;
 
   // Handles the selection of a room or area on the map
   const handleSelect = (id) => {

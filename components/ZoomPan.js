@@ -8,42 +8,129 @@ export default function ZoomPan({
   minScale = 0.5,
   maxScale = 4,
   initialScale = 1,
-  wheelStep = 0.15,
-  dblClickStep = 0.5,
-  disableDoubleClickZoom = false // Prop to enable/disable double-click zoom functionality
+  wheelStep = 0.001, // Sensitivity for wheel zoom; smaller values slow interaction
+  dblClickStep = 0.25,
+  disableDoubleClickZoom = false,
+  showControls = true
 }) {
   const viewportRef = useRef(null);
   const [scale, setScale] = useState(initialScale);
   const [pos, setPos] = useState({ x: 0, y: 0 });
 
+  const userHasDragged = useRef(false);
+
   // Clamp value between min and max
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
+  const getAnchorBounds = useCallback(() => {
+    const vp = viewportRef.current;
+    if (!vp) return null;
+    const inner = vp.firstElementChild;
+    if (!(inner instanceof HTMLElement)) return null;
+    const svg = inner.querySelector('svg');
+    if (!svg) return null;
+    const candidate =
+      svg.querySelector('[data-map-anchor]') ||
+      svg.querySelector('.campus') ||
+      svg;
+
+    if (!(candidate instanceof SVGGraphicsElement)) return null;
+
+    try {
+      const bbox = candidate.getBBox();
+      if (!Number.isFinite(bbox.width) || !Number.isFinite(bbox.height) || bbox.width <= 0 || bbox.height <= 0) {
+        return null;
+      }
+      return bbox;
+    } catch {
+      return null;
+    }
+  }, []);
+
   // Set scale at a specific point
-    const setScaleAt = useCallback(
+  const setScaleAt = useCallback(
     (next, cx, cy) => {
       const vp = viewportRef.current;
       if (!vp) return;
       const rect = vp.getBoundingClientRect();
-      const px = cx - rect.left;
-      const py = cy - rect.top;
 
       const prev = scale;
       next = clamp(next, minScale, maxScale);
 
+      const bounds = getAnchorBounds();
+      if (bounds && !userHasDragged.current) {
+        const desiredX = rect.width / 2 - next * (bounds.x + bounds.width / 2);
+        const desiredY = rect.height / 2 - next * (bounds.y + bounds.height / 2);
+        setPos({ x: desiredX, y: desiredY });
+        setScale(next);
+        return;
+      }
+
+      if (!Number.isFinite(cx) || !Number.isFinite(cy)) {
+        cx = rect.left + rect.width / 2;
+        cy = rect.top + rect.height / 2;
+      }
+
+      const px = cx - rect.left;
+      const py = cy - rect.top;
+
       // The point on the content that is under the cursor
-      const contentX = (px / prev) - pos.x;
-      const contentY = (py / prev) - pos.y;
+      const contentX = px / prev - pos.x;
+      const contentY = py / prev - pos.y;
 
       // The new position of that point after scaling
-      const newPosX = (px / next) - contentX;
-      const newPosY = (py / next) - contentY;
+      const newPosX = px / next - contentX;
+      const newPosY = py / next - contentY;
 
       setPos({ x: newPosX, y: newPosY });
       setScale(next);
     },
-    [scale, pos.x, pos.y, minScale, maxScale]
+    [scale, pos.x, pos.y, minScale, maxScale, getAnchorBounds]
   );
+
+  const getViewportCenter = useCallback(() => {
+    const vp = viewportRef.current;
+    if (!vp) return null;
+    const rect = vp.getBoundingClientRect();
+    return {
+      cx: rect.left + rect.width / 2,
+      cy: rect.top + rect.height / 2
+    };
+  }, []);
+
+  const zoomByMultiplier = useCallback(
+    (multiplier) => {
+      const center = getViewportCenter();
+      if (!center) return;
+      setScaleAt(scale * multiplier, center.cx, center.cy);
+    },
+    [getViewportCenter, scale, setScaleAt]
+  );
+
+  const resetView = useCallback(() => {
+    const nextScale = clamp(initialScale, minScale, maxScale);
+    let nextPos = { x: 0, y: 0 };
+
+    const vp = viewportRef.current;
+    if (vp) {
+      const rect = vp.getBoundingClientRect();
+      const bounds = getAnchorBounds();
+      if (bounds) {
+        nextPos = {
+          x: rect.width / 2 - nextScale * (bounds.x + bounds.width / 2),
+          y: rect.height / 2 - nextScale * (bounds.y + bounds.height / 2)
+        };
+      }
+    }
+
+    setScale(nextScale);
+    setPos(nextPos);
+    userHasDragged.current = false;
+  }, [initialScale, minScale, maxScale, getAnchorBounds]);
+
+  useEffect(() => {
+    resetView();
+  }, [resetView]);
 
   // ----- Pointer drag pan -----
   const drag = useRef({
@@ -83,6 +170,7 @@ export default function ZoomPan({
     if (!drag.current.captured && dist > TAP_SLOP) {
       drag.current.captured = true;
       drag.current.dragged = true;
+      userHasDragged.current = true;
       e.currentTarget.setPointerCapture(e.pointerId);
     }
 
@@ -109,7 +197,7 @@ export default function ZoomPan({
     }
   };
 
-  // Suppress container-level click after a drag so it doesn’t interfere
+  // Suppress container-level click after a drag so it doesn't interfere
   const onClickCapture = (e) => {
     if (drag.current._suppressClickOnce) {
       drag.current._suppressClickOnce = false;
@@ -126,8 +214,17 @@ export default function ZoomPan({
     // Handle wheel event for zooming
     const onWheel = (e) => {
       e.preventDefault();
-      const dir = e.deltaY < 0 ? 1 : -1;
-      setScaleAt(scale * (1 + wheelStep * dir), e.clientX, e.clientY);
+      const vp = viewportRef.current;
+      if (!vp) return;
+      const rect = vp.getBoundingClientRect();
+      const defaultCx = rect.left + rect.width / 2;
+      const defaultCy = rect.top + rect.height / 2;
+      const pointerCx = typeof e.clientX === 'number' ? e.clientX : defaultCx;
+      const pointerCy = typeof e.clientY === 'number' ? e.clientY : defaultCy;
+      const focusCx = userHasDragged.current ? pointerCx : defaultCx;
+      const focusCy = userHasDragged.current ? pointerCy : defaultCy;
+      const multiplier = Math.exp(-e.deltaY * wheelStep);
+      setScaleAt(scale * multiplier, focusCx, focusCy);
     };
 
     // Prevent default touchmove behavior for multi-touch
@@ -150,28 +247,59 @@ export default function ZoomPan({
   const onDoubleClick = (e) => {
     if (disableDoubleClickZoom) return;
     e.preventDefault();
-    setScaleAt(scale * (1 + dblClickStep), e.clientX, e.clientY);
+    const center = getViewportCenter();
+    const anchorCx = userHasDragged.current && typeof e.clientX === 'number'
+      ? e.clientX
+      : center?.cx ?? (typeof e.clientX === 'number' ? e.clientX : 0);
+    const anchorCy = userHasDragged.current && typeof e.clientY === 'number'
+      ? e.clientY
+      : center?.cy ?? (typeof e.clientY === 'number' ? e.clientY : 0);
+    setScaleAt(scale * (1 + dblClickStep), anchorCx, anchorCy);
   };
 
   // Handle keyboard events for zooming and panning
   useEffect(() => {
     const onKey = (e) => {
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
-      if (e.key === '+' || e.key === '=') setScaleAt(scale * (1 + wheelStep), innerWidth / 2, innerHeight / 2);
-      if (e.key === '-' || e.key === '_') setScaleAt(scale * (1 - wheelStep), innerWidth / 2, innerHeight / 2);
-      if (e.key === '0') {
-        setScale(1);
-        setPos({ x: 0, y: 0 });
+      if (e.key === '+' || e.key === '=') {
+        const centerPoint = getViewportCenter();
+        const anchorCx = centerPoint?.cx ?? innerWidth / 2;
+        const anchorCy = centerPoint?.cy ?? innerHeight / 2;
+        setScaleAt(scale * 1.1, anchorCx, anchorCy);
       }
-      if (e.key === 'ArrowLeft') setPos((p) => ({ ...p, x: p.x + 30 / scale }));
-      if (e.key === 'ArrowRight') setPos((p) => ({ ...p, x: p.x - 30 / scale }));
-      if (e.key === 'ArrowUp') setPos((p) => ({ ...p, y: p.y + 30 / scale }));
-      if (e.key === 'ArrowDown') setPos((p) => ({ ...p, y: p.y - 30 / scale }));
+      if (e.key === '-' || e.key === '_') {
+        const centerPoint = getViewportCenter();
+        const anchorCx = centerPoint?.cx ?? innerWidth / 2;
+        const anchorCy = centerPoint?.cy ?? innerHeight / 2;
+        setScaleAt(scale / 1.1, anchorCx, anchorCy);
+      }
+      if (e.key === '0') {
+        resetView();
+      }
+      if (e.key === 'ArrowLeft') {
+        userHasDragged.current = true;
+        setPos((p) => ({ ...p, x: p.x + 30 / scale }));
+      }
+      if (e.key === 'ArrowRight') {
+        userHasDragged.current = true;
+        setPos((p) => ({ ...p, x: p.x - 30 / scale }));
+      }
+      if (e.key === 'ArrowUp') {
+        userHasDragged.current = true;
+        setPos((p) => ({ ...p, y: p.y + 30 / scale }));
+      }
+      if (e.key === 'ArrowDown') {
+        userHasDragged.current = true;
+        setPos((p) => ({ ...p, y: p.y - 30 / scale }));
+      }
     };
 
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
-  }, [scale, setScaleAt, wheelStep]);
+  }, [scale, setScaleAt, resetView, getViewportCenter]);
+
+  const zoomIn = useCallback(() => zoomByMultiplier(1.15), [zoomByMultiplier]);
+  const zoomOut = useCallback(() => zoomByMultiplier(1 / 1.15), [zoomByMultiplier]);
 
   return (
     <div
@@ -201,6 +329,44 @@ export default function ZoomPan({
       >
         {children}
       </div>
+      {showControls && (
+        <div
+          className="position-absolute top-0 end-0 p-2"
+          style={{ pointerEvents: 'none', zIndex: 5 }}
+        >
+          <div
+            className="btn-group btn-group-sm shadow"
+            role="group"
+            aria-label="Zoom controls"
+            style={{ pointerEvents: 'auto' }}
+          >
+            <button
+              type="button"
+              className="btn btn-light"
+              onClick={zoomIn}
+              aria-label="Zoom in"
+            >
+              <span aria-hidden="true">+</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-light"
+              onClick={zoomOut}
+              aria-label="Zoom out"
+            >
+              <span aria-hidden="true">-</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-light"
+              onClick={resetView}
+              aria-label="Reset view"
+            >
+              <span aria-hidden="true">Reset</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,10 +10,10 @@
      maximum 18px (comfortable on desktops). */
 
   /* Variable 2: Responsive spacing unit , Karen Armendariz*/
-  --spacing-unit: clamp(0.5rem, 2vw, 1.5rem);
+  --spacing-unit: clamp(0.5rem, 1.5vw, 1.25rem);
   /* On phones: 0.5rem (compact),
-     scales with viewport (2vw),
-     on large screens: max 1.5rem. */
+     scales with viewport (1.5vw),
+     on large screens: max 1.25rem. */
 
   /* Justin's globals (normalized names) */
   --justin-globe1: "Georgia", Arial, sans-serif;
@@ -60,10 +60,10 @@ body {
 
 main {
   flex: 1; /* Pushes the footer down */
-  padding: var(--spacing-unit);
+  padding: clamp(0.5rem, 1vw, 1.25rem);
 }
 
-/* 🌟 Header Styles */
+/* Header Styles */
 .header {
   background-color: var(--bm-header-bg);
   color: var(--bm-header-text-color);
@@ -85,9 +85,14 @@ main {
   display: flex;
   align-items: center;
   justify-self: start;
-  padding-left: calc(var(--spacing-unit) * 15);
+  padding-left: calc(var(--spacing-unit) * 2);
 }
 
+@media (min-width: 992px) {
+  .header-left {
+    padding-left: calc(var(--spacing-unit) * 3);
+  }
+}
 
 .header-center {
   display: flex;
@@ -155,17 +160,17 @@ main {
   margin: 0;
 }
 
-/* ✅ Map container styles (your changes) */
+/* Map container styles */
 .map-wrap {
-  width: 85vw;           /* narrower → more white on sides */
-  margin: 2rem auto;     /* vertical + horizontal space */
-  background: #fff;      /* white card background */
-  padding: 2rem;         /* inner white padding around map */
-  border-radius: 8px;    /* optional: rounded corners */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* subtle depth */
+  width: 100%;
+  margin: clamp(0.75rem, 1.5vw, 2rem) auto;
+  background: #fff;
+  padding: clamp(0.75rem, 1.2vw, 1.5rem);
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* ✅ Sidebar styles (incoming changes) */
+/* Sidebar styles */
 .sidebar {
   position: fixed;
   top: 1.5vh;

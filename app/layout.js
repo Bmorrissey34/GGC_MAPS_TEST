@@ -38,12 +38,7 @@ export default function RootLayout({ children }) {
             {/* Right column with legend and helpful links */}
             <div className="layout-rail">
               <Legend className="mb-4" />
-              <section className="layout-rail-card link-panel" aria-labelledby="helpful-links-title">
-                <h2 id="helpful-links-title" className="link-panel-title">
-                  Helpful Links
-                </h2>
-                <Links />
-              </section>
+              <Links />
             </div>
           </div>
         </div>

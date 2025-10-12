@@ -1,6 +1,4 @@
 // components/PageContainer.js
-import Find from "../components/Find";
-import Links from "../components/Links";
 
 // PageContainer component serves as a layout wrapper for pages
 export default function PageContainer({
@@ -34,8 +32,6 @@ export default function PageContainer({
         {children} {/* Render child components */}
       </div>
 
-      {/* Footer section with Links component */}
-      <Links /> {/* Navigation links */}
     </div>
   );
 }

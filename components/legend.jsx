@@ -63,27 +63,11 @@ const PARKING_ITEMS = [
   { color: "#93c5fd", labelKey: "parkingHandicap" },
 ];
 
-const LEGEND_CONTAINER_STYLE = {
+const FLOATING_CONTAINER_STYLE = {
   top: "clamp(80px, 15vh, 250px)",
   right: "clamp(40px, 6vw, 200px)",
   zIndex: 1000,
   pointerEvents: "auto",
-};
-
-const LEGEND_PANEL_STYLE = {
-  width: "clamp(160px, 18vw, 280px)",   // narrower
-  maxWidth: "min(80vw, 240px)",         // cap at 280px
-  maxHeight: "clamp(210px, 48vh, 420px)",
-  overflowY: "auto",
-  backgroundColor: "rgba(255, 255, 255, 0.96)",
-  backdropFilter: "blur(4px)",
-  WebkitBackdropFilter: "blur(4px)",
-  color: "#0f172a",
-  lineHeight: 1.35,
-  fontSize: "clamp(0.86rem, 0.9vw, 0.95rem)",
-  border: "1px solid rgba(0,0,0,0.25)",
-  borderRadius: "0.75rem",
-  boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
 };
 
 const normalizeLocale = (value) => {
@@ -100,7 +84,7 @@ const getStoredLocale = () => {
 
 /** Reusable row with color square + label */
 function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
-  const classes = ["d-flex align-items-center gap-2", className].filter(Boolean).join(" ");
+  const classes = ["legend-item d-flex align-items-center gap-2", className].filter(Boolean).join(" ");
   return (
     <li
       className={classes}
@@ -109,15 +93,15 @@ function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
       style={{ wordBreak: "break-word" }}
     >
       <span
-        className="d-inline-block border rounded"
+        className="legend-swatch d-inline-block border rounded"
         style={{ width: "14px", height: "14px", backgroundColor: color, flexShrink: 0 }}
       />
-      <span>{label}</span>
+      <span className="legend-item-label">{label}</span>
     </li>
   );
 }
 
-export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
+export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, floating = false, className = "" }) {
   void mapScopeSelector;
 
   const [open, setOpen] = useState(true);
@@ -197,83 +181,100 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector }) {
     setUserOverride(true);
   };
 
-  return (
-    <div className="position-absolute" style={LEGEND_CONTAINER_STYLE}>
-      <aside
-        className="shadow rounded-3 py-3 px-4"
-        role="region"
-        aria-label={t("legendTitle")}
-        style={LEGEND_PANEL_STYLE}
-      >
-        {/* Header row: title + EN/ES cluster close together, collapse button floats right */}
-        <div className="d-flex align-items-center gap-2 mb-2">
-          <div className="fw-bold">{t("legendTitle")}</div>
+  const legendBody = (
+    <div
+      className={`legend-panel shadow rounded-4${open ? "" : " legend-panel--collapsed"}`}
+      role="region"
+      aria-label={t("legendTitle")}
+    >
+      {/* Header row: title + EN/ES cluster close together, collapse button floats right */}
+      <div className="legend-header d-flex align-items-center gap-2 mb-2">
+        <div className="legend-title fw-bold">{t("legendTitle")}</div>
 
-          <div className="btn-group btn-group-sm ms-2" role="group" aria-label={t("languageLabel")}>
-            {SUPPORTED_LOCALES.map((code) => (
-              <button
-                key={code}
-                type="button"
-                className={`btn btn-sm ${currentLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
-                onClick={() => handleLocaleChange(code)}
-                aria-pressed={currentLocale === code}
-                aria-label={t(code === "en" ? "languageEnglish" : "languageSpanish")}
-              >
-                {code.toUpperCase()}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-secondary ms-3"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-controls="legend-body"
-            title={open ? t("toggleHide") : t("toggleShow")}
-          >
-            {open ? <i className="bi bi-dash-lg"></i> : <i className="bi bi-plus-lg"></i>}
-          </button>
+        <div className="btn-group btn-group-sm ms-2" role="group" aria-label={t("languageLabel")}>
+          {SUPPORTED_LOCALES.map((code) => (
+            <button
+              key={code}
+              type="button"
+              className={`btn btn-sm ${currentLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
+              onClick={() => handleLocaleChange(code)}
+              aria-pressed={currentLocale === code}
+              aria-label={t(code === "en" ? "languageEnglish" : "languageSpanish")}
+            >
+              {code.toUpperCase()}
+            </button>
+          ))}
         </div>
 
-        <div id="legend-body" hidden={!open} className="pt-2">
-          <ul className="list-unstyled mb-0">
-            {BASE_ITEMS.map((item) => (
-              <SwatchItem
-                key={item.labelKey}
-                color={item.color}
-                label={t(item.labelKey)}
-                className="mb-2"
-                {...getHoverHandlers(item.labelKey)}
-              />
-            ))}
+        <button
+          type="button"
+          className="legend-toggle ms-auto"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls="legend-body"
+          title={open ? t("toggleHide") : t("toggleShow")}
+        >
+          <i
+            className={`bi ${open ? 'bi-chevron-right' : 'bi-chevron-left'} legend-toggle-icon`}
+            aria-hidden="true"
+          ></i>
+          <span className="visually-hidden">{open ? t("toggleHide") : t("toggleShow")}</span>
+        </button>
+      </div>
 
-            <li className="mt-3">
-              <div className="fw-semibold" style={{ paddingLeft: "22px" }}>
-                {t("parking")}
-              </div>
-              <ul className="list-unstyled mb-0 ps-3 mt-2">
-                {PARKING_ITEMS.map((item) => (
-                  <SwatchItem
-                    key={item.labelKey}
-                    color={item.color}
-                    label={t(item.labelKey)}
-                    className="mb-2"
-                    {...getHoverHandlers(item.labelKey)}
-                  />
-                ))}
-              </ul>
-            </li>
-
+      <div id="legend-body" className="legend-body pt-2" hidden={!open}>
+        <ul className="list-unstyled mb-0">
+          {BASE_ITEMS.map((item) => (
             <SwatchItem
-              color="#9ca3af"
-              label={t("restrictedArea")}
-              className="mt-3 mb-0"
-              {...getHoverHandlers("restrictedArea")}
+              key={item.labelKey}
+              color={item.color}
+              label={t(item.labelKey)}
+              className="mb-2"
+              {...getHoverHandlers(item.labelKey)}
             />
-          </ul>
-        </div>
-      </aside>
+          ))}
+
+          <li className="mt-3">
+            <div className="fw-semibold legend-section-heading">
+              {t("parking")}
+            </div>
+            <ul className="list-unstyled mb-0 ps-3 mt-2">
+              {PARKING_ITEMS.map((item) => (
+                <SwatchItem
+                  key={item.labelKey}
+                  color={item.color}
+                  label={t(item.labelKey)}
+                  className="mb-2"
+                  {...getHoverHandlers(item.labelKey)}
+                />
+              ))}
+            </ul>
+          </li>
+
+          <SwatchItem
+            color="#9ca3af"
+            label={t("restrictedArea")}
+            className="mt-3 mb-0"
+            {...getHoverHandlers("restrictedArea")}
+          />
+        </ul>
+      </div>
     </div>
+  );
+
+  if (floating) {
+    return (
+      <div className="legend-floating position-absolute" style={FLOATING_CONTAINER_STYLE}>
+        {legendBody}
+      </div>
+    );
+  }
+
+  const rootClassName = ["legend-slot", className, open ? "" : "is-collapsed"].filter(Boolean).join(" ");
+
+  return (
+    <aside className={rootClassName} aria-label={t("legendTitle")}>
+      {legendBody}
+    </aside>
   );
 }

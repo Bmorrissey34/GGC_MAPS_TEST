@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // ZoomPan component allows for zooming and panning of its children
 export default function ZoomPan({
@@ -11,7 +11,10 @@ export default function ZoomPan({
   wheelStep = 0.001, // Sensitivity for wheel zoom; smaller values slow interaction
   dblClickStep = 0.25,
   disableDoubleClickZoom = false,
-  showControls = true
+  showControls = true,
+  autoFit = false,
+  fitPadding = 24,
+  fitScaleMultiplier = 1
 }) {
   const viewportRef = useRef(null);
   const [scale, setScale] = useState(initialScale);
@@ -37,6 +40,24 @@ export default function ZoomPan({
     if (!(candidate instanceof SVGGraphicsElement)) return null;
 
     try {
+      if (candidate === svg) {
+        const viewBox = svg.viewBox?.baseVal;
+        if (
+          viewBox &&
+          Number.isFinite(viewBox.width) &&
+          Number.isFinite(viewBox.height) &&
+          viewBox.width > 0 &&
+          viewBox.height > 0
+        ) {
+          return {
+            x: viewBox.x,
+            y: viewBox.y,
+            width: viewBox.width,
+            height: viewBox.height
+          };
+        }
+      }
+
       const bbox = candidate.getBBox();
       if (!Number.isFinite(bbox.width) || !Number.isFinite(bbox.height) || bbox.width <= 0 || bbox.height <= 0) {
         return null;
@@ -107,7 +128,51 @@ export default function ZoomPan({
     [getViewportCenter, scale, setScaleAt]
   );
 
+  const fitToBounds = useCallback(
+    ({ force = false, padding = fitPadding } = {}) => {
+      if (!force && userHasDragged.current) return false;
+
+      const vp = viewportRef.current;
+      if (!vp) return false;
+      const rect = vp.getBoundingClientRect();
+      if (!(rect.width > 0 && rect.height > 0)) return false;
+
+      const bounds = getAnchorBounds();
+      if (!bounds) return false;
+
+      const safePadding = Math.max(0, Number.isFinite(padding) ? padding : 0);
+      const usableWidth = rect.width - safePadding * 2;
+      const usableHeight = rect.height - safePadding * 2;
+      if (!(usableWidth > 0 && usableHeight > 0)) return false;
+
+      const scaleX = usableWidth / bounds.width;
+      const scaleY = usableHeight / bounds.height;
+      const proposedScale = Math.min(scaleX, scaleY);
+      if (!Number.isFinite(proposedScale) || proposedScale <= 0) return false;
+
+      const scaled = proposedScale * fitScaleMultiplier;
+      const nextScale = clamp(scaled, minScale, maxScale);
+      const centerX = bounds.x + bounds.width / 2;
+      const centerY = bounds.y + bounds.height / 2;
+
+      const nextPos = {
+        x: rect.width / 2 - nextScale * centerX,
+        y: rect.height / 2 - nextScale * centerY
+      };
+
+      setScale(nextScale);
+      setPos(nextPos);
+      userHasDragged.current = false;
+      return true;
+    },
+    [fitPadding, fitScaleMultiplier, getAnchorBounds, maxScale, minScale]
+  );
+
   const resetView = useCallback(() => {
+    if (autoFit && fitToBounds({ force: true })) {
+      return;
+    }
+
     const nextScale = clamp(initialScale, minScale, maxScale);
     let nextPos = { x: 0, y: 0 };
 
@@ -126,7 +191,7 @@ export default function ZoomPan({
     setScale(nextScale);
     setPos(nextPos);
     userHasDragged.current = false;
-  }, [initialScale, minScale, maxScale, getAnchorBounds]);
+  }, [autoFit, fitToBounds, initialScale, minScale, maxScale, getAnchorBounds]);
 
   useEffect(() => {
     resetView();
@@ -300,6 +365,55 @@ export default function ZoomPan({
 
   const zoomIn = useCallback(() => zoomByMultiplier(1.15), [zoomByMultiplier]);
   const zoomOut = useCallback(() => zoomByMultiplier(1 / 1.15), [zoomByMultiplier]);
+
+  useLayoutEffect(() => {
+    if (!autoFit) return;
+
+    let cancelled = false;
+    let rafId = null;
+    let attempts = 0;
+
+    const scheduleFit = () => {
+      if (cancelled || userHasDragged.current) return;
+      const success = fitToBounds();
+      attempts += 1;
+      if (!success && attempts < 60) {
+        rafId = requestAnimationFrame(scheduleFit);
+      }
+    };
+
+    scheduleFit();
+
+    const vp = viewportRef.current;
+    let resizeObserver = null;
+    let mutationObserver = null;
+    if (typeof ResizeObserver !== 'undefined' && vp) {
+      resizeObserver = new ResizeObserver(() => {
+        if (!cancelled && !userHasDragged.current) {
+          attempts = 0;
+          scheduleFit();
+        }
+      });
+      resizeObserver.observe(vp);
+    }
+
+    if (typeof MutationObserver !== 'undefined' && vp) {
+      mutationObserver = new MutationObserver(() => {
+        if (!cancelled && !userHasDragged.current) {
+          attempts = 0;
+          scheduleFit();
+        }
+      });
+      mutationObserver.observe(vp, { childList: true, subtree: true });
+    }
+
+    return () => {
+      cancelled = true;
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (resizeObserver) resizeObserver.disconnect();
+      if (mutationObserver) mutationObserver.disconnect();
+    };
+  }, [autoFit, fitToBounds]);
 
   return (
     <div

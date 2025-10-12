@@ -425,17 +425,20 @@ export default function ZoomPan({
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
       onClickCapture={onClickCapture}
-      style={{
-        position: 'relative',
-        overflow: 'hidden',
-        touchAction: 'none',
-        overscrollBehavior: 'contain',
-        background: 'white',
-        cursor: drag.current.captured ? 'grabbing' : 'grab'
-      }}
+        style={{
+          position: 'relative',
+          overflow: 'hidden',
+          touchAction: 'none',
+          overscrollBehavior: 'contain',
+          background: 'transparent',
+          cursor: drag.current.captured ? 'grabbing' : 'grab'
+        }}
     >
       <div
+        className="zoompan-stage"
         style={{
+          width: '100%',
+          height: '100%',
           transform: `translate(${pos.x}px, ${pos.y}px) scale(${scale})`,
           transformOrigin: '0 0',
           willChange: 'transform'

@@ -29,8 +29,8 @@
   --justin-globe-inputBarSize: 250px;
 
   /* William Stein's Global Variables*/
-  --sidebar-width: 21.5rem;
-  --sidebar-collapsed-width: 4.2rem;
+  --sidebar-width: 26rem;
+  --sidebar-collapsed-width: 4.5rem;
   --sidebar-link-color: black;
   --sidebar-hover-color: gold;
 
@@ -162,12 +162,38 @@ main {
 
 /* Map container styles */
 .map-wrap {
+  position: relative;
   width: 100%;
-  margin: clamp(0.75rem, 1.5vw, 2rem) auto;
+  flex: 1 1 auto;
+  min-height: clamp(360px, 55vh, 760px);
+  max-height: clamp(500px, 72vh, 820px);
+  margin: 0;
   background: #fff;
-  padding: clamp(0.75rem, 1.2vw, 1.5rem);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  overflow: hidden;
   border-radius: 0.75rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.zoompan-stage,
+.map-viewport {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.page-container-inner {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
 }
 
 /* Core layout structure */
@@ -176,21 +202,34 @@ main {
   padding-right: clamp(1rem, 3vw, 3rem);
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   gap: clamp(1.5rem, 2.5vw, 2.75rem);
 }
 
 .layout-columns {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: clamp(1.25rem, 2vw, 2.5rem);
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .layout-main {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   gap: clamp(1rem, 1.5vw, 1.75rem);
+}
+
+.layout-main > .container,
+.layout-main > .container-fluid {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* Sidebar layout */
@@ -200,6 +239,7 @@ main {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  align-self: stretch;
   align-items: stretch;
   padding-right: clamp(0.75rem, 1.5vw, 1.5rem);
   transition: flex-basis 240ms ease, max-width 240ms ease, padding-right 240ms ease;
@@ -752,6 +792,19 @@ main {
   font-weight: 700;
 }
 
-
-
-
+.map-wrap {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: clamp(360px, 55vh, 760px);            /* your normal baseline */
+  max-height: calc(100vh - var(--spacing-unit) * 15);/* same cap as legend */
+  overflow: hidden;                                  /* keep content inside */
+}
+.page-container-inner {
+  display: flex;
+  flex-direction: column;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: auto;      /* <-- was height:100% */
+  min-height: 0;     /* <-- remove any previous min-height */
+}

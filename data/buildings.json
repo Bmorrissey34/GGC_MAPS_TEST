@@ -85,6 +85,13 @@
     ]
   },
   {
+    "id": "1000",
+    "name": "Building 1000",
+    "floors": [
+      { "id": "L1", "label": "Level 1", "file": "/BuildingMaps/1000/L1.svg" }
+    ]
+  },
+  {
     "id": "2000",
     "name": "Building 2000",
     "floors": [

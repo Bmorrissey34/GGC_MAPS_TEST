@@ -1,6 +1,4 @@
 // components/PageContainer.js
-import Find from "../components/Find";
-import Links from "../components/Links";
 
 // PageContainer component serves as a layout wrapper for pages
 export default function PageContainer({
@@ -9,8 +7,10 @@ export default function PageContainer({
   headerContent,
   fluid = false // Add a fluid prop, default to false
 }) {
+  const containerClass = fluid ? "container-fluid px-0" : "container mt-3";
+
   return (
-    <div className={fluid ? "container-fluid" : "container mt-3"}>
+    <div className={containerClass}>
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h1
           className="h4 mb-0"
@@ -28,14 +28,12 @@ export default function PageContainer({
 
       {/* Main content area with a white background and rounded border */}
       <div
-        className="border rounded-3"
+        className="border rounded-3 page-container-inner"
         style={{ overflow: 'hidden', background: 'white' }}
       >
         {children} {/* Render child components */}
       </div>
 
-      {/* Footer section with Links component */}
-      <Links /> {/* Navigation links */}
     </div>
   );
 }

@@ -126,10 +126,12 @@ export default function FloorMapView({ src, interactiveSelector = '.room-group, 
       <PageContainer title="Floor Map" headerContent={headerContent} fluid={true}>
         <ZoomPan
           initialScale={1}
-          minScale={0.4}
+          minScale={0.25}
           maxScale={6}
           className="w-100"
           disableDoubleClickZoom={true} // Disable double-click zoom
+          autoFit={true}
+          fitPadding={24}
         >
           {/* Replaces <object> with inline SVG so pan/zoom work */}
           <div

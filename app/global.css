@@ -789,6 +789,77 @@ main {
   transition: fill 120ms ease, stroke 120ms ease;
 }
 
+.map-wrap svg .hover-highlight.student-housing,
+.map-wrap svg .hover-highlight .student-housing,
+.map-wrap svg .student-housing.hover-highlight,
+.map-wrap svg .student-housing:hover,
+.map-wrap svg .student-housing:hover .building,
+.map-wrap svg #BUILDING_1000.hover-highlight,
+.map-wrap svg #BUILDING_2000.hover-highlight,
+.map-wrap svg #BUILDING_3000.hover-highlight,
+.map-wrap svg [id='1000'].hover-highlight,
+.map-wrap svg [id='2000'].hover-highlight,
+.map-wrap svg [id='3000'].hover-highlight,
+.map-wrap svg [id='b1000'].hover-highlight,
+.map-wrap svg [id='2'].hover-highlight,
+.map-wrap svg [id='3'].hover-highlight {
+  fill: #ff0000 !important;
+}
+
+.inline-svg {
+  position: relative;
+}
+
+.inline-svg__content {
+  width: 100%;
+  height: 100%;
+}
+
+.map-tooltip {
+  position: absolute;
+  transform: translate(-50%, -115%);
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(128, 0, 0, 0.35);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  color: #7a1111;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease;
+  z-index: 5;
+}
+
+.map-tooltip.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.student-housing-tooltip::before,
+.student-housing-tooltip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.student-housing-tooltip::before {
+  bottom: -6px;
+  border: 6px solid transparent;
+  border-top-color: rgba(128, 0, 0, 0.35);
+}
+
+.student-housing-tooltip::after {
+  bottom: -5px;
+  border: 5px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.96);
+}
+
 .map-wrap svg .hover-highlight text,
 .map-wrap svg .hover-highlight .building-label,
 .map-wrap svg text.hover-highlight {

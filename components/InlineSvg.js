@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Sanitize the SVG content to remove potentially harmful scripts and attributes
 function sanitize(t) {
@@ -21,6 +21,10 @@ function inferKind(el) {
   return 'poi';
 }
 
+const STUDENT_HOUSING_MESSAGE = 'Student Housing: No Floor Plan Availability';
+const STUDENT_HOUSING_CLASS = 'student-housing';
+const POINTER_SOURCE = 'pointer:student';
+
 // InlineSvg component renders an SVG file and adds interactivity
 export default function InlineSvg({
   src, // Path to the SVG file
@@ -30,11 +34,66 @@ export default function InlineSvg({
   onSelect, // Callback for when an element is selected
   onReady, // Callback for when the SVG is ready
 }) {
-  const ref = useRef(null); // Reference to the SVG container
+  const containerRef = useRef(null); // Outer wrapper for the SVG and overlays
+  const svgContainerRef = useRef(null); // Holds the injected SVG markup
   const [markup, setMarkup] = useState(null); // State to store the sanitized SVG markup
   const [error, setError] = useState(null); // State to store any loading errors
   const prev = useRef(null); // Reference to the previously selected element
   const hoverRefs = useRef(new Map()); // Track hover highlight nodes by source
+  const pointerTargetRef = useRef(null); // Track the current student housing node under the pointer
+  const [tooltipState, setTooltipState] = useState({
+    visible: false,
+    top: 0,
+    left: 0,
+  });
+
+  const showTooltip = useCallback((node) => {
+    const container = containerRef.current;
+    if (!container || !node || typeof node.getBoundingClientRect !== 'function') return;
+
+    const containerRect = container.getBoundingClientRect();
+    const nodeRect = node.getBoundingClientRect();
+
+    if (!containerRect || !nodeRect || (nodeRect.width === 0 && nodeRect.height === 0)) return;
+
+    const top = nodeRect.top - containerRect.top;
+    const left = nodeRect.left - containerRect.left + nodeRect.width / 2;
+
+    setTooltipState({
+      visible: true,
+      top,
+      left,
+    });
+  }, []);
+
+  const hideTooltip = useCallback(() => {
+    setTooltipState((prev) => (prev.visible ? { ...prev, visible: false } : prev));
+  }, []);
+
+  const updateTooltipFromRefs = useCallback(() => {
+    const pointerNodes = hoverRefs.current.get(POINTER_SOURCE);
+    const pointerTarget = pointerNodes?.find(
+      (node) => node && node.classList && node.classList.contains(STUDENT_HOUSING_CLASS)
+    );
+    if (pointerTarget) {
+      showTooltip(pointerTarget);
+      return;
+    }
+
+    let studentNode = null;
+    hoverRefs.current.forEach((nodes, source) => {
+      if (source === POINTER_SOURCE || studentNode) return;
+      studentNode = nodes?.find(
+        (node) => node && node.classList && node.classList.contains(STUDENT_HOUSING_CLASS)
+      );
+    });
+
+    if (studentNode) {
+      showTooltip(studentNode);
+    } else {
+      hideTooltip();
+    }
+  }, [hideTooltip, showTooltip]);
 
 
   // Fetch and sanitize the SVG content when the source changes
@@ -51,8 +110,9 @@ export default function InlineSvg({
 
   // Add interactivity and accessibility to the SVG elements
   useEffect(() => {
-    if (!markup || !ref.current) return; // Ensure markup and ref are available
-    const root = ref.current; // Reference to the SVG root element
+    if (!markup || !svgContainerRef.current) return; // Ensure markup and ref are available
+    const root = svgContainerRef.current; // Reference to the SVG root element
+
 
     // Handle click events on interactive elements
     const click = (e) => {
@@ -83,8 +143,44 @@ export default function InlineSvg({
       }
     });
 
+    const pointerOver = (e) => {
+      const hovered = e.target.closest(`.${STUDENT_HOUSING_CLASS}`);
+      if (!hovered || !root.contains(hovered)) return;
+      const base = hovered.closest('.building-group') || hovered;
+      if (pointerTargetRef.current === base) return;
+      pointerTargetRef.current = base;
+      hoverRefs.current.set(POINTER_SOURCE, [base]);
+      updateTooltipFromRefs();
+    };
+
+    const pointerOut = (e) => {
+      const hovered = e.target.closest(`.${STUDENT_HOUSING_CLASS}`);
+      if (!hovered || !root.contains(hovered)) return;
+      const currentBase = hovered.closest('.building-group') || hovered;
+      const related = e.relatedTarget;
+      if (related && currentBase.contains(related)) return;
+      if (pointerTargetRef.current === currentBase) {
+        pointerTargetRef.current = null;
+      }
+      hoverRefs.current.delete(POINTER_SOURCE);
+      updateTooltipFromRefs();
+    };
+
+    const pointerMove = (e) => {
+      const hovered = e.target.closest(`.${STUDENT_HOUSING_CLASS}`);
+      if (hovered && root.contains(hovered)) return;
+      if (hoverRefs.current.has(POINTER_SOURCE)) {
+        pointerTargetRef.current = null;
+        hoverRefs.current.delete(POINTER_SOURCE);
+        updateTooltipFromRefs();
+      }
+    };
+
     root.addEventListener('click', click); // Add click event listener
     root.addEventListener('keydown', key); // Add keydown event listener
+    root.addEventListener('pointerover', pointerOver);
+    root.addEventListener('pointerout', pointerOut);
+    root.addEventListener('pointermove', pointerMove);
 
     // Report the IDs of interactive elements to the parent component
     if (onReady) {
@@ -105,8 +201,14 @@ export default function InlineSvg({
     return () => {
       root.removeEventListener('click', click); // Cleanup click event listener
       root.removeEventListener('keydown', key); // Cleanup keydown event listener
+      root.removeEventListener('pointerover', pointerOver);
+      root.removeEventListener('pointerout', pointerOut);
+      root.removeEventListener('pointermove', pointerMove);
+      hoverRefs.current.delete(POINTER_SOURCE);
+      pointerTargetRef.current = null;
+      updateTooltipFromRefs();
     };
-  }, [markup, interactiveSelector, onSelect, onReady, src]);
+  }, [markup, interactiveSelector, onSelect, onReady, src, updateTooltipFromRefs]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -119,21 +221,8 @@ export default function InlineSvg({
       return String(value).replace(/[^a-zA-Z0-9_-]/g, (char) => `\\${char}`);
     };
 
-    const clearSource = (source) => {
-      const nodes = hoverRefs.current.get(source);
-      if (nodes) {
-        nodes.forEach((node) => node.classList.remove('hover-highlight'));
-        hoverRefs.current.delete(source);
-      }
-    };
-
-    const clearAll = () => {
-      hoverRefs.current.forEach((nodes) => nodes.forEach((node) => node.classList.remove('hover-highlight')));
-      hoverRefs.current.clear();
-    };
-
     const collectTargets = ({ selector, ids }) => {
-      const rootEl = ref.current;
+      const rootEl = svgContainerRef.current;
       if (!rootEl) return [];
       const collected = new Set();
       if (selector) {
@@ -155,6 +244,24 @@ export default function InlineSvg({
       return Array.from(collected).filter(Boolean);
     };
 
+    const removeHighlight = (nodes) => {
+      nodes?.forEach((node) => node.classList.remove('hover-highlight'));
+    };
+
+    const clearSource = (source) => {
+      const nodes = hoverRefs.current.get(source);
+      if (nodes) {
+        removeHighlight(nodes);
+        hoverRefs.current.delete(source);
+      }
+    };
+
+    const clearAll = () => {
+      hoverRefs.current.forEach(removeHighlight);
+      hoverRefs.current.clear();
+      updateTooltipFromRefs();
+    };
+
     const handleHover = (event) => {
       const detail = event.detail || {};
       const { source } = detail;
@@ -165,6 +272,7 @@ export default function InlineSvg({
         targets.forEach((node) => node.classList.add('hover-highlight'));
         hoverRefs.current.set(source, targets);
       }
+      updateTooltipFromRefs();
     };
 
     const handleHoverClear = (event) => {
@@ -174,7 +282,9 @@ export default function InlineSvg({
         clearSource(source);
       } else {
         clearAll();
+        return;
       }
+      updateTooltipFromRefs();
     };
 
     window.addEventListener('ggcmap-hover', handleHover);
@@ -185,16 +295,38 @@ export default function InlineSvg({
       window.removeEventListener('ggcmap-hover-clear', handleHoverClear);
       clearAll();
     };
-  }, []);
+  }, [updateTooltipFromRefs]);
 
   useEffect(() => {
     hoverRefs.current.forEach((nodes) => nodes.forEach((node) => node.classList.remove('hover-highlight')));
     hoverRefs.current.clear();
-  }, [markup]);
+    updateTooltipFromRefs();
+  }, [markup, updateTooltipFromRefs]);
+
+  useEffect(() => {
+    const root = svgContainerRef.current;
+    if (!root) return;
+
+    const clearPointerTooltip = () => {
+      if (hoverRefs.current.has(POINTER_SOURCE)) {
+        hoverRefs.current.delete(POINTER_SOURCE);
+      }
+      pointerTargetRef.current = null;
+      updateTooltipFromRefs();
+    };
+
+    root.addEventListener('pointerleave', clearPointerTooltip);
+    root.addEventListener('pointercancel', clearPointerTooltip);
+
+    return () => {
+      root.removeEventListener('pointerleave', clearPointerTooltip);
+      root.removeEventListener('pointercancel', clearPointerTooltip);
+    };
+  }, [updateTooltipFromRefs]);
 
   // Highlight the selected element and remove highlighting from the previous one
   useEffect(() => {
-    const root = ref.current; // Reference to the SVG root element
+    const root = svgContainerRef.current; // Reference to the SVG root element
     if (!root) return; // Exit if root is not available
     if (prev.current) {
       const p = root.querySelector(`#${CSS.escape(prev.current)}`); // Find previous element
@@ -223,10 +355,27 @@ export default function InlineSvg({
 
   return (
     <div
-      ref={ref} // Reference to the SVG container
+      ref={containerRef} // Reference to the outer wrapper
       className={`inline-svg ${className}`} // Apply class names
-      dangerouslySetInnerHTML={{ __html: markup }} // Set inner HTML to sanitized markup
-      style={{ isolation: 'isolate' }} // Contain the shadow DOM
-    />
+      style={{ isolation: 'isolate', position: 'relative' }} // Contain the shadow DOM and anchor overlays
+    >
+      <div
+        ref={svgContainerRef} // Reference to the SVG container
+        className="inline-svg__content"
+        dangerouslySetInnerHTML={{ __html: markup || '' }} // Set inner HTML to sanitized markup
+      />
+      <div
+        className={`map-tooltip student-housing-tooltip${tooltipState.visible ? ' is-visible' : ''}`}
+        style={{
+          top: tooltipState.top,
+          left: tooltipState.left,
+        }}
+        role="status"
+        aria-live="polite"
+        aria-hidden={tooltipState.visible ? 'false' : 'true'}
+      >
+        {STUDENT_HOUSING_MESSAGE}
+      </div>
+    </div>
   );
 }

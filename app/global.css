@@ -519,11 +519,14 @@ main {
 }
 
 .legend-slot.is-collapsed {
-  flex: 0 0 var(--sidebar-collapsed-width);
-  max-width: var(--sidebar-collapsed-width);
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  align-self: flex-end;
+  margin-left: auto;
 }
 
 .legend-slot.is-collapsed .legend-panel {

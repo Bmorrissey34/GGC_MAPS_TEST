@@ -1,8 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-const STORAGE_KEY = 'helpfulLinksOpen';
+import { useState } from 'react';
 
 const LINKS = [
   {
@@ -25,19 +23,6 @@ const LINKS = [
 export default function Links({ className = '' }) {
   const [open, setOpen] = useState(true);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === '0') {
-      setOpen(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(STORAGE_KEY, open ? '1' : '0');
-  }, [open]);
-
   const slotClassName = ['legend-slot', className, open ? '' : 'is-collapsed'].filter(Boolean).join(' ');
   const panelClassName = ['legend-panel', 'link-panel', open ? '' : 'legend-panel--collapsed']
     .filter(Boolean)
@@ -53,16 +38,23 @@ export default function Links({ className = '' }) {
           </h2>
           <button
             type="button"
-            className="legend-toggle ms-auto"
+            className={[
+              'legend-toggle',
+              open ? 'ms-auto' : null,
+              open ? 'sidebar-collapse' : null,
+              open ? null : 'sidebar-toggle',
+              open ? null : 'btn',
+              open ? null : 'btn-sm',
+              open ? null : 'btn-outline-secondary',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
             aria-controls="helpful-links-body"
             title={toggleLabel}
           >
-            <i
-              className={`bi ${open ? 'bi-chevron-right' : 'bi-chevron-left'} legend-toggle-icon`}
-              aria-hidden="true"
-            ></i>
+            <i className={`bi ${open ? 'bi-chevron-left' : 'bi-chevron-right'} legend-toggle-icon`} aria-hidden="true"></i>
             <span className="visually-hidden">{toggleLabel}</span>
           </button>
         </div>

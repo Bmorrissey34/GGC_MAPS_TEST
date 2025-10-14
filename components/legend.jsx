@@ -208,16 +208,23 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
 
         <button
           type="button"
-          className="legend-toggle ms-auto"
+          className={[
+            "legend-toggle",
+            open ? "ms-auto" : null,
+            open ? "sidebar-collapse" : null,
+            open ? null : "sidebar-toggle",
+            open ? null : "btn",
+            open ? null : "btn-sm",
+            open ? null : "btn-outline-secondary",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="legend-body"
           title={open ? t("toggleHide") : t("toggleShow")}
         >
-          <i
-            className={`bi ${open ? 'bi-chevron-right' : 'bi-chevron-left'} legend-toggle-icon`}
-            aria-hidden="true"
-          ></i>
+          <i className={`bi ${open ? "bi-chevron-left" : "bi-chevron-right"} legend-toggle-icon`} aria-hidden="true"></i>
           <span className="visually-hidden">{open ? t("toggleHide") : t("toggleShow")}</span>
         </button>
       </div>

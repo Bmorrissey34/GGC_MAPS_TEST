@@ -90,6 +90,9 @@ function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
       className={classes}
       onMouseEnter={() => onEnter?.()}
       onMouseLeave={() => onLeave?.()}
+      onFocus={() => onEnter?.()}
+      onBlur={() => onLeave?.()}
+      tabIndex={0}
       style={{ wordBreak: "break-word" }}
     >
       <span
@@ -245,7 +248,7 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
             <div className="fw-semibold legend-section-heading">
               {t("parking")}
             </div>
-            <ul className="list-unstyled mb-0 ps-3 mt-2">
+            <ul className="legend-sublist list-unstyled mb-0 mt-2">
               {PARKING_ITEMS.map((item) => (
                 <SwatchItem
                   key={item.labelKey}

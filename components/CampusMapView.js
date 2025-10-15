@@ -15,6 +15,7 @@ export default function CampusMapView({
 }) {
   const [selectedId, setSelectedId] = useState(null);
   const router = useRouter();
+  const[error, setError] = useState('');
 
   // Create a set of known building IDs for quick lookup
   const known = useMemo(
@@ -23,10 +24,15 @@ export default function CampusMapView({
   );
 
   // Handle the selection of a building
+  const HOUSING_IDS = ['1000', '2000', '3000', 'B1000', '2', '3', 'BUILDING_1000', 'BUILDING_2000', 'BUILDING_3000'];
   const handleSelect = (id) => {
     if (!id) return;
     setSelectedId(id);
     const code = String(id).toUpperCase();
+    if (HOUSING_IDS.includes(code)) {
+      setError('Student housing layouts are not avaialable to the public.');
+      return;
+    }
     if (known.has(code)) {
       router.push(`/building/${code}`);
     }
@@ -143,8 +149,18 @@ export default function CampusMapView({
             onReady={handleSvgReady}
           />
         </ZoomPan>
-
       </div>
+
+      {error && (
+        <div className="campus-popup-error">
+          <div className="campus-popup-error-inner">
+            <div className="mb-3">{error}</div>
+            <button className="link-panel-button" onClick={() => setError('')}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </PageContainer>
   );
 }

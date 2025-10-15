@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "extract-rooms": "node scripts/extract-room-data.js"
+    "extract-rooms": "node scripts/extract-room-data.js",
+    "test": "jest"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
@@ -20,7 +21,11 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "eslint": "8.57.1",
-    "eslint-config-next": "15.5.4"
+    "eslint-config-next": "15.5.4",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0"
   }
 }

@@ -25,12 +25,8 @@ const NAV_ITEMS = [
   { key: 'campus', label: 'Campus', path: '/', hover: { selector: '.building-group' } },
   ...buildings
     .slice()
-    .sort((a, b) => {
-      const priorityA = ['1000', '2000', '3000'].includes(a.id) ? 1 : 0;
-      const priorityB = ['1000', '2000', '3000'].includes(b.id) ? 1 : 0;
-      if (priorityA !== priorityB) return priorityA - priorityB;
-      return a.name.localeCompare(b.name);
-    })
+    .filter(b => !['1000', '2000', '3000', 'B1000', '2', '3'].includes((b.id))) // Exclude student housing buildings
+    .sort((a, b) => a.name.localeCompare(b.name))
     .map((building) => ({
       key: building.id,
       label: building.name,

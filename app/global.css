@@ -366,11 +366,10 @@ main {
 
 .sidebar .nav-link:hover,
 .sidebar .nav-link:focus-visible {
-  background: linear-gradient(135deg, var(--bm-header-bg), #00a86b);
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 16px 28px rgba(0, 100, 0, 0.24);
-  border-color: rgba(0, 100, 0, 0.24);
+  background: rgba(0, 100, 0, 0.18);
+  color: #013b16;
+  transform: translateX(2px);
+  box-shadow: 0 10px 22px rgba(0, 100, 0, 0.12);
 }
 
 .sidebar .nav-link.active {

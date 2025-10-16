@@ -84,7 +84,7 @@ const getStoredLocale = () => {
 
 /** Reusable row with color square + label */
 function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
-  const classes = ["legend-item d-flex align-items-center gap-2", className].filter(Boolean).join(" ");
+  const classes = ["legend-item d-flex align-items-center gap-1", className].filter(Boolean).join(" ");
   return (
     <li
       className={classes}
@@ -97,7 +97,7 @@ function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
     >
       <span
         className="legend-swatch d-inline-block border rounded"
-        style={{ width: "14px", height: "14px", backgroundColor: color, flexShrink: 0 }}
+        style={{ width: "12px", height: "12px", backgroundColor: color, flexShrink: 0 }}
       />
       <span className="legend-item-label">{label}</span>
     </li>
@@ -244,7 +244,7 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
             />
           ))}
 
-          <li className="mt-3">
+          <li className="legend-parking-group mt-3">
             <div className="fw-semibold legend-section-heading">
               {t("parking")}
             </div>

@@ -184,12 +184,12 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
     setUserOverride(true);
   };
 
+  const panelClassNames = open
+    ? ["legend-panel", "shadow", "rounded-4"]
+    : ["legend-panel--collapsed"];
+
   const legendBody = (
-    <div
-      className={`legend-panel shadow rounded-4${open ? "" : " legend-panel--collapsed"}`}
-      role="region"
-      aria-label={t("legendTitle")}
-    >
+    <div className={panelClassNames.join(" ")} role="region" aria-label={t("legendTitle")}>
       {/* Header row: title + EN/ES cluster close together, collapse button floats right */}
       <div className="legend-header d-flex align-items-center gap-2 mb-2">
         <div className="legend-title fw-bold">{t("legendTitle")}</div>
@@ -214,7 +214,10 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
           className={[
             "legend-toggle",
             "legend-toggle--floating",
-            open ? "legend-toggle--expanded" : "legend-toggle--collapsed",
+            open ? "sidebar-collapse" : "sidebar-toggle",
+            open ? null : "btn",
+            open ? null : "btn-sm",
+            open ? null : "btn-outline-secondary",
           ]
             .filter(Boolean)
             .join(" ")}

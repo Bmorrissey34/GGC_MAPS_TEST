@@ -24,9 +24,13 @@ export default function Links({ className = '' }) {
   const [open, setOpen] = useState(true);
 
   const slotClassName = ['legend-slot', className, open ? '' : 'is-collapsed'].filter(Boolean).join(' ');
-  const panelClassName = ['legend-panel', 'link-panel', open ? '' : 'legend-panel--collapsed']
-    .filter(Boolean)
-    .join(' ');
+  const panelClasses = [];
+  if (open) {
+    panelClasses.push('legend-panel', 'link-panel', 'shadow', 'rounded-4');
+  } else {
+    panelClasses.push('legend-panel--collapsed');
+  }
+  const panelClassName = panelClasses.join(' ');
   const toggleLabel = open ? 'Hide helpful links' : 'Show helpful links';
 
   return (
@@ -41,7 +45,10 @@ export default function Links({ className = '' }) {
             className={[
               'legend-toggle',
               'legend-toggle--floating',
-              open ? 'legend-toggle--expanded' : 'legend-toggle--collapsed',
+              open ? 'sidebar-collapse' : 'sidebar-toggle',
+              open ? null : 'btn',
+              open ? null : 'btn-sm',
+              open ? null : 'btn-outline-secondary',
             ]
               .filter(Boolean)
               .join(' ')}

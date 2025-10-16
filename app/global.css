@@ -515,21 +515,14 @@ main {
   top: clamp(-0.45rem, 0.02vw, -0.18rem);
 }
 
-.legend-toggle--collapsed {
-  right: clamp(0.35rem, 0.85vw, 1.1rem);
-  background: rgba(255, 255, 255, 0.96);
-  color: #013b16;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.85rem;
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
-  transform: translateX(0);
-}
-
 .legend-slot.is-collapsed .legend-toggle--floating,
 .legend-slot.is-collapsed .legend-panel .legend-toggle--floating {
-  right: clamp(0.4rem, 1vw, 1.25rem);
+  position: static;
+  right: auto;
+  top: auto;
+  margin: 0;
 }
+
 
 .legend-body > ul {
   display: flex;
@@ -583,6 +576,16 @@ main {
 }
 
 .legend-panel--collapsed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  width: auto;
+  min-width: 0;
   overflow: visible;
 }
 
@@ -596,19 +599,14 @@ main {
 }
 
 .legend-toggle {
-  background: rgba(0, 100, 0, 0.15);
-  color: #05330f;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.75rem;
   border: none;
-  box-shadow: none;
   outline: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   font-size: 1.15rem;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .legend-toggle-icon {
@@ -617,35 +615,30 @@ main {
   line-height: 1;
 }
 
-.legend-toggle:hover,
-.legend-toggle:focus-visible {
-  background: rgba(0, 100, 0, 0.3);
-  color: #011a08;
-  transform: translateX(-2px);
-}
-
-.legend-toggle--collapsed:hover,
-.legend-toggle--collapsed:focus-visible {
-  background: rgba(255, 255, 255, 0.99);
-  color: #001f0b;
-  box-shadow: none;
-  transform: translateX(2px);
-}
-
 .legend-slot.is-collapsed {
-  flex: 0 0 var(--sidebar-collapsed-width);
-  max-width: var(--sidebar-collapsed-width);
+  flex: 0 0 auto;
+  max-width: none;
+  width: auto;
+  margin-left: auto;
+  margin-right: clamp(0.5rem, 1vw, 1rem);
 }
 
 .legend-slot.is-collapsed .legend-panel {
-  padding: clamp(0.55rem, 0.8vw, 0.75rem);
+  padding: 0;
   align-items: center;
+  justify-content: center;
   max-height: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  width: auto;
 }
 
 .legend-slot.is-collapsed .legend-header {
   justify-content: center;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 0;
+  padding: 0;
 }
 
 .legend-slot.is-collapsed .legend-title,
@@ -655,6 +648,13 @@ main {
 
 .legend-slot.is-collapsed .legend-toggle {
   margin-left: 0 !important;
+}
+
+.legend-slot.is-collapsed .legend-toggle--floating {
+  position: static;
+  right: auto;
+  top: auto;
+  margin: 0;
 }
 
 .link-panel {
@@ -942,4 +942,8 @@ main {
   max-width: 90vw;
   text-align: center;
   border: 1px solid #ccc;
+}
+
+.legend-panel--collapsed .legend-header {
+  margin: 0;
 }

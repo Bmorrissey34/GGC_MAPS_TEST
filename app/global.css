@@ -40,10 +40,10 @@
   --bm-header-shadow: 0 2px 4px rgba(0,0,0,0.1);  /* Header subtle shadow */
   --bm-header-title-font-size: 1.5rem;      /* Header title size */
 
-  --bm-footer-bg: #333333;                  /* Footer background */
+  --bm-footer-bg: var(--bm-header-bg);      /* Footer background matches header */
   --bm-footer-text-color: #cccccc;          /* Footer text color */
   --bm-footer-font-size: 0.9rem;            /* Footer base font size */
-  --bm-footer-padding-y: calc(var(--spacing-unit) * 2); /* Vertical padding */
+  --bm-footer-padding-y: calc(var(--spacing-unit) * 0.5); /* Vertical padding */
   --bm-footer-border-top: var(--justin-globe3-border);  /* Reuse existing border var */
 }
 

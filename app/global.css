@@ -343,12 +343,12 @@ main {
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.sidebar .nav-link:hover,
-.sidebar .nav-link:focus-visible {
-  background: rgba(0, 100, 0, 0.18);
-  color: #013b16;
-  transform: translateX(2px);
-  box-shadow: 0 10px 22px rgba(0, 100, 0, 0.12);
+.sidebar .nav-link:hover:not(.active),
+.sidebar .nav-link:focus-visible:not(.active) {
+  background: linear-gradient(135deg, var(--bm-header-bg), #00a86b);
+  color: #ffffff;
+  box-shadow: 0 16px 28px rgba(0, 100, 0, 0.24);
+  transform: translateY(-1px);
 }
 
 .sidebar .nav-link.active {

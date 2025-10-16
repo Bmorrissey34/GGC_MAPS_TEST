@@ -213,12 +213,8 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
           type="button"
           className={[
             "legend-toggle",
-            open ? "ms-auto" : null,
-            open ? "sidebar-collapse" : null,
-            open ? null : "sidebar-toggle",
-            open ? null : "btn",
-            open ? null : "btn-sm",
-            open ? null : "btn-outline-secondary",
+            "legend-toggle--floating",
+            open ? "legend-toggle--expanded" : "legend-toggle--collapsed",
           ]
             .filter(Boolean)
             .join(" ")}

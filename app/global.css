@@ -411,6 +411,7 @@ main {
   background: rgba(255, 255, 255, 0.97);
   border: 1px solid rgba(0, 0, 0, 0.08);
   padding: clamp(0.6rem, 0.9vw, 1rem);
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: clamp(0.4rem, 0.6vw, 0.6rem);
@@ -452,6 +453,9 @@ main {
 .legend-header {
   flex-wrap: wrap;
   gap: clamp(0.35rem, 0.5vw, 0.6rem) !important;
+  position: relative;
+  padding-right: clamp(2.4rem, 4vw, 3rem);
+  padding-bottom: clamp(0.35rem, 0.5vw, 0.45rem);
 }
 
 .legend-header .btn-group,
@@ -460,11 +464,11 @@ main {
 }
 
 .legend-header .legend-toggle {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .legend-item {
-  color: #012b10;
+  color: #111111;
   background: rgba(0, 100, 0, 0.06);
   border: 1px solid rgba(0, 100, 0, 0.18);
   border-radius: 0.85rem;
@@ -498,6 +502,33 @@ main {
 .legend-item:hover .legend-swatch,
 .legend-item:focus-visible .legend-swatch {
   border-color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.legend-toggle--floating {
+  position: absolute;
+  top: clamp(0.15rem, 0.45vw, 0.55rem);
+  right: clamp(0.6rem, 1.2vw, 1.4rem);
+  z-index: 5;
+}
+
+.link-panel .legend-toggle--floating {
+  top: clamp(-0.45rem, 0.02vw, -0.18rem);
+}
+
+.legend-toggle--collapsed {
+  right: clamp(0.35rem, 0.85vw, 1.1rem);
+  background: rgba(255, 255, 255, 0.96);
+  color: #013b16;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+  transform: translateX(0);
+}
+
+.legend-slot.is-collapsed .legend-toggle--floating,
+.legend-slot.is-collapsed .legend-panel .legend-toggle--floating {
+  right: clamp(0.4rem, 1vw, 1.25rem);
 }
 
 .legend-body > ul {
@@ -567,13 +598,16 @@ main {
 .legend-toggle {
   background: rgba(0, 100, 0, 0.15);
   color: #05330f;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.65rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  border: none;
+  box-shadow: none;
+  outline: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.15rem;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
@@ -588,6 +622,14 @@ main {
   background: rgba(0, 100, 0, 0.3);
   color: #011a08;
   transform: translateX(-2px);
+}
+
+.legend-toggle--collapsed:hover,
+.legend-toggle--collapsed:focus-visible {
+  background: rgba(255, 255, 255, 0.99);
+  color: #001f0b;
+  box-shadow: none;
+  transform: translateX(2px);
 }
 
 .legend-slot.is-collapsed {
@@ -616,6 +658,7 @@ main {
 }
 
 .link-panel {
+  padding: clamp(0.6rem, 0.9vw, 1rem);
   border-radius: 0.75rem;
 }
 
@@ -623,46 +666,37 @@ main {
   font-size: clamp(1rem, 0.35vw + 1rem, 1.1rem);
   font-weight: 700;
   color: #123524;
-  margin: 0;
+  margin: 0 0 clamp(0.35rem, 0.5vw, 0.6rem);
 }
 
 .link-panel-body {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.6rem, 0.8vw, 0.9rem);
+  gap: 0.35rem;
 }
 
 .link-panel-button {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  padding: clamp(0.65rem, 0.45vw + 0.6rem, 0.95rem);
-  border-radius: 0.85rem;
-  background: rgba(0, 100, 0, 0.06);
-  border: 1px solid rgba(0, 100, 0, 0.18);
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(0.5rem, 0.6vw, 0.75rem);
   text-decoration: none;
-  color: #012b10;
-  font-weight: 600;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.link-panel-button:hover,
-.link-panel-button:focus-visible {
-  background: linear-gradient(135deg, var(--bm-header-bg), #00a86b);
-  color: #ffffff;
-  box-shadow: 0 16px 28px rgba(0, 100, 0, 0.24);
-  transform: translateY(-1px);
+  color: #111111;
+  width: 100%;
 }
 
 .link-panel-button-primary {
   font-size: 0.95rem;
   font-weight: 700;
+  white-space: nowrap;
+  color: inherit;
 }
 
 .link-panel-button-secondary {
   font-size: 0.85rem;
-  opacity: 0.85;
+  opacity: 1;
+  flex: 1;
+  color: inherit;
 }
 
 @media (max-width: 992px) {

@@ -40,12 +40,8 @@ export default function Links({ className = '' }) {
             type="button"
             className={[
               'legend-toggle',
-              open ? 'ms-auto' : null,
-              open ? 'sidebar-collapse' : null,
-              open ? null : 'sidebar-toggle',
-              open ? null : 'btn',
-              open ? null : 'btn-sm',
-              open ? null : 'btn-outline-secondary',
+              'legend-toggle--floating',
+              open ? 'legend-toggle--expanded' : 'legend-toggle--collapsed',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -65,7 +61,7 @@ export default function Links({ className = '' }) {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="link-panel-button"
+              className="legend-item link-panel-button"
             >
               <span className="link-panel-button-secondary">For {link.label}</span>
               <span className="link-panel-button-primary">Click here</span>

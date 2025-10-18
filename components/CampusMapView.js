@@ -11,7 +11,7 @@ import buildings from '../data/buildings.json';
 // CampusMapView component displays the campus map with interactive elements
 export default function CampusMapView({
   src = '/BuildingMaps/(Campus)/Campus.svg', // Default path to the campus map SVG
-  interactiveSelector = '.building-group, .building', // CSS selector for interactive elements
+  interactiveSelector = '.building-group, .building, .student-housing', // CSS selector for interactive elements
 }) {
   const [selectedId, setSelectedId] = useState(null);
   const router = useRouter();
@@ -25,18 +25,38 @@ export default function CampusMapView({
 
   // Handle the selection of a building
   const HOUSING_IDS = ['1000', '2000', '3000', 'B1000', '2', '3', 'BUILDING_1000', 'BUILDING_2000', 'BUILDING_3000'];
-  const handleSelect = (id) => {
-    if (!id) return;
-    setSelectedId(id);
-    const code = String(id).toUpperCase();
-    if (HOUSING_IDS.includes(code)) {
+  const handleSelect = (id, element) => {
+    const isStudentHousing = element?.classList?.contains('student-housing');
+    if (!id && !isStudentHousing) return;
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('[CampusMapView] select', id, { isStudentHousing, element });
+    }
+    if (id) {
+      setSelectedId(id);
+    }
+
+    const code = id ? String(id).toUpperCase() : null;
+    if (isStudentHousing || (code && HOUSING_IDS.includes(code))) {
       setError('Student housing layouts are not avaialable to the public.');
       return;
     }
-    if (known.has(code)) {
+    if (code && known.has(code)) {
       router.push(`/building/${code}`);
     }
   };
+
+  useEffect(() => {
+    const handler = (event) => {
+      const detailId = event?.detail?.id ?? null;
+      const code = detailId ? String(detailId).toUpperCase() : null;
+      if (!detailId || HOUSING_IDS.includes(code ?? detailId)) {
+        setError('Student housing layouts are not avaialable to the public.');
+      }
+    };
+    window.addEventListener('ggcmap-student-housing-click', handler);
+    return () => window.removeEventListener('ggcmap-student-housing-click', handler);
+  }, []);
 
   // Ensure student housing groups carry a helper class for interactivity
   const ensureStudentHousingClasses = useCallback(() => {
@@ -155,7 +175,15 @@ export default function CampusMapView({
         <div className="campus-popup-error">
           <div className="campus-popup-error-inner">
             <div className="mb-3">{error}</div>
-            <button className="link-panel-button" onClick={() => setError('')}>
+            <button
+              className="link-panel-button"
+              onClick={() => {
+                setError('');
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new Event('ggcmap-zoom-cancel'));
+                }
+              }}
+            >
               OK
             </button>
           </div>

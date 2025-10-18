@@ -139,6 +139,7 @@ export default function InlineSvg({
         interactiveNodes.add(resolved);
       }
     });
+    root.querySelectorAll('.student-housing[id]').forEach((node) => interactiveNodes.add(node));
 
     interactiveNodes.forEach((el) => {
       if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0'); // Make elements focusable
@@ -149,29 +150,68 @@ export default function InlineSvg({
       }
     });
 
-    const dispatchSelection = (target, normalize = true) => {
+    const dispatchSelection = (target, { normalize = true, forceHousing = false } = {}) => {
       if (!target) return;
       const id = target.id ? (normalize ? target.id.toLowerCase() : target.id) : null;
+      if (process.env.NODE_ENV !== 'production') {
+        console.debug('[InlineSvg] dispatchSelection', { id, target });
+      }
       onSelect?.(id, target); // Call onSelect callback
+      if (forceHousing || target.classList?.contains(STUDENT_HOUSING_CLASS)) {
+        window.dispatchEvent(
+          new CustomEvent('ggcmap-student-housing-click', {
+            detail: { id: target.id || null },
+          })
+        );
+      }
+    };
+
+    const resolveCandidate = (start) => {
+      if (!start) return null;
+      let candidate = start.closest(interactiveSelector);
+      if (!candidate) {
+        candidate = start.closest('.student-housing[id], [id]');
+      }
+      return resolveInteractiveElement(candidate);
     };
 
     // Handle click events on interactive elements
     const click = (e) => {
-      const candidate = e.target.closest(interactiveSelector); // Find closest interactive element
-      const target = resolveInteractiveElement(candidate);
+      const target = resolveCandidate(e.target);
       if (!target) return;
-      dispatchSelection(target, true);
+      dispatchSelection(target);
     };
 
     // Handle keyboard events for accessibility
     const key = (e) => {
-      const candidate = e.target.closest(interactiveSelector); // Find closest interactive element
-      if (!candidate) return; // Exit if no element found
+      const candidate = e.target.closest(interactiveSelector);
+      if (!candidate) return;
       if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault(); // Prevent default action
-        const target = resolveInteractiveElement(candidate);
+        e.preventDefault();
+        const target = resolveCandidate(candidate);
         if (!target) return;
-        dispatchSelection(target, false);
+        dispatchSelection(target, { normalize: false });
+      }
+    };
+
+    const pointerUpCapture = (e) => {
+      const target = resolveCandidate(e.target);
+      if (!target || !target.classList?.contains(STUDENT_HOUSING_CLASS)) return;
+      dispatchSelection(target, { forceHousing: true });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('ggcmap-zoom-cancel'));
+      }
+      const viewport = containerRef.current
+        ? containerRef.current.closest('.map-viewport')
+        : null;
+      if (viewport && typeof viewport.releasePointerCapture === 'function') {
+        try {
+          if (typeof viewport.hasPointerCapture !== 'function' || viewport.hasPointerCapture(e.pointerId)) {
+            viewport.releasePointerCapture(e.pointerId);
+          }
+        } catch {
+          // ignore failures; this is best-effort
+        }
       }
     };
 
@@ -210,6 +250,7 @@ export default function InlineSvg({
 
     root.addEventListener('click', click); // Add click event listener
     root.addEventListener('keydown', key); // Add keydown event listener
+    root.addEventListener('pointerup', pointerUpCapture, true);
     root.addEventListener('pointerover', pointerOver);
     root.addEventListener('pointerout', pointerOut);
     root.addEventListener('pointermove', pointerMove);
@@ -233,6 +274,7 @@ export default function InlineSvg({
     return () => {
       root.removeEventListener('click', click); // Cleanup click event listener
       root.removeEventListener('keydown', key); // Cleanup keydown event listener
+      root.removeEventListener('pointerup', pointerUpCapture, true);
       root.removeEventListener('pointerover', pointerOver);
       root.removeEventListener('pointerout', pointerOut);
       root.removeEventListener('pointermove', pointerMove);

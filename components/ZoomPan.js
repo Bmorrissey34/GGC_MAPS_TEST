@@ -262,6 +262,26 @@ export default function ZoomPan({
     }
   };
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const cancelDrag = () => {
+      const vp = viewportRef.current;
+      if (!vp) return;
+      if (drag.current.captured) {
+        try { vp.releasePointerCapture(drag.current.id); } catch {}
+      }
+      drag.current.active = false;
+      drag.current.captured = false;
+      drag.current.dragged = false;
+      drag.current._suppressClickOnce = false;
+      drag.current.id = null;
+    };
+
+    window.addEventListener('ggcmap-zoom-cancel', cancelDrag);
+    return () => window.removeEventListener('ggcmap-zoom-cancel', cancelDrag);
+  }, []);
+
   // Suppress container-level click after a drag so it doesn't interfere
   const onClickCapture = (e) => {
     if (drag.current._suppressClickOnce) {

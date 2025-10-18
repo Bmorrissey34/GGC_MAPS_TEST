@@ -113,35 +113,67 @@ export default function InlineSvg({
     if (!markup || !svgContainerRef.current) return; // Ensure markup and ref are available
     const root = svgContainerRef.current; // Reference to the SVG root element
 
-
-    // Handle click events on interactive elements
-    const click = (e) => {
-      const el = e.target.closest(interactiveSelector); // Find closest interactive element
-      if (el) {
-        const normalizedId = el.id ? el.id.toLowerCase() : null; // Normalize the ID to lowercase
-        onSelect?.(normalizedId, el); // Call onSelect callback
+    const resolveInteractiveElement = (start) => {
+      if (!(start instanceof Element)) return null;
+      if (start.id) {
+        return start;
       }
+      const withId = start.closest('[id]');
+      if (!withId || !root.contains(withId)) {
+        return null;
+      }
+      if (withId.matches(interactiveSelector)) {
+        return withId;
+      }
+      const interactiveAncestor = withId.closest(interactiveSelector);
+      if (interactiveAncestor && root.contains(interactiveAncestor) && interactiveAncestor.id) {
+        return interactiveAncestor;
+      }
+      return withId.id ? withId : null;
     };
 
-    // Handle keyboard events for accessibility
-    const key = (e) => {
-      const el = e.target.closest(interactiveSelector); // Find closest interactive element
-      if (!el) return; // Exit if no element found
-      if (e.key === 'Enter' || e.key === ' ') { 
-        e.preventDefault(); // Prevent default action
-        onSelect?.(el.id || null, el); // Call onSelect callback
+    const interactiveNodes = new Set();
+    root.querySelectorAll(interactiveSelector).forEach((node) => {
+      const resolved = resolveInteractiveElement(node);
+      if (resolved) {
+        interactiveNodes.add(resolved);
       }
-    };
+    });
 
-    // Enhance accessibility by adding attributes to interactive elements
-    root.querySelectorAll(interactiveSelector).forEach(el => {
-      el.hasAttribute('tabindex') || el.setAttribute('tabindex', '0'); // Make elements focusable
-      el.hasAttribute('role') || el.setAttribute('role', 'button'); // Add a button role
+    interactiveNodes.forEach((el) => {
+      if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0'); // Make elements focusable
+      if (!el.hasAttribute('role')) el.setAttribute('role', 'button'); // Add a button role
       if (!el.hasAttribute('aria-label')) {
         const t = el.querySelector('text'); // Get text content for aria-label
         el.setAttribute('aria-label', (t && t.textContent.trim()) || el.id || 'map element'); // Set aria-label
       }
     });
+
+    const dispatchSelection = (target, normalize = true) => {
+      if (!target) return;
+      const id = target.id ? (normalize ? target.id.toLowerCase() : target.id) : null;
+      onSelect?.(id, target); // Call onSelect callback
+    };
+
+    // Handle click events on interactive elements
+    const click = (e) => {
+      const candidate = e.target.closest(interactiveSelector); // Find closest interactive element
+      const target = resolveInteractiveElement(candidate);
+      if (!target) return;
+      dispatchSelection(target, true);
+    };
+
+    // Handle keyboard events for accessibility
+    const key = (e) => {
+      const candidate = e.target.closest(interactiveSelector); // Find closest interactive element
+      if (!candidate) return; // Exit if no element found
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); // Prevent default action
+        const target = resolveInteractiveElement(candidate);
+        if (!target) return;
+        dispatchSelection(target, false);
+      }
+    };
 
     const pointerOver = (e) => {
       const hovered = e.target.closest(`.${STUDENT_HOUSING_CLASS}`);
@@ -184,7 +216,7 @@ export default function InlineSvg({
 
     // Report the IDs of interactive elements to the parent component
     if (onReady) {
-      const items = Array.from(root.querySelectorAll(interactiveSelector))
+      const items = Array.from(interactiveNodes)
         .filter(el => el.id && String(el.id).trim().length > 0) // Filter elements with valid IDs
         .map(el => {
           const label = el.querySelector('text')?.textContent?.trim() || ''; // Get label text

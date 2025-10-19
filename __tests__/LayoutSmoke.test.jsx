@@ -15,11 +15,15 @@ jest.mock('next/navigation', () => {
   return { useRouter: () => ({ push }), usePathname: () => '/' };
 });
 
-// Next <Image /> mock (if not already in jest.setup.js)
-jest.mock('next/image', () => (props) => {
-  // eslint-disable-next-line jsx-a11y/alt-text
-  return <img {...props} />;
+//const React = require('react');
+
+jest.mock('next/image', () => {
+  const React = require('react');
+  return function Image(props) {
+    return React.createElement('img', props);
+  };
 });
+
 
 function RenderLayout() {
   return (

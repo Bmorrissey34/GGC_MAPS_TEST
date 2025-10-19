@@ -1,17 +1,29 @@
-// Jest runs setup in CJS; use require here
+// jest.setup.js
+// CommonJS so Jest can parse it without ESM config
 require('@testing-library/jest-dom');
 
+
 jest.mock('next/image', () => {
-  const React = require('react');git
+  const React = require('react');
   return {
     __esModule: true,
-    default: (props) => {
-      const { priority, ...rest } = props; // strip unsupported prop in tests
-      // eslint-disable-next-line @next/next/no-img-element
-      return React.createElement('img', rest);
-    },
+    default: (props) =>
+      React.createElement('img', {
+        ...props,
+        // Next/Image requires alt; default to empty for tests
+        alt: props.alt ?? '',
+      }),
   };
 });
+
+// (optional) mock router if your tests navigate
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+}));
 
 const originalError = console.error;
 const originalDebug = console.debug;

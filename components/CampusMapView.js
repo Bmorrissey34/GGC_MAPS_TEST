@@ -184,7 +184,7 @@ export default function CampusMapView({
                 }
               }}
             >
-              OK
+              <span className="link-panel-button-primary">OK</span>
             </button>
           </div>
         </div>

@@ -103,39 +103,39 @@ export default function CampusMapView({
     if (!svgRoot) return;
 
     svgRoot.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-    svgRoot.setAttribute('data-map-anchor', '');
 
-    svgRoot.querySelectorAll('[data-map-anchor]').forEach((el) => {
-      if (el !== svgRoot) el.removeAttribute('data-map-anchor');
-    });
-
-    // Clear any transforms we may have set previously during experiments
+    // Prefer the main campus group for bounding-box calculations; fall back to the SVG root.
     const mainGroup =
       svgRoot.querySelector('g#campus, g#Campus') || svgRoot.querySelector('svg > g');
+    const anchorTarget = mainGroup || svgRoot;
+    anchorTarget.setAttribute('data-map-anchor', '');
+    svgRoot.querySelectorAll('[data-map-anchor]').forEach((el) => {
+      if (el !== anchorTarget) el.removeAttribute('data-map-anchor');
+    });
+
+    // Clear any transforms so the bbox reflects the true geometry.
     if (mainGroup) {
       mainGroup.removeAttribute('transform');
     }
 
-    if (zoomRef.current && typeof zoomRef.current.fitToElement === 'function') {
-      try {
-        zoomRef.current.fitToElement(svgRoot, {
-          padding: 0,
-          scaleMultiplier: 0.15
-        });
-      } catch {
-        // ignore if not supported
+    const raf =
+      typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function'
+        ? window.requestAnimationFrame
+        : (fn) => setTimeout(fn, 16);
+    const fitOptions = {
+      padding: 128,
+      scaleMultiplier: 0.8
+    };
+
+    const attemptFit = (attempt = 0) => {
+      if (!zoomRef.current || typeof zoomRef.current.fitToElement !== 'function') return;
+      const success = zoomRef.current.fitToElement(fitOptions);
+      if (!success && attempt < 5) {
+        raf(() => attemptFit(attempt + 1));
       }
-    }
-    if (zoomRef.current && typeof zoomRef.current.centerOn === 'function') {
-      try {
-        const bbox = svgRoot.getBBox(); // get map bounding box
-        const centerX = bbox.x + bbox.width / 2;
-        const centerY = bbox.y + bbox.height / 2;
-        zoomRef.current.centerOn(centerX, centerY);
-      } catch {
-        // ignore if not supported
-      }
-    }
+    };
+
+    raf(() => attemptFit());
   }, [ensureStudentHousingClasses]);
 
   // Header helper text

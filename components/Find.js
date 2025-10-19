@@ -23,7 +23,7 @@ function highlightInPage(roomId) {
     svg.querySelector(`g[id="${CSS.escape(roomId)}"]`);
   if (!group) return false;
 
- const shape = group.querySelector(".room") || group.querySelector("rect, polygon, path");
+  const shape = group.querySelector(".room") || group.querySelector("rect, polygon, path");
   const label = group.querySelector(".label") || group.querySelector("text");
 
   if (shape) shape.classList.add("active-room");  
@@ -58,14 +58,15 @@ export default function Find() {
 };
 
   const onFindClickButton = () => {
-    
-    const userInput=findValue.trim().toLowerCase();
+  const userInput = findValue.trim().toLowerCase();
 
-    if (userInput === "") {
-      setError("You must enter a search term.");
-    }
+  if (userInput === "") {
+    setError("You must enter a search term.");
+    return; // ⬅️ this stops the function early
+  }
 
-    const aliasHit = ALIASES[userInput];
+  const aliasHit = ALIASES[userInput];
+
     if (aliasHit) {
       setError("");
       const { building, level, room } = aliasHit;
@@ -103,10 +104,11 @@ export default function Find() {
       setShowHelp(true);
     }
 
-    else{
-     let match = rooms.find((room) => {
+    else {
+  let match = rooms.find(
     (room) => (room.uniqueId || "").toLowerCase() === userInput
-});
+  );
+
 
       if (!match) {
     match = rooms.find((room) => {
@@ -144,10 +146,12 @@ export default function Find() {
   return (
     <>
       <div className="d-flex align-items-center" style={{ gap: "var(--justin-globe-gap)" }}>        
-        <label htmlFor="findlabel" className="h4 mb-0" style={{fontFamily: "var(--justin-globe1)",color: "white"}}>Find:</label>
+        <label id="findLabel" htmlFor="findInput" className="h4 mb-0" style={{fontFamily: "var(--justin-globe1)", color: "white"}}>Find:</label>
 
         <input
           id="findInput"
+          aria-label="Find"
+          aria-labelledby="findLabel"
           type="text"
           size={"50"}
           className="form-control w-100"

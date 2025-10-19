@@ -179,10 +179,11 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
   }, [locale, currentLocale, userOverride]);
 
   const handleLocaleChange = (code) => {
-    if (code === currentLocale) return;
-    setCurrentLocale(code);
-    setUserOverride(true);
-  };
+  if (code === currentLocale) return;
+  setUserOverride(true);
+  setCurrentLocale(code);
+};
+
 
   const panelClassNames = open
     ? ["legend-panel", "shadow", "rounded-4"]
@@ -194,20 +195,36 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
       <div className="legend-header d-flex align-items-center gap-2 mb-2">
         <div className="legend-title fw-bold">{t("legendTitle")}</div>
 
-        <div className="btn-group btn-group-sm ms-2" role="group" aria-label={t("languageLabel")}>
-          {SUPPORTED_LOCALES.map((code) => (
-            <button
-              key={code}
-              type="button"
-              className={`btn btn-sm ${currentLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
-              onClick={() => handleLocaleChange(code)}
-              aria-pressed={currentLocale === code}
-              aria-label={t(code === "en" ? "languageEnglish" : "languageSpanish")}
-            >
-              {code.toUpperCase()}
-            </button>
-          ))}
+        <div
+          className="btn-group btn-group-sm ms-2"
+          role="group"
+          aria-label={t("languageLabel")}
+        >
+          {/* EN button */}
+          <button
+            type="button"
+            className={`btn btn-sm ${currentLocale === "en" ? "btn-secondary" : "btn-outline-secondary"}`}
+            onClick={() => handleLocaleChange("en")}
+            aria-pressed={currentLocale === "en"}
+            aria-label="EN"
+            title="EN"
+          >
+            EN
+          </button>
+
+          {/* ES button */}
+          <button
+            type="button"
+            className={`btn btn-sm ${currentLocale === "es" ? "btn-secondary" : "btn-outline-secondary"}`}
+            onClick={() => handleLocaleChange("es")}
+            aria-pressed={currentLocale === "es"}
+            aria-label="ES"
+            title="ES"
+          >
+            ES
+          </button>
         </div>
+
 
         <button
           type="button"

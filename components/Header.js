@@ -16,7 +16,7 @@ export default function Header() {
               alt="GGC Logo"
               width={40}
               height={40}
-              priority
+              //priority
             />
             <span className="header-title">GGC Maps</span>
           </Link>

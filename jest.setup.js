@@ -1,21 +1,37 @@
-// jest.setup.js
-import '@testing-library/jest-dom';
+// Jest runs setup in CJS; use require here
+require('@testing-library/jest-dom');
 
-// 🧩 Mock Next.js Image component so tests don’t crash
-jest.mock('next/image', () => (props) => {
-  // eslint-disable-next-line jsx-a11y/alt-text
-  return <img {...props} />;
+jest.mock('next/image', () => {
+  const React = require('react');git
+  return {
+    __esModule: true,
+    default: (props) => {
+      const { priority, ...rest } = props; // strip unsupported prop in tests
+      // eslint-disable-next-line @next/next/no-img-element
+      return React.createElement('img', rest);
+    },
+  };
 });
 
-// 🧭 Optional: silence React “act()” warnings if they appear
 const originalError = console.error;
+const originalDebug = console.debug;
+
 beforeAll(() => {
   console.error = (...args) => {
-    if (/Warning.*not wrapped in act/.test(args[0])) return;
+    const msg = String(args[0] ?? '');
+    if (
+      /Warning.*not wrapped in act/i.test(msg) ||
+      /Received `true` for a non-boolean attribute `priority`/i.test(msg) // <- keep this line exactly
+    ) {
+      return;
+    }
     originalError.call(console, ...args);
   };
+
+  console.debug = jest.fn();
 });
 
 afterAll(() => {
   console.error = originalError;
+  console.debug = originalDebug;
 });

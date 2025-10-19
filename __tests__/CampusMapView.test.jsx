@@ -47,8 +47,15 @@ test('clicking student housing shows error popup (blocked)', async () => {
   render(<CampusMapView />);
 
   await waitFor(() => expect(document.querySelector('svg')).toBeInTheDocument());
-  const housing = document.querySelector('#1000.building');
+  // Instead of querySelector('#1000.building')
+  const root = document.getElementById('1000'); // safe even if id starts with a number
+  const housing =
+    root?.closest('.building-group') ??
+    root?.querySelector('.building') ??
+    root;
+
   await userEvent.click(housing);
+
 
   expect(router.push).not.toHaveBeenCalled();
   expect(screen.getByText(/student housing layouts/i)).toBeInTheDocument();

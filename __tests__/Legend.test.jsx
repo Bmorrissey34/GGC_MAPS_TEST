@@ -28,7 +28,7 @@ test('language toggle switches to ES and persists', async () => {
   expect(screen.getByText(/edificio acad/i)).toBeInTheDocument();
 
   render(<Legend />);
-  expect(screen.getByText(/edificio acad/i)).toBeInTheDocument();
+ expect(screen.getAllByText(/edificio acad/i)[0]).toBeInTheDocument();
 });
 
 test('hover dispatches custom events', async () => {

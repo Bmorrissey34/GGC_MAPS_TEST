@@ -1,24 +1,69 @@
 'use client';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 
 // ZoomPan component allows for zooming and panning of its children
-export default function ZoomPan({
+const ZoomPan = forwardRef(function ZoomPan({
   children,
   className = '',
   minScale = 0.5,
   maxScale = 4,
   initialScale = 1,
-  wheelStep = 0.001, // Sensitivity for wheel zoom; smaller values slow interaction
+  wheelStep = 0.001,
   dblClickStep = 0.25,
   disableDoubleClickZoom = false,
   showControls = true,
   autoFit = false,
   fitPadding = 24,
   fitScaleMultiplier = 1
-}) {
+}, ref) {
+
   const viewportRef = useRef(null);
-  const [scale, setScale] = useState(initialScale);
+  const [scale, setScaleState] = useState(initialScale);
+  const scaleRef = useRef(initialScale);
   const [pos, setPos] = useState({ x: 0, y: 0 });
+
+  const setScale = useCallback(
+    (value) => {
+      const next =
+        typeof value === 'function' ? value(scaleRef.current) : value;
+      if (!Number.isFinite(next)) return;
+      scaleRef.current = next;
+      setScaleState(next);
+    },
+    [setScaleState]
+  );
+
+  useImperativeHandle(ref, () => ({
+      centerOn(x, y) {
+        const vp = viewportRef.current;
+        if (!vp) return;
+        const rect = vp.getBoundingClientRect();
+        const currentScale = scaleRef.current;
+        if (!Number.isFinite(currentScale)) return;
+        setPos({
+          x: rect.width / 2 - currentScale * x,
+          y: rect.height / 2 - currentScale * y
+        });
+        userHasDragged.current = false;
+      },
+      fitToElement(arg1, arg2) {
+        if (typeof fitToBounds !== 'function') return;
+        let options = {};
+        if (arg2 && typeof arg2 === 'object') {
+          options = arg2;
+        } else if (arg1 && typeof arg1 === 'object' && !('nodeType' in arg1)) {
+          options = arg1;
+        }
+        const padding =
+          Number.isFinite(options.padding) ? options.padding : fitPadding;
+        const multiplier =
+          Number.isFinite(options.scaleMultiplier)
+            ? options.scaleMultiplier
+            : fitScaleMultiplier;
+        return fitToBounds({ force: true, padding, multiplier });
+      }
+    }));
+
 
   const userHasDragged = useRef(false);
 
@@ -106,7 +151,7 @@ export default function ZoomPan({
       setPos({ x: newPosX, y: newPosY });
       setScale(next);
     },
-    [scale, pos.x, pos.y, minScale, maxScale, getAnchorBounds]
+    [scale, pos.x, pos.y, minScale, maxScale, getAnchorBounds, setScale]
   );
 
   const getViewportCenter = useCallback(() => {
@@ -129,7 +174,7 @@ export default function ZoomPan({
   );
 
   const fitToBounds = useCallback(
-    ({ force = false, padding = fitPadding } = {}) => {
+    ({ force = false, padding = fitPadding, multiplier = fitScaleMultiplier } = {}) => {
       if (!force && userHasDragged.current) return false;
 
       const vp = viewportRef.current;
@@ -150,7 +195,8 @@ export default function ZoomPan({
       const proposedScale = Math.min(scaleX, scaleY);
       if (!Number.isFinite(proposedScale) || proposedScale <= 0) return false;
 
-      const scaled = proposedScale * fitScaleMultiplier;
+      const safeMultiplier = Number.isFinite(multiplier) ? multiplier : fitScaleMultiplier;
+      const scaled = proposedScale * safeMultiplier;
       const nextScale = clamp(scaled, minScale, maxScale);
       const centerX = bounds.x + bounds.width / 2;
       const centerY = bounds.y + bounds.height / 2;
@@ -165,7 +211,7 @@ export default function ZoomPan({
       userHasDragged.current = false;
       return true;
     },
-    [fitPadding, fitScaleMultiplier, getAnchorBounds, maxScale, minScale]
+    [fitPadding, fitScaleMultiplier, getAnchorBounds, maxScale, minScale, setScale]
   );
 
   const resetView = useCallback(() => {
@@ -191,7 +237,7 @@ export default function ZoomPan({
     setScale(nextScale);
     setPos(nextPos);
     userHasDragged.current = false;
-  }, [autoFit, fitToBounds, initialScale, minScale, maxScale, getAnchorBounds]);
+  }, [autoFit, fitToBounds, initialScale, minScale, maxScale, getAnchorBounds, setScale]);
 
   useEffect(() => {
     resetView();
@@ -251,7 +297,7 @@ export default function ZoomPan({
   const onPointerUp = (e) => {
     if (drag.current.id === e.pointerId) {
       if (drag.current.captured) {
-        try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
+        try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { }
       }
       // Reset; if not dragged, the native click will go to the SVG target
       drag.current.active = false;
@@ -269,7 +315,7 @@ export default function ZoomPan({
       const vp = viewportRef.current;
       if (!vp) return;
       if (drag.current.captured) {
-        try { vp.releasePointerCapture(drag.current.id); } catch {}
+        try { vp.releasePointerCapture(drag.current.id); } catch { }
       }
       drag.current.active = false;
       drag.current.captured = false;
@@ -445,14 +491,14 @@ export default function ZoomPan({
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
       onClickCapture={onClickCapture}
-        style={{
-          position: 'relative',
-          overflow: 'hidden',
-          touchAction: 'none',
-          overscrollBehavior: 'contain',
-          background: 'transparent',
-          cursor: drag.current.captured ? 'grabbing' : 'grab'
-        }}
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        touchAction: 'none',
+        overscrollBehavior: 'contain',
+        background: 'transparent',
+        cursor: drag.current.captured ? 'grabbing' : 'grab'
+      }}
     >
       <div
         className="zoompan-stage"
@@ -506,4 +552,6 @@ export default function ZoomPan({
       )}
     </div>
   );
-}
+});
+
+export default ZoomPan;

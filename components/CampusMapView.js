@@ -38,7 +38,7 @@ export default function CampusMapView({
 
     const code = id ? String(id).toUpperCase() : null;
     if (isStudentHousing || (code && HOUSING_IDS.includes(code))) {
-      setError('Student housing layouts are not avaialable to the public.');
+      setError('Student housing layouts are not available to the public.');
       return;
     }
     if (code && known.has(code)) {

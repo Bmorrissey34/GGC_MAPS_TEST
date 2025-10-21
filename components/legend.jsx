@@ -1,4 +1,4 @@
-// components/legend.jsx
+// components/legend.jsx  -- Legend component with localization and hover interactions - Karen Armendariz
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";

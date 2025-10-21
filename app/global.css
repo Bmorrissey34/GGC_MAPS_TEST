@@ -1,6 +1,20 @@
 /* app/globals.css */
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
+/* --- Sidebar vs Bootstrap: neutralize Bootstrap nav styles inside sidebar --- */
+.sidebar .nav-link,
+.sidebar .nav-link:hover,
+.sidebar .nav-link:focus,
+.sidebar .nav-link:active,
+.sidebar .nav-link.active,
+.sidebar .nav-item,
+.sidebar .nav-item .nav-link,
+.sidebar .nav-item .nav-link:hover,
+.sidebar .nav-item .nav-link:focus {
+  background-image: transparent !important; /* kill BS gradient/background */
+  border-radius: .75rem !important;
+}
+
 /* 🌍 Global Variables  Karen Armendariz*/
 :root {
   /* Variable 1: Responsive font size */
@@ -326,42 +340,57 @@ main {
   gap: clamp(0.45rem, 0.6vw, 0.75rem);
 }
 
-.sidebar .nav-item {
+.sidebar .sidebar-nav-item {
   margin: 0;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important; /* ensure the parent doesn't create a square background */
 }
 
-.sidebar .nav-link {
+.sidebar .sidebar-nav-item:hover,
+.sidebar .sidebar-nav-item:focus-within {
+  background: transparent !important;
+}
+
+.sidebar .sidebar-nav-link {
   display: block;
   width: 100%;
   padding: clamp(0.55rem, 0.4vw + 0.5rem, 0.85rem) clamp(0.75rem, 0.9vw, 1rem);
-  border-radius: 0.85rem;
+  border-radius: 0.85rem !important;
   border: 1px solid rgba(0, 100, 0, 0.18);
-  background: rgba(0, 100, 0, 0.06);
-  color: var(--sidebar-link-color);
+  background: rgba(0, 100, 0, 0.06) !important;
+  color: var(--sidebar-link-color) !important;
   font-weight: 600;
   font-size: clamp(0.95rem, 0.2vw + 0.95rem, 1.05rem);
   letter-spacing: 0.02em;
-  text-decoration: none;
+  text-decoration: none !important;
   box-sizing: border-box;
   transform: translateY(0);
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.sidebar .nav-link:hover,
-.sidebar .nav-link:focus-visible {
-  background: linear-gradient(135deg, var(--bm-header-bg), #00a86b);
-  color: #ffffff;
-  border-color: rgba(0, 100, 0, 0.25);
-  box-shadow: 0 16px 28px rgba(0, 100, 0, 0.24);
+.sidebar .sidebar-nav-link:hover,
+.sidebar .sidebar-nav-link:focus-visible {
+  background: linear-gradient(135deg, var(--bm-header-bg), #00a86b) !important;
+  color: #ffffff !important;
+  border-color: rgba(0, 100, 0, 0.25) !important;
+  box-shadow: 0 16px 28px rgba(0, 100, 0, 0.24) !important;
   transform: translateY(-1px);
   outline: none;
 }
 
-.sidebar .nav-link.active {
-  background: linear-gradient(135deg, var(--bm-header-bg), #00a86b);
-  color: #ffffff;
-  border-color: rgba(0, 100, 0, 0.25);
-  box-shadow: 0 16px 28px rgba(0, 100, 0, 0.24);
+/* Ensure no Bootstrap nav hover styles bleed through from parent hover */
+.sidebar .sidebar-nav-item:hover .sidebar-nav-link:not(.active),
+.sidebar .sidebar-nav-item .sidebar-nav-link:not(.active):hover {
+  background: linear-gradient(135deg, var(--bm-header-bg), #00a86b) !important;
+  color: #ffffff !important;
+}
+
+.sidebar .sidebar-nav-link.active {
+  background: linear-gradient(135deg, var(--bm-header-bg), #00a86b) !important;
+  color: #ffffff !important;
+  border-color: rgba(0, 100, 0, 0.25) !important;
+  box-shadow: 0 16px 28px rgba(0, 100, 0, 0.24) !important;
   transform: translateY(-1px);
 }
 

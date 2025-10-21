@@ -82,9 +82,9 @@ export default function Sidebar() {
             {NAV_ITEMS.map((item) => {
               const handlers = createHandlers(item);
               const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
-              const linkClass = `nav-link${isActive ? ' active' : ''}`;
+              const linkClass = `sidebar-nav-link${isActive ? ' active' : ''}`;
               return (
-                <li key={item.key} className="nav-item">
+                <li key={item.key} className="sidebar-nav-item">
                   <Link
                     className={linkClass}
                     href={item.path}

@@ -83,4 +83,8 @@ Helpful docs for contributors and users:
 - Client Liaison
 - Programmer
 
+### Brendan Morrissey
+- Lead Programmer
+- Programmer (x2)
+
 ### Project Flyer and video (at the end of the semester)

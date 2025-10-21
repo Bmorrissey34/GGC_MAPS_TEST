@@ -1,9 +1,9 @@
 "use client";
-
+//imports
 import { useState } from "react";
 import rooms from "../data/rooms.json";
 import { useRouter } from "next/navigation";
-
+//allows size and other valid entries
 const maxCharsAllowed = 30;
 const validBuildings = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "l", "w"];
 const validBuildingFloors = [
@@ -11,7 +11,7 @@ const validBuildingFloors = [
   "e1", "e2", "e3", "f1", "f2", "h1", "h2", "h3",
   "i1", "i2", "i3", "l1", "l2", "l3", "w1", "w2", "w3"
 ];
-
+//highlights room when outside of building or floor
 function highlightInPage(roomId) {
   const host = document.querySelector(".floor-content");
   if (!host) return false;
@@ -39,7 +39,7 @@ function highlightInPage(roomId) {
 
   return true;
 }
-
+//highlights room when inside floor of building
 function highlightWithRetry(roomId, attempts = 10, delay = 100) {
   const ok = highlightInPage(roomId);
   if (ok) return;
@@ -47,13 +47,13 @@ function highlightWithRetry(roomId, attempts = 10, delay = 100) {
   if (attempts <= 0) return;
   setTimeout(() => highlightWithRetry(roomId, attempts - 1, delay), delay);
 }
-
+//the actual find function that takes input and goes to what user typed for or shows error when not valid
 export default function Find() {
   const [showHelp, setShowHelp] = useState(false);
   const [error, setError] = useState("");
   const [findValue, setFindValue] = useState("");
   const router = useRouter();
-
+//room nicknames
   const ALIASES = {
     aec: { building: "W", level: "L1", room: "1160" },
     cisco: { building: "C", level: "L1", room: "1260" },
@@ -64,12 +64,12 @@ export default function Find() {
 
   const onFindClickButton = () => {
     const userInput = findValue.trim().toLowerCase();
-
+//blank error
     if (userInput === "") {
       setError("You must enter a search term.");
       return;
     }
-
+//if you type a nickname
     const aliasHit = ALIASES[userInput];
     if (aliasHit) {
       setError("");
@@ -90,14 +90,14 @@ export default function Find() {
       highlightWithRetry(room);
       return;
     }
-
+//if you type just a valid building letter
     if (validBuildings.includes(userInput) && userInput.length === 1) {
       const building = userInput.toUpperCase();
       router.push(`/building/${building}/L1`);
       setError("");
       return;
     }
-
+//if you type just a valid building letter and valid floor number
     if (validBuildingFloors.includes(userInput) && userInput.length === 2) {
       const building = userInput.slice(0, 1).toUpperCase();
       const floor = userInput.slice(1).toUpperCase();
@@ -105,24 +105,23 @@ export default function Find() {
       setError("");
       return;
     }
-
+//user types help pulls up help menu
     if (userInput === "help") {
       setShowHelp(true);
       return;
     }
 
-    // ✅ Fixed rooms lookup — removed arrow inside arrow bug
     let match = rooms.find(
       (room) => (room.uniqueId || "").toLowerCase() === userInput
     );
-
+//if user types in whole unique id it will work
     if (!match) {
       match = rooms.find((room) => {
         const [building, level, roomNumber] = room.uniqueId.split("-");
         return (building.toLowerCase() + roomNumber.toLowerCase()) === userInput;
       });
     }
-
+//error if user types in something that does not meet the valid credentials
     if (!match) {
       setError(`${userInput} is not valid`);;
       return;
@@ -144,11 +143,11 @@ export default function Find() {
 
     router.push(`/building/${building}/L${floor}?room=${encodeURIComponent(roomOnly)}`);
   };
-
+//help button function that shows help menu
   const onHelpClick = () => {
     setShowHelp(true);
   };
-
+//html bootstrap css that is the actual find bar with the buttons and the help menu
   return (
     <>
       <div

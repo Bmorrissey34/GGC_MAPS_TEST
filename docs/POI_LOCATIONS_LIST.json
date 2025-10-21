@@ -1,0 +1,368 @@
+﻿[
+  {
+    "name": "A",
+    "building": "(Campus)",
+    "floor": "Campus",
+    "category": "other"
+  },
+  {
+    "name": "B",
+    "building": "(Campus)",
+    "floor": "Campus",
+    "category": "other"
+  },
+  {
+    "name": "Buildings",
+    "building": "(Campus)",
+    "floor": "Campus",
+    "category": "other"
+  },
+  {
+    "name": "C",
+    "building": "(Campus)",
+    "floor": "Campus",
+    "category": "other"
+  },
+  {
+    "name": "E",
+    "building": "(Campus)",
+    "floor": "Campus",
+    "category": "other"
+  },
+  {
+    "name": "L",
+    "building": "(Campus)",
+    "floor": "Campus",
+    "category": "other"
+  },
+  {
+    "name": "Parking",
+    "building": "(Campus)",
+    "floor": "Campus",
+    "category": "other"
+  },
+  {
+    "name": "Fireroute",
+    "building": "A",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Einstein Bros Bagels",
+    "building": "B",
+    "floor": "L1",
+    "category": "amenity_food"
+  },
+  {
+    "name": "Fireroute",
+    "building": "B",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "B",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "3400A",
+    "building": "B",
+    "floor": "L3",
+    "category": "other"
+  },
+  {
+    "name": "3400B",
+    "building": "B",
+    "floor": "L3",
+    "category": "other"
+  },
+  {
+    "name": "3400C",
+    "building": "B",
+    "floor": "L3",
+    "category": "other"
+  },
+  {
+    "name": "3500A",
+    "building": "B",
+    "floor": "L3",
+    "category": "other"
+  },
+  {
+    "name": "3500B",
+    "building": "B",
+    "floor": "L3",
+    "category": "other"
+  },
+  {
+    "name": "3500C",
+    "building": "B",
+    "floor": "L3",
+    "category": "other"
+  },
+  {
+    "name": "3500D",
+    "building": "B",
+    "floor": "L3",
+    "category": "other"
+  },
+  {
+    "name": "Fireroute",
+    "building": "B",
+    "floor": "L3",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "C",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "C",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "D",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Label",
+    "building": "D",
+    "floor": "L1",
+    "category": "other"
+  },
+  {
+    "name": "Dining Hall",
+    "building": "E",
+    "floor": "L1",
+    "category": "amenity_food"
+  },
+  {
+    "name": "Fireroute",
+    "building": "E",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Food Stations",
+    "building": "E",
+    "floor": "L1",
+    "category": "other"
+  },
+  {
+    "name": "Kitchen Area",
+    "building": "E",
+    "floor": "L1",
+    "category": "other"
+  },
+  {
+    "name": "Outdoor Dining",
+    "building": "E",
+    "floor": "L1",
+    "category": "amenity_food"
+  },
+  {
+    "name": "Fireroute",
+    "building": "E",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "Info Desk",
+    "building": "E",
+    "floor": "L2",
+    "category": "other"
+  },
+  {
+    "name": "Terrace",
+    "building": "E",
+    "floor": "L2",
+    "category": "other"
+  },
+  {
+    "name": "Fireroute",
+    "building": "E",
+    "floor": "L3",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "F",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "F",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "H",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "H",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "H",
+    "floor": "L3",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "I",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "I",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "I",
+    "floor": "L3",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "L",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "L",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "L",
+    "floor": "L3",
+    "category": "safety"
+  },
+  {
+    "name": "Aed",
+    "building": "W",
+    "floor": "GL",
+    "category": "safety"
+  },
+  {
+    "name": "Elevator1",
+    "building": "W",
+    "floor": "GL",
+    "category": "accessibility"
+  },
+  {
+    "name": "Elevator2",
+    "building": "W",
+    "floor": "GL",
+    "category": "accessibility"
+  },
+  {
+    "name": "Fire Alarm",
+    "building": "W",
+    "floor": "GL",
+    "category": "safety"
+  },
+  {
+    "name": "Fire Extinguisher",
+    "building": "W",
+    "floor": "GL",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "W",
+    "floor": "GL",
+    "category": "safety"
+  },
+  {
+    "name": "Aed",
+    "building": "W",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Elevator2",
+    "building": "W",
+    "floor": "L1",
+    "category": "accessibility"
+  },
+  {
+    "name": "Fire Alarm",
+    "building": "W",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Fire Extinguisher",
+    "building": "W",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "W",
+    "floor": "L1",
+    "category": "safety"
+  },
+  {
+    "name": "Rooms",
+    "building": "W",
+    "floor": "L1",
+    "category": "other"
+  },
+  {
+    "name": "Aed",
+    "building": "W",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "Elevator1",
+    "building": "W",
+    "floor": "L2",
+    "category": "accessibility"
+  },
+  {
+    "name": "Elevator2",
+    "building": "W",
+    "floor": "L2",
+    "category": "accessibility"
+  },
+  {
+    "name": "Fire Extinguisher",
+    "building": "W",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "Fireroute",
+    "building": "W",
+    "floor": "L2",
+    "category": "safety"
+  },
+  {
+    "name": "Safety",
+    "building": "W",
+    "floor": "L2",
+    "category": "other"
+  }
+]

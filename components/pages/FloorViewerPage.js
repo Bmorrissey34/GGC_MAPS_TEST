@@ -30,37 +30,15 @@ export default function FloorViewerPage({ buildingId, floorId }) {
   }
 
   return (
-    <div className="floor-viewer">
-      {/* Floor Map with Navigation Overlay */}
-      <div className="floor-content">
-        <FloorMapView src={currentFloor.file} /> {/* Render the floor map */}
-        
-        {/* Vertical Floor Navigation Overlay */}
-        <div className="floor-navigation-overlay">
-          <button 
-            onClick={goToUpperFloor}
-            disabled={currentFloorIndex === floors.length - 1} // Disable if on top floor
-            className="nav-arrow-vertical"
-            title="Upper Floor"
-          >
-            ↑
-          </button>
-          
-          <div className="floor-display-vertical">
-            <span className="current-floor-vertical">{currentFloor.label}</span> {/* Display current floor label */}
-            <span className="building-name-vertical">{buildingData.name}</span> {/* Display building name */}
-          </div>
-          
-          <button 
-            onClick={goToLowerFloor}
-            disabled={currentFloorIndex === 0} // Disable if on ground floor
-            className="nav-arrow-vertical"
-            title="Lower Floor"
-          >
-            ↓
-          </button>
-        </div>
-      </div>
-    </div>
+    <main role="main" className="floor-viewer">
+      <FloorMapView 
+        src={currentFloor.file}
+        buildingData={buildingData}
+        currentFloorId={floorId}
+        onFloorChange={(newFloorId) => {
+          router.push(`/building/${buildingId}/${newFloorId}`);
+        }}
+      />
+    </main>
   );
 }

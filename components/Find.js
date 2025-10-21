@@ -1,17 +1,22 @@
 "use client";
-//imports
+
 import { useState } from "react";
 import rooms from "../data/rooms.json";
 import { useRouter } from "next/navigation";
-//allows size and other valid entries
+import { searchForRoom, validateSearchInput, parseFloorInput, formatNotFoundError, extractRoomNavInfo } from "../lib/searchUtils";
 const maxCharsAllowed = 30;
 const validBuildings = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "l", "w"];
-const validBuildingFloors = [
-  "a1", "b1", "b2", "b3", "c1", "c2", "d1", "d2",
-  "e1", "e2", "e3", "f1", "f2", "h1", "h2", "h3",
-  "i1", "i2", "i3", "l1", "l2", "l3", "w1", "w2", "w3"
-];
-//highlights room when outside of building or floor
+const validBuildingFloors = ["a1", "b1", "b2", "b3", "c1", "c2", "d1", "d2", "e1", "e2", "e3", "f1", "f2", "h1", "h2", "h3", "i1", "i2", "i3", "l1", "l2", "l3", "w1", "w2", "w3"];
+
+// Room aliases for quick navigation to common locations
+const ALIASES = {
+  aec: { building: "W", level: "L1", room: "1160" },
+  cisco: { building: "C", level: "L1", room: "1260" },
+  park: { building: "D", level: "L1", room: "1125" },
+  test: { building: "D", level: "L1", room: "1301" },
+  den: { building: "A", level: "L1", room: "1510" },
+};
+
 function highlightInPage(roomId) {
   const host = document.querySelector(".floor-content");
   if (!host) return false;
@@ -19,10 +24,12 @@ function highlightInPage(roomId) {
   const svg = host.querySelector("svg");
   if (!svg) return false;
 
-  svg.querySelectorAll(".active-room").forEach((el) =>
+  // Clear previous highlights
+  svg.querySelectorAll(".active-room").forEach(el =>
     el.classList.remove("active-room")
   );
 
+  // Find the room group or element
   const group =
     svg.querySelector(`g.room-group[id="${CSS.escape(roomId)}"]`) ||
     svg.querySelector(`g[id="${CSS.escape(roomId)}"]`);
@@ -34,12 +41,13 @@ function highlightInPage(roomId) {
   if (shape) shape.classList.add("active-room");
   if (label) label.classList.add("label--active");
 
+  // Ensure elements are rendered on top
   if (shape?.parentElement) shape.parentElement.appendChild(shape);
   if (label?.parentElement) label.parentElement.appendChild(label);
 
   return true;
 }
-//highlights room when inside floor of building
+
 function highlightWithRetry(roomId, attempts = 10, delay = 100) {
   const ok = highlightInPage(roomId);
   if (ok) return;
@@ -47,150 +55,110 @@ function highlightWithRetry(roomId, attempts = 10, delay = 100) {
   if (attempts <= 0) return;
   setTimeout(() => highlightWithRetry(roomId, attempts - 1, delay), delay);
 }
-//the actual find function that takes input and goes to what user typed for or shows error when not valid
+
+
 export default function Find() {
   const [showHelp, setShowHelp] = useState(false);
   const [error, setError] = useState("");
   const [findValue, setFindValue] = useState("");
   const router = useRouter();
-//room nicknames
-  const ALIASES = {
-    aec: { building: "W", level: "L1", room: "1160" },
-    cisco: { building: "C", level: "L1", room: "1260" },
-    park: { building: "D", level: "L1", room: "1125" },
-    test: { building: "D", level: "L1", room: "1301" },
-    den: { building: "A", level: "L1", room: "1510" },
-  };
 
   const onFindClickButton = () => {
     const userInput = findValue.trim().toLowerCase();
-//blank error
-    if (userInput === "") {
+
+    // Validate input
+    if (!validateSearchInput(userInput)) {
       setError("You must enter a search term.");
       return;
     }
-//if you type a nickname
-    const aliasHit = ALIASES[userInput];
-    if (aliasHit) {
-      setError("");
-      const { building, level, room } = aliasHit;
+
+    // Clear previous errors
+    setError("");
+
+    // 1. Check for room alias (quick navigation)
+    if (ALIASES[userInput]) {
+      const { building, level, room } = ALIASES[userInput];
       router.push(`/building/${building}/${level}?room=${encodeURIComponent(room)}`);
-
-      const svgHere = document.querySelector(
-        `.floor-content svg[data-building="${building}"][data-level="${level}"]`
-      );
-
-      if (svgHere) {
-        highlightWithRetry(room);
-      } else {
-        router.push(`/building/${building}/${level}?room=${encodeURIComponent(room)}`);
-      }
-
-      highlightInPage(room);
       highlightWithRetry(room);
       return;
     }
-//if you type just a valid building letter
+
+    // 2. Check for single building letter (e.g., "b")
     if (validBuildings.includes(userInput) && userInput.length === 1) {
       const building = userInput.toUpperCase();
       router.push(`/building/${building}/L1`);
-      setError("");
       return;
     }
-//if you type just a valid building letter and valid floor number
+
+    // 3. Check for building + floor (e.g., "b2")
     if (validBuildingFloors.includes(userInput) && userInput.length === 2) {
-      const building = userInput.slice(0, 1).toUpperCase();
-      const floor = userInput.slice(1).toUpperCase();
-      router.push(`/building/${building}/L${floor}`);
-      setError("");
-      return;
+      const floorData = parseFloorInput(userInput);
+      if (floorData) {
+        router.push(`/building/${floorData.building}/L${floorData.floor}`);
+        return;
+      }
     }
-//user types help pulls up help menu
+
+    // 4. Check for help request
     if (userInput === "help") {
       setShowHelp(true);
       return;
     }
 
-    let match = rooms.find(
-      (room) => (room.uniqueId || "").toLowerCase() === userInput
-    );
-//if user types in whole unique id it will work
+    // 5. Search for room by query
+    const match = searchForRoom(userInput, rooms);
     if (!match) {
-      match = rooms.find((room) => {
-        const [building, level, roomNumber] = room.uniqueId.split("-");
-        return (building.toLowerCase() + roomNumber.toLowerCase()) === userInput;
-      });
-    }
-//error if user types in something that does not meet the valid credentials
-    if (!match) {
-      setError(`${userInput} is not valid`);;
+      setError(formatNotFoundError(findValue));
       return;
     }
 
-    setError("");
-    const building = userInput[0].toUpperCase();
-    const m = userInput.match(/^[a-z](\d)/i);
-    if (!m) {
-      setError("Invalid room format.");
+    // Extract navigation info from matched room
+    const navInfo = extractRoomNavInfo(match);
+    if (!navInfo) {
+      setError("Invalid room format in database.");
       return;
     }
 
-    const floor = m[1];
-    const roomOnly = findValue.trim().replace(/^[a-z]/i, "");
-    highlightWithRetry(roomOnly);
-
-    if (highlightInPage(roomOnly)) return;
-
-    router.push(`/building/${building}/L${floor}?room=${encodeURIComponent(roomOnly)}`);
+    // Navigate to the room and highlight it
+    const { building, floor, roomNumber } = navInfo;
+    router.push(`/building/${building}/L${floor}?room=${encodeURIComponent(roomNumber)}`);
+    highlightWithRetry(roomNumber);
   };
-//help button function that shows help menu
+
   const onHelpClick = () => {
     setShowHelp(true);
   };
-//html bootstrap css that is the actual find bar with the buttons and the help menu
+
+  const onKeyDown = (e) => {
+    if (e.key === "Enter") {
+      onFindClickButton();
+    }
+  };
+
   return (
     <>
-      <div
-        className="d-flex align-items-center"
-        style={{ gap: "var(--justin-globe-gap)" }}
-      >
-        <label
-          id="findLabel"
-          htmlFor="findInput"
-          className="h4 mb-0"
-          style={{ fontFamily: "var(--justin-globe1)", color: "white" }}
-        >
+      <div className="d-flex align-items-center" style={{ gap: "var(--justin-globe-gap)" }}>
+        <label htmlFor="findlabel" className="h4 mb-0" style={{ fontFamily: "var(--justin-globe1)", color: "white" }}>
           Find:
         </label>
 
         <input
           id="findInput"
-          aria-label="Find"
-          aria-labelledby="findLabel"
           type="text"
-          size="50"
+          size={"50"}
           className="form-control w-100"
           placeholder="AEC, gameroom, library"
           maxLength={maxCharsAllowed}
           style={{ width: "var(--justin-globe-inputBarSize)" }}
           value={findValue}
           onChange={(e) => setFindValue(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && onFindClickButton()}
+          onKeyDown={onKeyDown}
         />
-
-        <button
-          id="findInputButton"
-          className="btn btn-primary"
-          onClick={onFindClickButton}
-        >
+        <button id="findInputButton" className="btn btn-primary" onClick={onFindClickButton}>
           Find
         </button>
 
-        <button
-          id="helpButton"
-          className="btn btn-secondary"
-          onClick={onHelpClick}
-        >
+        <button id="helpButton" className="btn btn-secondary" onClick={onHelpClick}>
           Help
         </button>
       </div>
@@ -201,36 +169,25 @@ export default function Find() {
             color: "hotpink",
             marginTop: "0.5rem",
             fontWeight: "bold",
+            fontSize: "clamp(0.75rem, 1.5vw, 0.875rem)",
+            wordWrap: "break-word",
+            overflow: "hidden"
           }}
         >
           {error}
         </div>
       )}
+      
+      
 
       {showHelp && (
-        <div
-          className="position-fixed top-50 start-50 translate-middle bg-white label-4 border rounded shadow"
-          style={{
-            zIndex: 1050,
-            height: "800px",
-            width: "800px",
-            textAlign: "center",
-          }}
-        >
+        <div className="find-help-dialog">
           <h5 style={{ color: "blue" }}>Help (not case sensitive)</h5>
-          <table
-            className="table table-bordered table-striped table-lg table-half"
-            style={{
-              tableLayout: "fixed",
-              width: "100%",
-              wordWrap: "break-word",
-              overflowWrap: "break-word",
-            }}
-          >
+          <table className="table table-bordered table-striped" style={{ tableLayout: "fixed", width: "100%", wordWrap: "break-word", overflowWrap: "break-word" }}>
             <thead>
               <tr>
-                <th className="w-50">What you search</th>
-                <th className="w-50">What it does</th>
+                <th>What you search</th>
+                <th>What it does</th>
               </tr>
             </thead>
             <tbody>
@@ -247,48 +204,29 @@ export default function Find() {
                 <td>Goes to floor entered in building</td>
               </tr>
               <tr>
-                <td>Room nicknames (aec, cfa, game, gym, book)</td>
+                <td>Room nicknames (aec, cisco, park, test, den)</td>
                 <td>Goes to room</td>
               </tr>
               <tr>
-                <td>Food</td>
-                <td>Shows all places to eat on campus</td>
-              </tr>
-              <tr>
-                <td>Park</td>
-                <td>Shows all places to park on campus</td>
-              </tr>
-              <tr>
-                <td>sport / athlete / exercise / workout</td>
-                <td>Shows all places related to sports or exercise</td>
-              </tr>
-              <tr>
                 <td>Help</td>
-                <td>Shows all school support services</td>
-              </tr>
-              <tr>
-                <td>ggc</td>
-                <td>Shows whole campus</td>
+                <td>Shows this help dialog</td>
               </tr>
             </tbody>
           </table>
-
-          <h4 style={{ color: "blue" }}>Searches that work</h4>
-          <label style={{ color: "blue" }}>b → goes to building B</label>
-          <br />
-          <label style={{ color: "blue" }}>b2 → goes to building B floor 2</label>
-          <br />
-          <label style={{ color: "blue" }}>b2210 → goes to building B room 2210</label>
-          <br />
-          <label style={{ color: "blue" }}>
-            cfa / chick fil a → goes to Chick-fil-A
+          <h4 style={{ color: "blue", marginTop: "1.5rem" }}>Searches that work</h4>
+          <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
+            <strong>b</strong> goes to building B
           </label>
-          <br />
-          <button
-            className="btn btn-primary"
-            style={{ marginTop: "auto" }}
-            onClick={() => setShowHelp(false)}
-          >
+          <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
+            <strong>b2</strong> goes to building B floor 2
+          </label>
+          <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
+            <strong>b2210</strong> goes to building B room 2210 and highlights it
+          </label>
+          <label style={{ color: "blue", display: "block", marginBottom: "1rem" }}>
+            <strong>aec</strong> goes to AEC location
+          </label>
+          <button className="btn btn-primary" onClick={() => setShowHelp(false)}>
             Close
           </button>
         </div>
@@ -296,3 +234,5 @@ export default function Find() {
     </>
   );
 }
+
+

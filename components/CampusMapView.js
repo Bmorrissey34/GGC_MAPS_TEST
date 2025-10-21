@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation';
 import InlineSvg from './InlineSvg';
 import ZoomPan from './ZoomPan';
 import PageContainer from './PageContainer';
+import OverlayHUD from './OverlayHUD';
 import buildings from '../data/buildings.json';
+import { RESTRICTED_BUILDING_IDS, RESTRICTION_ERROR_MESSAGE } from '../lib/constants';
 
 // CampusMapView component displays the campus map with interactive elements
 export default function CampusMapView({
   src = '/BuildingMaps/(Campus)/Campus.svg', // Default path to the campus map SVG
-  interactiveSelector = '.building-group, .building, .student-housing', // CSS selector for interactive elements
+  interactiveSelector = '.building-group, .building', // CSS selector for interactive elements
 }) {
   const [selectedId, setSelectedId] = useState(null);
   const router = useRouter();
@@ -24,39 +26,18 @@ export default function CampusMapView({
   );
 
   // Handle the selection of a building
-  const HOUSING_IDS = ['1000', '2000', '3000', 'B1000', '2', '3', 'BUILDING_1000', 'BUILDING_2000', 'BUILDING_3000'];
-  const handleSelect = (id, element) => {
-    const isStudentHousing = element?.classList?.contains('student-housing');
-    if (!id && !isStudentHousing) return;
-
-    if (process.env.NODE_ENV !== 'production') {
-      console.debug('[CampusMapView] select', id, { isStudentHousing, element });
-    }
-    if (id) {
-      setSelectedId(id);
-    }
-
-    const code = id ? String(id).toUpperCase() : null;
-    if (isStudentHousing || (code && HOUSING_IDS.includes(code))) {
-      setError('Student housing layouts are not available to the public.');
+  const handleSelect = (id) => {
+    if (!id) return;
+    setSelectedId(id);
+    const code = String(id).toUpperCase();
+    if (RESTRICTED_BUILDING_IDS.includes(code)) {
+      setError(RESTRICTION_ERROR_MESSAGE);
       return;
     }
-    if (code && known.has(code)) {
+    if (known.has(code)) {
       router.push(`/building/${code}`);
     }
   };
-
-  useEffect(() => {
-    const handler = (event) => {
-      const detailId = event?.detail?.id ?? null;
-      const code = detailId ? String(detailId).toUpperCase() : null;
-      if (!detailId || HOUSING_IDS.includes(code ?? detailId)) {
-        setError('Student housing layouts are not avaialable to the public.');
-      }
-    };
-    window.addEventListener('ggcmap-student-housing-click', handler);
-    return () => window.removeEventListener('ggcmap-student-housing-click', handler);
-  }, []);
 
   // Ensure student housing groups carry a helper class for interactivity
   const ensureStudentHousingClasses = useCallback(() => {
@@ -103,92 +84,82 @@ export default function CampusMapView({
     if (!svgRoot) return;
 
     svgRoot.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svgRoot.setAttribute('data-map-anchor', '');
 
-    // Prefer the main campus group for bounding-box calculations; fall back to the SVG root.
-    const mainGroup =
-      svgRoot.querySelector('g#campus, g#Campus') || svgRoot.querySelector('svg > g');
-    const anchorTarget = mainGroup || svgRoot;
-    anchorTarget.setAttribute('data-map-anchor', '');
     svgRoot.querySelectorAll('[data-map-anchor]').forEach((el) => {
-      if (el !== anchorTarget) el.removeAttribute('data-map-anchor');
+      if (el !== svgRoot) el.removeAttribute('data-map-anchor');
     });
 
-    // Clear any transforms so the bbox reflects the true geometry.
+    // Clear any transforms we may have set previously during experiments
+    const mainGroup =
+      svgRoot.querySelector('g#campus, g#Campus') || svgRoot.querySelector('svg > g');
     if (mainGroup) {
       mainGroup.removeAttribute('transform');
     }
 
-    const raf =
-      typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function'
-        ? window.requestAnimationFrame
-        : (fn) => setTimeout(fn, 16);
-    const fitOptions = {
-      padding: 128,
-      scaleMultiplier: 0.8
-    };
-
-    const attemptFit = (attempt = 0) => {
-      if (!zoomRef.current || typeof zoomRef.current.fitToElement !== 'function') return;
-      const success = zoomRef.current.fitToElement(fitOptions);
-      if (!success && attempt < 5) {
-        raf(() => attemptFit(attempt + 1));
+    if (zoomRef.current && typeof zoomRef.current.fitToElement === 'function') {
+      try {
+        zoomRef.current.fitToElement(svgRoot, {
+          padding: 0,
+          scaleMultiplier: 0.15
+        });
+      } catch {
+        // ignore if not supported
       }
-    };
-
-    raf(() => attemptFit());
+    }
+    if (zoomRef.current && typeof zoomRef.current.centerOn === 'function') {
+      try {
+        const bbox = svgRoot.getBBox(); // get map bounding box
+        const centerX = bbox.x + bbox.width / 2;
+        const centerY = bbox.y + bbox.height / 2;
+        zoomRef.current.centerOn(centerX, centerY);
+      } catch {
+        // ignore if not supported
+      }
+    }
   }, [ensureStudentHousingClasses]);
 
-  // Header helper text
-  const headerContent = (
-    <span className="text-muted small">
-      Use +/- buttons or scroll/pinch to zoom; drag to pan
-    </span>
-  );
-
   return (
-    <PageContainer title="Campus Map" headerContent={headerContent} fluid={true}>
-      <div className="map-wrap">
-        {/* Disable autoFit so we can center manually */}
-        <ZoomPan
-          ref={zoomRef}
-          initialScale={1}
-          minScale={0.1}
-          maxScale={6}
-          className="map-viewport"
-          disableDoubleClickZoom={true}
-          autoFit={false}
-          fitPadding={0}
-          fitScaleMultiplier={0.70}
-        >
-          <InlineSvg
-            src={src}
-            className="w-100 h-100"
-            interactiveSelector={interactiveSelector}
-            selectedId={selectedId}
-            onSelect={handleSelect}
-            onReady={handleSvgReady}
-          />
-        </ZoomPan>
-      </div>
+    <div className="map-wrap">
+      <ZoomPan
+        ref={zoomRef}
+        initialScale={1}
+        minScale={0.1}
+        maxScale={6}
+        className="map-viewport"
+        disableDoubleClickZoom={true}
+        autoFit={false}
+        fitPadding={0}
+        fitScaleMultiplier={0.70}
+      >
+        <InlineSvg
+          src={src}
+          className="w-100 h-100"
+          interactiveSelector={interactiveSelector}
+          selectedId={selectedId}
+          onSelect={handleSelect}
+          onReady={handleSvgReady}
+        />
+      </ZoomPan>
+
+      <OverlayHUD />
+
+      {selectedId && (
+        <div className="map-selection-indicator">
+          Selected: <strong>{selectedId}</strong>
+        </div>
+      )}
 
       {error && (
         <div className="campus-popup-error">
           <div className="campus-popup-error-inner">
             <div className="mb-3">{error}</div>
-            <button
-              className="link-panel-button"
-              onClick={() => {
-                setError('');
-                if (typeof window !== 'undefined') {
-                  window.dispatchEvent(new Event('ggcmap-zoom-cancel'));
-                }
-              }}
-            >
-              <span className="link-panel-button-primary">OK</span>
+            <button className="link-panel-button" onClick={() => setError('')}>
+              OK
             </button>
           </div>
         </div>
       )}
-    </PageContainer>
+    </div>
   );
 }

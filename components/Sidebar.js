@@ -3,6 +3,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getAllBuildings } from '../lib/campus';
+import { RESTRICTED_BUILDING_IDS } from '../lib/constants';
+import { dispatchHoverEvent, createHoverHandlers } from '../lib/eventSystem';
 
 // Get building data and create navigation items
 const buildings = getAllBuildings();
@@ -25,7 +27,7 @@ const NAV_ITEMS = [
   { key: 'campus', label: 'Campus', path: '/', hover: { selector: '.building-group' } },
   ...buildings
     .slice()
-    .filter(b => !['1000', '2000', '3000', 'B1000', '2', '3'].includes((b.id))) // Exclude student housing buildings
+    .filter(b => !RESTRICTED_BUILDING_IDS.includes((b.id))) // Exclude student housing buildings
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((building) => ({
       key: building.id,
@@ -34,12 +36,6 @@ const NAV_ITEMS = [
       hover: buildHoverDetail(building),
     }))
 ];
-
-const dispatchHoverEvent = (type, source, detail) => {
-  if (typeof window === 'undefined') return;
-  const eventDetail = { source, ...(detail ?? {}) };
-  window.dispatchEvent(new CustomEvent(type, { detail: eventDetail }));
-};
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -52,16 +48,8 @@ export default function Sidebar() {
 
   const handleExpand = () => setCollapsed(false);
 
-  const createHandlers = (item) => {
-    const source = `sidebar:${item.key}`;
-    const hoverDetail = item.hover;
-    return {
-      onMouseEnter: () => hoverDetail && dispatchHoverEvent('ggcmap-hover', source, hoverDetail),
-      onMouseLeave: () => dispatchHoverEvent('ggcmap-hover-clear', source),
-      onFocus: () => hoverDetail && dispatchHoverEvent('ggcmap-hover', source, hoverDetail),
-      onBlur: () => dispatchHoverEvent('ggcmap-hover-clear', source),
-    };
-  };
+  const createHandlers = (item) => 
+    createHoverHandlers(`sidebar:${item.key}`, item.hover);
 
   return (
     <div className={`sidebar-slot${collapsed ? ' is-collapsed' : ''}`}>
@@ -69,22 +57,14 @@ export default function Sidebar() {
         <nav className="sidebar" aria-label="Campus navigation">
           <div className="sidebar-header">
             <span className="sidebar-title">Explore Campus</span>
-            <button
-              type="button"
-              className="sidebar-collapse"
-              onClick={handleCollapse}
-              aria-label="Collapse sidebar navigation"
-            >
-              <i className="bi bi-chevron-left" aria-hidden="true"></i>
-            </button>
           </div>
           <ul className="sidebar-nav">
             {NAV_ITEMS.map((item) => {
               const handlers = createHandlers(item);
               const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
-              const linkClass = `sidebar-nav-link${isActive ? ' active' : ''}`;
+              const linkClass = `nav-link${isActive ? ' active' : ''}`;
               return (
-                <li key={item.key} className="sidebar-nav-item">
+                <li key={item.key} className="nav-item">
                   <Link
                     className={linkClass}
                     href={item.path}
@@ -99,15 +79,6 @@ export default function Sidebar() {
         </nav>
       ) : (
         <div className="sidebar-toggle-wrap">
-          <button
-            type="button"
-            className="sidebar-toggle btn btn-sm btn-outline-secondary"
-            onClick={handleExpand}
-            aria-label="Expand sidebar navigation"
-          >
-            <i className="bi bi-chevron-right" aria-hidden="true"></i>
-            <span className="visually-hidden">Expand sidebar navigation</span>
-          </button>
         </div>
       )}
     </div>

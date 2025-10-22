@@ -8,7 +8,7 @@ export default function ZoomPan({
   minScale = 0.5,
   maxScale = 4,
   initialScale = 1,
-  wheelStep = 0.001, // Sensitivity for wheel zoom; smaller values slow interaction
+  wheelStep = 0.0005, 
   dblClickStep = 0.25,
   disableDoubleClickZoom = false,
   showControls = true,
@@ -70,7 +70,7 @@ export default function ZoomPan({
 
   // Set scale at a specific point
   const setScaleAt = useCallback(
-    (next, cx, cy) => {
+    (next, cx, cy, isAutoFit = false) => {
       const vp = viewportRef.current;
       if (!vp) return;
       const rect = vp.getBoundingClientRect();
@@ -79,7 +79,7 @@ export default function ZoomPan({
       next = clamp(next, minScale, maxScale);
 
       const bounds = getAnchorBounds();
-      if (bounds && !userHasDragged.current) {
+      if (bounds && isAutoFit && !userHasDragged.current) {
         const desiredX = rect.width / 2 - next * (bounds.x + bounds.width / 2);
         const desiredY = rect.height / 2 - next * (bounds.y + bounds.height / 2);
         setPos({ x: desiredX, y: desiredY });
@@ -296,14 +296,10 @@ export default function ZoomPan({
       const vp = viewportRef.current;
       if (!vp) return;
       const rect = vp.getBoundingClientRect();
-      const defaultCx = rect.left + rect.width / 2;
-      const defaultCy = rect.top + rect.height / 2;
-      const pointerCx = typeof e.clientX === 'number' ? e.clientX : defaultCx;
-      const pointerCy = typeof e.clientY === 'number' ? e.clientY : defaultCy;
-      const focusCx = userHasDragged.current ? pointerCx : defaultCx;
-      const focusCy = userHasDragged.current ? pointerCy : defaultCy;
+      const pointerCx = typeof e.clientX === 'number' ? e.clientX : rect.left + rect.width / 2;
+      const pointerCy = typeof e.clientY === 'number' ? e.clientY : rect.top + rect.height / 2;
       const multiplier = Math.exp(-e.deltaY * wheelStep);
-      setScaleAt(scale * multiplier, focusCx, focusCy);
+      setScaleAt(scale * multiplier, pointerCx, pointerCy);
     };
 
     // Prevent default touchmove behavior for multi-touch

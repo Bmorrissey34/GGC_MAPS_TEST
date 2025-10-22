@@ -1,7 +1,7 @@
 import BuildingIndexPage from '../../../components/pages/BuildingIndexPage';
 import buildings from '../../../data/buildings.json';
 import { redirect } from 'next/navigation';
-import { getBuildingData } from '../../../lib/campus';
+import { getBuildingById } from '../../../lib/campus';
 
 // Generate static parameters for all buildings
 export function generateStaticParams() {
@@ -10,7 +10,7 @@ export function generateStaticParams() {
 
 // Main page component for displaying building data
 export default function Page({ params }) {
-  const buildingData = getBuildingData(params.buildingId); // Fetch building data by ID
+  const buildingData = getBuildingById(params.buildingId); // Fetch building data by ID
   
   if (!buildingData || !buildingData.floors.length) {
     redirect('/'); // Redirect to home if building not found

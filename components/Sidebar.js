@@ -3,19 +3,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getAllBuildings } from '../lib/campus';
-import { RESTRICTED_BUILDING_IDS } from '../lib/constants';
-import { dispatchHoverEvent, createHoverHandlers } from '../lib/eventSystem';
+import { RESTRICTED_BUILDING_IDS, RESTRICTED_HOVER_SELECTORS } from '../lib/constants';
+import { clearHoverEvents, createHoverHandlers } from '../lib/eventSystem';
 
 // Get building data and create navigation items
 const buildings = getAllBuildings();
-const SPECIAL_HOVER_SELECTORS = {
-  '1000': '#BUILDING_1000, [id="1000"], [id="b1000"]',
-  '2000': '#BUILDING_2000, [id="2000"], [id="2"]',
-  '3000': '#BUILDING_3000, [id="3000"], [id="3"]',
-};
 
 const buildHoverDetail = (building) => {
-  const selector = SPECIAL_HOVER_SELECTORS[building.id];
+  const selector = RESTRICTED_HOVER_SELECTORS[building.id];
   if (selector) {
     return { selector };
   }
@@ -42,7 +37,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const handleCollapse = () => {
-    dispatchHoverEvent('ggcmap-hover-clear', 'sidebar:collapse');
+    clearHoverEvents('sidebar:collapse');
     setCollapsed(true);
   };
 

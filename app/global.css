@@ -1222,25 +1222,39 @@ svg[data-map-anchor] {
   display: block;
 }
 
+
+
 .floor-content svg .active-room .room,
 .floor-content svg .room.active-room,
 .floor-content svg .active-room,
+.map-viewport svg .active-room .room,
+.map-viewport svg .room.active-room,
+.map-viewport svg .active-room,
 .floor-content svg .hover-highlight .room,
 .floor-content svg .room.hover-highlight,
-.floor-content svg .hover-highlight {
+.floor-content svg .hover-highlight,
+.map-viewport svg .hover-highlight .room,
+.map-viewport svg .room.hover-highlight,
+.map-viewport svg .hover-highlight {
   fill: #f5e100;
 }
 .floor-content svg .active-room .label,
-.floor-content svg .hover-highlight .label {
+.floor-content svg .hover-highlight .label,
+.map-viewport svg .active-room .label,
+.map-viewport svg .hover-highlight .label {
   fill: #000000 !important;
   font-weight: 700;
 }
 
-.floor-content svg .label--active {
+.floor-content svg .label--active,
+.map-viewport svg .label--active {
   fill: #000 !important;
   font-weight: 700;
 }
 
+.room .active-room{
+  fill: #f5e100;
+}
 
 .map-wrap svg .hover-highlight,
 .map-wrap svg .hover-highlight .building,

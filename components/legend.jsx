@@ -120,7 +120,7 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
 
   const sendHover = (source, detail) => {
     if (typeof window === "undefined" || !detail) return;
-    dispatchHoverEvent("ggcmap-hover", source, detail);
+    dispatchHoverEvent(source, detail);
   };
 
   const clearHover = (source) => {

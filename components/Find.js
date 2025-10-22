@@ -2,11 +2,20 @@
 
 import { useState } from "react";
 import rooms from "../data/rooms.json";
+import buildings from "../data/buildings.json";
 import { useRouter } from "next/navigation";
 import { searchForRoom, validateSearchInput, parseFloorInput, formatNotFoundError, extractRoomNavInfo } from "../lib/searchUtils";
+
 const maxCharsAllowed = 30;
-const validBuildings = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "l", "w"];
-const validBuildingFloors = ["a1", "b1", "b2", "b3", "c1", "c2", "d1", "d2", "e1", "e2", "e3", "f1", "f2", "h1", "h2", "h3", "i1", "i2", "i3", "l1", "l2", "l3", "w1", "w2", "w3"];
+
+// Dynamically generate valid buildings and floors from buildings.json
+const validBuildings = buildings.map(b => b.id.toLowerCase());
+const validBuildingFloors = buildings.flatMap(b =>
+  b.floors.map(f => {
+    const floorNum = f.id.match(/\d+/)?.[0] || '';
+    return `${b.id.toLowerCase()}${floorNum}`;
+  })
+);
 
 // Room aliases for quick navigation to common locations
 const ALIASES = {
@@ -16,46 +25,6 @@ const ALIASES = {
   test: { building: "D", level: "L1", room: "1301" },
   den: { building: "A", level: "L1", room: "1510" },
 };
-
-function highlightInPage(roomId) {
-  const host = document.querySelector(".floor-content");
-  if (!host) return false;
-
-  const svg = host.querySelector("svg");
-  if (!svg) return false;
-
-  // Clear previous highlights
-  svg.querySelectorAll(".active-room").forEach(el =>
-    el.classList.remove("active-room")
-  );
-
-  // Find the room group or element
-  const group =
-    svg.querySelector(`g.room-group[id="${CSS.escape(roomId)}"]`) ||
-    svg.querySelector(`g[id="${CSS.escape(roomId)}"]`);
-  if (!group) return false;
-
-  const shape = group.querySelector(".room") || group.querySelector("rect, polygon, path");
-  const label = group.querySelector(".label") || group.querySelector("text");
-
-  if (shape) shape.classList.add("active-room");
-  if (label) label.classList.add("label--active");
-
-  // Ensure elements are rendered on top
-  if (shape?.parentElement) shape.parentElement.appendChild(shape);
-  if (label?.parentElement) label.parentElement.appendChild(label);
-
-  return true;
-}
-
-function highlightWithRetry(roomId, attempts = 10, delay = 100) {
-  const ok = highlightInPage(roomId);
-  if (ok) return;
-
-  if (attempts <= 0) return;
-  setTimeout(() => highlightWithRetry(roomId, attempts - 1, delay), delay);
-}
-
 
 export default function Find() {
   const [showHelp, setShowHelp] = useState(false);
@@ -79,7 +48,6 @@ export default function Find() {
     if (ALIASES[userInput]) {
       const { building, level, room } = ALIASES[userInput];
       router.push(`/building/${building}/${level}?room=${encodeURIComponent(room)}`);
-      highlightWithRetry(room);
       return;
     }
 
@@ -122,7 +90,6 @@ export default function Find() {
     // Navigate to the room and highlight it
     const { building, floor, roomNumber } = navInfo;
     router.push(`/building/${building}/L${floor}?room=${encodeURIComponent(roomNumber)}`);
-    highlightWithRetry(roomNumber);
   };
 
   const onHelpClick = () => {

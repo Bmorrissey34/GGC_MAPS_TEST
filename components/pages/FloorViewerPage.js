@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useCallback } from 'react';
 import FloorMapView from '../FloorMapView';
 import { getBuildingById } from '../../lib/campus';
 
@@ -81,6 +81,43 @@ function FloorViewerContent({ buildingId, floorId }) {
     highlightWithRetry(roomToHighlight);
   }, [roomToHighlight]);
 
+  // Handle room selection from map clicks
+  const handleRoomSelect = useCallback((roomId) => {
+    // Create a highlight effect immediately for visual feedback
+    const highlightInPage = (roomId) => {
+      const floorViewer = document.querySelector('.floor-viewer');
+      if (!floorViewer) return false;
+      
+      const svg = floorViewer.querySelector('svg');
+      if (!svg) return false;
+
+      // Clear previous highlights
+      svg.querySelectorAll(".active-room").forEach(el =>
+        el.classList.remove("active-room")
+      );
+
+      // Find the room group or element
+      const group =
+        svg.querySelector(`g.room-group[id="${roomId}"]`) ||
+        svg.querySelector(`g[id="${roomId}"]`);
+      if (!group) return false;
+
+      const shape = group.querySelector(".room") || group.querySelector("rect, polygon, path");
+      const label = group.querySelector(".label") || group.querySelector("text");
+
+      if (shape) shape.classList.add("active-room");
+      if (label) label.classList.add("label--active");
+
+      // Ensure elements are rendered on top
+      if (shape?.parentElement) shape.parentElement.appendChild(shape);
+      if (label?.parentElement) label.parentElement.appendChild(label);
+
+      return true;
+    };
+
+    highlightInPage(roomId);
+  }, []);
+
   if (!buildingData || !currentFloor) {
     return <div>Floor not found</div>; // Display message if floor not found
   }
@@ -94,6 +131,7 @@ function FloorViewerContent({ buildingId, floorId }) {
         onFloorChange={(newFloorId) => {
           router.push(`/building/${buildingId}/${newFloorId}`);
         }}
+        onRoomSelect={handleRoomSelect}
       />
     </main>
   );

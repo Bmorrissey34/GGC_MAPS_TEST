@@ -14,7 +14,8 @@ export default function FloorMapView({
   interactiveSelector = '.room-group, .room, .label',
   buildingData,
   currentFloorId,
-  onFloorChange
+  onFloorChange,
+  onRoomSelect
 }) {
   const [svgContent, setSvgContent] = useState('');
   const containerRef = useRef(null);
@@ -39,6 +40,9 @@ export default function FloorMapView({
   const handleSelect = (id) => {
     if (id) {
       setSelectedId(String(id).trim()); // Update the selected ID state
+      if (onRoomSelect) {
+        onRoomSelect(String(id).trim()); // Notify parent of room selection
+      }
     }
   };
 

@@ -105,7 +105,7 @@ export default function FloorMapView({
   }, [svgContent, interactiveSelector]);
 
   return (
-    <div className="map-wrap">
+    <div className="map-wrap" data-building={buildingData?.id}>
       <ZoomPan
         ref={containerRef}
         initialScale={1}

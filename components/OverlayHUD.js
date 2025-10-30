@@ -103,7 +103,7 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
       <div className={`overlay-panel overlay-left ${openSidebar ? "is-open" : ""}`} role="dialog" aria-label="Navigation panel" aria-hidden={!openSidebar}>
         <div className="overlay-panel-inner">
           <div className="overlay-panel-header">
-            <span className="overlay-panel-title"></span>
+            <span className="overlay-panel-title">Explore Campus</span>
             <button type="button" className="overlay-close" onClick={() => setOpenSidebar(false)} aria-label="Close navigation">
               <i className="bi bi-x" aria-hidden="true" />
             </button>
@@ -154,7 +154,7 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
       <div className={`overlay-panel overlay-right ${openLegend ? "is-open" : ""}`} role="dialog" aria-label="Legend panel" aria-hidden={!openLegend}>
         <div className="overlay-panel-inner">
           <div className="overlay-panel-header">
-            <span className="overlay-panel-title">Legend</span>
+            {/* <span className="overlay-panel-title">Legend</span> */}
             <button type="button" className="overlay-close" onClick={() => setOpenLegend(false)} aria-label="Close legend">
               <i className="bi bi-x" aria-hidden="true" />
             </button>

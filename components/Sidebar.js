@@ -51,7 +51,7 @@ export default function Sidebar() {
       {!collapsed ? (
         <nav className="sidebar" aria-label="Campus navigation">
           <div className="sidebar-header">
-            <span className="sidebar-title">Explore Campus</span>
+            
           </div>
           <ul className="sidebar-nav">
             {NAV_ITEMS.map((item) => {

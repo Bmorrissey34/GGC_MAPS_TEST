@@ -1,7 +1,8 @@
-// components/legend.jsx  -- Legend component with localization and hover interactions - Karen Armendariz
+// components/legend.jsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { dispatchHoverEvent, clearHoverEvents } from "../lib/eventSystem";
 
 const HOVER_TARGETS = {
   academicBuilding: { selector: ".building-group:not(.student-housing)" },
@@ -84,20 +85,17 @@ const getStoredLocale = () => {
 
 /** Reusable row with color square + label */
 function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
-  const classes = ["legend-item d-flex align-items-center gap-1", className].filter(Boolean).join(" ");
+  const classes = ["legend-item d-flex align-items-center gap-2", className].filter(Boolean).join(" ");
   return (
     <li
       className={classes}
       onMouseEnter={() => onEnter?.()}
       onMouseLeave={() => onLeave?.()}
-      onFocus={() => onEnter?.()}
-      onBlur={() => onLeave?.()}
-      tabIndex={0}
       style={{ wordBreak: "break-word" }}
     >
       <span
         className="legend-swatch d-inline-block border rounded"
-        style={{ width: "12px", height: "12px", backgroundColor: color, flexShrink: 0 }}
+        style={{ width: "14px", height: "14px", backgroundColor: color, flexShrink: 0 }}
       />
       <span className="legend-item-label">{label}</span>
     </li>
@@ -122,12 +120,12 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
 
   const sendHover = (source, detail) => {
     if (typeof window === "undefined" || !detail) return;
-    window.dispatchEvent(new CustomEvent("ggcmap-hover", { detail: { source, ...detail } }));
+    dispatchHoverEvent(source, detail);
   };
 
   const clearHover = (source) => {
     if (typeof window === "undefined") return;
-    window.dispatchEvent(new CustomEvent("ggcmap-hover-clear", { detail: { source } }));
+    clearHoverEvents(source);
   };
 
   const getHoverHandlers = (key) => {
@@ -179,73 +177,37 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
   }, [locale, currentLocale, userOverride]);
 
   const handleLocaleChange = (code) => {
-  if (code === currentLocale) return;
-  setUserOverride(true);
-  setCurrentLocale(code);
-};
-
-
-  const panelClassNames = open
-    ? ["legend-panel", "shadow", "rounded-4"]
-    : ["legend-panel--collapsed"];
+    if (code === currentLocale) return;
+    setCurrentLocale(code);
+    setUserOverride(true);
+  };
 
   const legendBody = (
-    <div className={panelClassNames.join(" ")} role="region" aria-label={t("legendTitle")}>
+    <div
+      className={`legend-panel shadow rounded-4${open ? "" : " legend-panel--collapsed"}`}
+      role="region"
+      aria-label={t("legendTitle")}
+    >
       {/* Header row: title + EN/ES cluster close together, collapse button floats right */}
       <div className="legend-header d-flex align-items-center gap-2 mb-2">
         <div className="legend-title fw-bold">{t("legendTitle")}</div>
 
-        <div
-          className="btn-group btn-group-sm ms-2"
-          role="group"
-          aria-label={t("languageLabel")}
-        >
-          {/* EN button */}
-          <button
-            type="button"
-            className={`btn btn-sm ${currentLocale === "en" ? "btn-secondary" : "btn-outline-secondary"}`}
-            onClick={() => handleLocaleChange("en")}
-            aria-pressed={currentLocale === "en"}
-            aria-label="EN"
-            title="EN"
-          >
-            EN
-          </button>
-
-          {/* ES button */}
-          <button
-            type="button"
-            className={`btn btn-sm ${currentLocale === "es" ? "btn-secondary" : "btn-outline-secondary"}`}
-            onClick={() => handleLocaleChange("es")}
-            aria-pressed={currentLocale === "es"}
-            aria-label="ES"
-            title="ES"
-          >
-            ES
-          </button>
+        <div className="btn-group btn-group-sm ms-2" role="group" aria-label={t("languageLabel")}>
+          {SUPPORTED_LOCALES.map((code) => (
+            <button
+              key={code}
+              type="button"
+              className={`btn btn-sm ${currentLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
+              onClick={() => handleLocaleChange(code)}
+              aria-pressed={currentLocale === code}
+              aria-label={t(code === "en" ? "languageEnglish" : "languageSpanish")}
+            >
+              {code.toUpperCase()}
+            </button>
+          ))}
         </div>
 
-
-        <button
-          type="button"
-          className={[
-            "legend-toggle",
-            "legend-toggle--floating",
-            open ? "sidebar-collapse" : "sidebar-toggle",
-            open ? null : "btn",
-            open ? null : "btn-sm",
-            open ? null : "btn-outline-secondary",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-controls="legend-body"
-          title={open ? t("toggleHide") : t("toggleShow")}
-        >
-          <i className={`bi ${open ? "bi-chevron-left" : "bi-chevron-right"} legend-toggle-icon`} aria-hidden="true"></i>
-          <span className="visually-hidden">{open ? t("toggleHide") : t("toggleShow")}</span>
-        </button>
+        
       </div>
 
       <div id="legend-body" className="legend-body pt-2" hidden={!open}>
@@ -260,11 +222,11 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
             />
           ))}
 
-          <li className="legend-parking-group mt-3">
+          <li className="mt-3">
             <div className="fw-semibold legend-section-heading">
               {t("parking")}
             </div>
-            <ul className="legend-sublist list-unstyled mb-0 mt-2">
+            <ul className="list-unstyled mb-0 ps-3 mt-2">
               {PARKING_ITEMS.map((item) => (
                 <SwatchItem
                   key={item.labelKey}

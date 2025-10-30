@@ -3,37 +3,46 @@
 import { useState, useEffect, useRef } from 'react';
 import ZoomPan from './ZoomPan';
 import PageContainer from './PageContainer';
-
-// Strip scripts and inline handlers embedded in the SVG source
-const sanitizeSvgMarkup = (markup) =>
-  markup
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/\son\w+="[^"]*"/gi, '')
-    .replace(/\son\w+='[^']*'/gi, '')
-    .replace(/\s(xlink:)?href=["']\s*javascript:[^"']*["']/gi, ' ');
+import OverlayHUD from './OverlayHUD';
+import { sanitizeSvgMarkup, escapeSelectorId } from '../lib/svgUtils';
+import { getNextFloor, getPreviousFloor } from '../lib/floorNavigation';
+import { useElementSelection } from '../hooks/useElementSelection';
 
 // FloorMapView component for rendering an interactive floor map
-export default function FloorMapView({ src, interactiveSelector = '.room-group, .room, .label' }) {
-  const [selectedId, setSelectedId] = useState(null); // State to track the selected room ID
+export default function FloorMapView({ 
+  src, 
+  interactiveSelector = '.room-group, .room, .label',
+  buildingData,
+  currentFloorId,
+  onFloorChange,
+  onRoomSelect
+}) {
   const [svgContent, setSvgContent] = useState('');
   const containerRef = useRef(null);
-  const prevHighlightedRef = useRef(null);
+  const [selectedId, setSelectedId] = useElementSelection(containerRef.current, svgContent);
 
-  const escapeSelectorId = (value) => {
-    if (!value) return '';
-    if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
-      return CSS.escape(value);
-    }
-    return String(value).replace(/([ -\\/:-@[-`{-~])/g, '\\$1');
+  // Find current floor index and data
+  const floors = buildingData?.floors || [];
+  const currentFloorIndex = floors.findIndex(floor => floor.id === currentFloorId);
+
+  // Floor navigation handlers
+  const goToUpperFloor = () => {
+    const next = getNextFloor(floors, currentFloorId);
+    if (next) onFloorChange(next.id);
   };
 
-  // Content for the header providing user instructions
-  const headerContent = <span className="text-muted small">Use +/- buttons or scroll/pinch to zoom; drag to pan</span>;
+  const goToLowerFloor = () => {
+    const prev = getPreviousFloor(floors, currentFloorId);
+    if (prev) onFloorChange(prev.id);
+  };
 
   // Handles the selection of a room or area on the map
   const handleSelect = (id) => {
     if (id) {
       setSelectedId(String(id).trim()); // Update the selected ID state
+      if (onRoomSelect) {
+        onRoomSelect(String(id).trim()); // Notify parent of room selection
+      }
     }
   };
 
@@ -95,64 +104,33 @@ export default function FloorMapView({ src, interactiveSelector = '.room-group, 
     return () => container.removeEventListener('click', onClick);
   }, [svgContent, interactiveSelector]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    const prevEl = prevHighlightedRef.current;
-
-    if (prevEl?.isConnected) {
-      prevEl.classList.remove('active-room');
-      prevEl.removeAttribute('aria-selected');
-      prevHighlightedRef.current = null;
-    }
-
-    if (!container || !svgContent || !selectedId) return;
-
-    const escapedId = escapeSelectorId(selectedId);
-    if (!escapedId) return;
-
-    const candidate = container.querySelector(`#${escapedId}`);
-    const target = candidate?.closest('.room-group') || candidate;
-
-    if (target) {
-      target.classList.add('active-room');
-      target.setAttribute('aria-selected', 'true');
-      prevHighlightedRef.current = target;
-    }
-  }, [selectedId, svgContent]);
-
   return (
-    // Render the floor map viewer with zoom/pan functionality and selection handling
-    <>
-      <PageContainer title="Floor Map" headerContent={headerContent} fluid={true}>
-        <ZoomPan
-          initialScale={1}
-          minScale={0.25}
-          maxScale={6}
-          className="w-100"
-          disableDoubleClickZoom={true} // Disable double-click zoom
-          autoFit={true}
-          fitPadding={24}
-        >
-          {/* Replaces <object> with inline SVG so pan/zoom work */}
-          <div
-            ref={containerRef}
-            className="w-100 h-auto"
-            style={{ pointerEvents: 'auto' }}
-            dangerouslySetInnerHTML={{ __html: svgContent }}
-          />
-        </ZoomPan>
-      </PageContainer>
-      <div className="container mt-2 small text-muted">
-        {selectedId ? (
-          // Display the selected room or area ID
-          <>
-            Selected: <strong>{selectedId}</strong>
-          </>
-        ) : (
-          // Prompt the user to click a room if none is selected
-          'Click a room to select.'
-        )}
-      </div>
-    </>
+    <div className="map-wrap" data-building={buildingData?.id}>
+      <ZoomPan
+        ref={containerRef}
+        initialScale={1}
+        minScale={0.1}
+        maxScale={6}
+        className="map-viewport"
+        disableDoubleClickZoom={true}
+        autoFit={false}
+        fitPadding={0}
+        fitScaleMultiplier={0.70}
+      >
+        <div
+          className="w-100 h-100"
+          style={{ pointerEvents: 'auto' }}
+          dangerouslySetInnerHTML={{ __html: svgContent }}
+        />
+      </ZoomPan>
+
+      <OverlayHUD buildingData={buildingData} currentFloorId={currentFloorId} onFloorChange={onFloorChange} isFloorView={true} />
+
+      {selectedId && (
+        <div className="map-selection-indicator">
+          Selected: <strong>{selectedId}</strong>
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+// Script to extract room data from SVG files and compile it into a JSON file
 const fs = require('fs').promises;
 const path = require('path');
 const cheerio = require('cheerio');

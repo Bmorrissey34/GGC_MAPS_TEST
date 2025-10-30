@@ -5,35 +5,22 @@ export default function PageContainer({
   children,
   title,
   headerContent,
-  fluid = false // Add a fluid prop, default to false
+  fluid = false,
+  edgeToEdge = false,
 }) {
-  const containerClass = fluid ? "container-fluid px-0" : "container mt-3";
-
   return (
-    <div className={containerClass}>
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <h1
-          className="h4 mb-0"
-          style={{
-            fontFamily: "var(--justin-globe1)",
-            color: "var(--justin-globe1-color)",
-            fontWeight: "var(--justin-globe1-bold)"
-          }}
-        >
-          {title}
-        </h1>
-         {/* Search component old spot for the find*/}
-        {headerContent} {/* Optional additional header content */}
+    <article className={`page-container ${edgeToEdge ? 'edge-to-edge' : 'contained'} ${fluid ? 'fluid' : ''}`}>
+      {title && (
+        <header className="page-header">
+          <h1 className="page-title">
+            {title}
+          </h1>
+          {headerContent}
+        </header>
+      )}
+      <div className="page-content">
+        {children}
       </div>
-
-      {/* Main content area with a white background and rounded border */}
-      <div
-        className="border rounded-3 page-container-inner"
-        style={{ overflow: 'hidden', background: 'white' }}
-      >
-        {children} {/* Render child components */}
-      </div>
-
-    </div>
+    </article>
   );
 }

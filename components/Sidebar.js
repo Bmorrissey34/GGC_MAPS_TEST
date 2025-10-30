@@ -3,17 +3,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getAllBuildings } from '../lib/campus';
+import { RESTRICTED_BUILDING_IDS, RESTRICTED_HOVER_SELECTORS } from '../lib/constants';
+import { clearHoverEvents, createHoverHandlers } from '../lib/eventSystem';
 
 // Get building data and create navigation items
 const buildings = getAllBuildings();
-const SPECIAL_HOVER_SELECTORS = {
-  '1000': '#BUILDING_1000, [id="1000"], [id="b1000"]',
-  '2000': '#BUILDING_2000, [id="2000"], [id="2"]',
-  '3000': '#BUILDING_3000, [id="3000"], [id="3"]',
-};
 
 const buildHoverDetail = (building) => {
-  const selector = SPECIAL_HOVER_SELECTORS[building.id];
+  const selector = RESTRICTED_HOVER_SELECTORS[building.id];
   if (selector) {
     return { selector };
   }
@@ -25,7 +22,7 @@ const NAV_ITEMS = [
   { key: 'campus', label: 'Campus', path: '/', hover: { selector: '.building-group' } },
   ...buildings
     .slice()
-    .filter(b => !['1000', '2000', '3000', 'B1000', '2', '3'].includes((b.id))) // Exclude student housing buildings
+    .filter(b => !RESTRICTED_BUILDING_IDS.includes((b.id))) // Exclude student housing buildings
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((building) => ({
       key: building.id,
@@ -35,56 +32,34 @@ const NAV_ITEMS = [
     }))
 ];
 
-const dispatchHoverEvent = (type, source, detail) => {
-  if (typeof window === 'undefined') return;
-  const eventDetail = { source, ...(detail ?? {}) };
-  window.dispatchEvent(new CustomEvent(type, { detail: eventDetail }));
-};
-
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
   const handleCollapse = () => {
-    dispatchHoverEvent('ggcmap-hover-clear', 'sidebar:collapse');
+    clearHoverEvents('sidebar:collapse');
     setCollapsed(true);
   };
 
   const handleExpand = () => setCollapsed(false);
 
-  const createHandlers = (item) => {
-    const source = `sidebar:${item.key}`;
-    const hoverDetail = item.hover;
-    return {
-      onMouseEnter: () => hoverDetail && dispatchHoverEvent('ggcmap-hover', source, hoverDetail),
-      onMouseLeave: () => dispatchHoverEvent('ggcmap-hover-clear', source),
-      onFocus: () => hoverDetail && dispatchHoverEvent('ggcmap-hover', source, hoverDetail),
-      onBlur: () => dispatchHoverEvent('ggcmap-hover-clear', source),
-    };
-  };
+  const createHandlers = (item) => 
+    createHoverHandlers(`sidebar:${item.key}`, item.hover);
 
   return (
     <div className={`sidebar-slot${collapsed ? ' is-collapsed' : ''}`}>
       {!collapsed ? (
         <nav className="sidebar" aria-label="Campus navigation">
           <div className="sidebar-header">
-            <span className="sidebar-title">Explore Campus</span>
-            <button
-              type="button"
-              className="sidebar-collapse"
-              onClick={handleCollapse}
-              aria-label="Collapse sidebar navigation"
-            >
-              <i className="bi bi-chevron-left" aria-hidden="true"></i>
-            </button>
+            
           </div>
           <ul className="sidebar-nav">
             {NAV_ITEMS.map((item) => {
               const handlers = createHandlers(item);
               const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
-              const linkClass = `sidebar-nav-link${isActive ? ' active' : ''}`;
+              const linkClass = `nav-link${isActive ? ' active' : ''}`;
               return (
-                <li key={item.key} className="sidebar-nav-item">
+                <li key={item.key} className="nav-item">
                   <Link
                     className={linkClass}
                     href={item.path}
@@ -99,15 +74,6 @@ export default function Sidebar() {
         </nav>
       ) : (
         <div className="sidebar-toggle-wrap">
-          <button
-            type="button"
-            className="sidebar-toggle btn btn-sm btn-outline-secondary"
-            onClick={handleExpand}
-            aria-label="Expand sidebar navigation"
-          >
-            <i className="bi bi-chevron-right" aria-hidden="true"></i>
-            <span className="visually-hidden">Expand sidebar navigation</span>
-          </button>
         </div>
       )}
     </div>

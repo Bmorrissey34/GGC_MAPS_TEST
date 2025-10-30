@@ -2,4 +2,14 @@ node_modules/
 .next/
 *.log
 .github/
-scripts/
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.vscode/
+.idea/
+coverage/
+build/
+dist/
+Refactor/

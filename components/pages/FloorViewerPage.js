@@ -1,15 +1,18 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useCallback } from 'react';
 import FloorMapView from '../FloorMapView';
-import { getBuildingData } from '../../lib/campus';
+import { getBuildingById } from '../../lib/campus';
 
-// FloorViewerPage component for displaying a specific floor of a building
-export default function FloorViewerPage({ buildingId, floorId }) {
+// Inner component that uses useSearchParams
+function FloorViewerContent({ buildingId, floorId }) {
   const router = useRouter(); // Router for navigation
-  const buildingData = getBuildingData(buildingId); // Fetch building data
+  const searchParams = useSearchParams(); // Get URL search parameters
+  const buildingData = getBuildingById(buildingId); // Fetch building data
   const floors = buildingData?.floors || []; // Get floors or default to empty array
   const currentFloorIndex = floors.findIndex(floor => floor.id === floorId); // Find current floor index
   const currentFloor = floors[currentFloorIndex]; // Get current floor data
+  const roomToHighlight = searchParams.get('room'); // Get room from query params
 
   // Navigate to the upper floor
   const goToUpperFloor = () => {
@@ -25,42 +28,120 @@ export default function FloorViewerPage({ buildingId, floorId }) {
     }
   };
 
+  // Highlight room when component mounts or room param changes
+  useEffect(() => {
+    if (!roomToHighlight) return;
+
+    const highlightInPage = (roomId) => {
+      // Look for SVG in the floor viewer main element
+      const floorViewer = document.querySelector('.floor-viewer');
+      if (!floorViewer) {
+        return false;
+      }
+      
+      const svg = floorViewer.querySelector('svg');
+      if (!svg) return false;
+
+      // Clear previous highlights
+      svg.querySelectorAll(".active-room").forEach(el =>
+        el.classList.remove("active-room")
+      );
+
+      // Find the room group or element
+      const group =
+        svg.querySelector(`g.room-group[id="${roomId}"]`) ||
+        svg.querySelector(`g[id="${roomId}"]`);
+      if (!group) return false;
+
+      const shape = group.querySelector(".room") || group.querySelector("rect, polygon, path");
+      const label = group.querySelector(".label") || group.querySelector("text");
+
+      if (shape) shape.classList.add("active-room");
+      if (label) label.classList.add("label--active");
+
+      // Ensure elements are rendered on top
+      if (shape?.parentElement) shape.parentElement.appendChild(shape);
+      if (label?.parentElement) label.parentElement.appendChild(label);
+
+      return true;
+    };
+
+    const highlightWithRetry = (roomId, attempts = 10, delay = 100) => {
+      const ok = highlightInPage(roomId);
+      if (ok) {
+        return;
+      }
+
+      if (attempts <= 0) {
+        return;
+      }
+      setTimeout(() => highlightWithRetry(roomId, attempts - 1, delay), delay);
+    };
+
+    highlightWithRetry(roomToHighlight);
+  }, [roomToHighlight]);
+
+  // Handle room selection from map clicks
+  const handleRoomSelect = useCallback((roomId) => {
+    // Create a highlight effect immediately for visual feedback
+    const highlightInPage = (roomId) => {
+      const floorViewer = document.querySelector('.floor-viewer');
+      if (!floorViewer) return false;
+      
+      const svg = floorViewer.querySelector('svg');
+      if (!svg) return false;
+
+      // Clear previous highlights
+      svg.querySelectorAll(".active-room").forEach(el =>
+        el.classList.remove("active-room")
+      );
+
+      // Find the room group or element
+      const group =
+        svg.querySelector(`g.room-group[id="${roomId}"]`) ||
+        svg.querySelector(`g[id="${roomId}"]`);
+      if (!group) return false;
+
+      const shape = group.querySelector(".room") || group.querySelector("rect, polygon, path");
+      const label = group.querySelector(".label") || group.querySelector("text");
+
+      if (shape) shape.classList.add("active-room");
+      if (label) label.classList.add("label--active");
+
+      // Ensure elements are rendered on top
+      if (shape?.parentElement) shape.parentElement.appendChild(shape);
+      if (label?.parentElement) label.parentElement.appendChild(label);
+
+      return true;
+    };
+
+    highlightInPage(roomId);
+  }, []);
+
   if (!buildingData || !currentFloor) {
     return <div>Floor not found</div>; // Display message if floor not found
   }
 
   return (
-    <div className="floor-viewer">
-      {/* Floor Map with Navigation Overlay */}
-      <div className="floor-content">
-        <FloorMapView src={currentFloor.file} /> {/* Render the floor map */}
-        
-        {/* Vertical Floor Navigation Overlay */}
-        <div className="floor-navigation-overlay">
-          <button 
-            onClick={goToUpperFloor}
-            disabled={currentFloorIndex === floors.length - 1} // Disable if on top floor
-            className="nav-arrow-vertical"
-            title="Upper Floor"
-          >
-            ↑
-          </button>
-          
-          <div className="floor-display-vertical">
-            <span className="current-floor-vertical">{currentFloor.label}</span> {/* Display current floor label */}
-            <span className="building-name-vertical">{buildingData.name}</span> {/* Display building name */}
-          </div>
-          
-          <button 
-            onClick={goToLowerFloor}
-            disabled={currentFloorIndex === 0} // Disable if on ground floor
-            className="nav-arrow-vertical"
-            title="Lower Floor"
-          >
-            ↓
-          </button>
-        </div>
-      </div>
-    </div>
+    <main role="main" className="floor-viewer">
+      <FloorMapView 
+        src={currentFloor.file}
+        buildingData={buildingData}
+        currentFloorId={floorId}
+        onFloorChange={(newFloorId) => {
+          router.push(`/building/${buildingId}/${newFloorId}`);
+        }}
+        onRoomSelect={handleRoomSelect}
+      />
+    </main>
+  );
+}
+
+// Outer component that wraps with Suspense
+export default function FloorViewerPage({ buildingId, floorId }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FloorViewerContent buildingId={buildingId} floorId={floorId} />
+    </Suspense>
   );
 }

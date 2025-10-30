@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+const STORAGE_KEY = 'helpfulLinksOpen';
 
 const LINKS = [
   {
@@ -20,17 +22,28 @@ const LINKS = [
   },
 ];
 
-export default function Links({ className = '' }) {
-  const [open, setOpen] = useState(true);
+export default function Links({ className = '', forceOpen }) {
+  const [open, setOpen] = useState(forceOpen ?? true);
+
+  useEffect(() => {
+    if (forceOpen !== undefined) return; // don't apply persisted state when forced
+    if (typeof window === 'undefined') return;
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored === '0') {
+      setOpen(false);
+    }
+  }, [forceOpen]);
+
+  useEffect(() => {
+    if (forceOpen !== undefined) return; // don't persist when forced
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(STORAGE_KEY, open ? '1' : '0');
+  }, [open, forceOpen]);
 
   const slotClassName = ['legend-slot', className, open ? '' : 'is-collapsed'].filter(Boolean).join(' ');
-  const panelClasses = [];
-  if (open) {
-    panelClasses.push('legend-panel', 'link-panel', 'shadow', 'rounded-4');
-  } else {
-    panelClasses.push('legend-panel--collapsed');
-  }
-  const panelClassName = panelClasses.join(' ');
+  const panelClassName = ['legend-panel', 'link-panel', open ? '' : 'legend-panel--collapsed']
+    .filter(Boolean)
+    .join(' ');
   const toggleLabel = open ? 'Hide helpful links' : 'Show helpful links';
 
   return (
@@ -40,26 +53,7 @@ export default function Links({ className = '' }) {
           <h2 id="helpful-links-title" className="legend-title link-panel-title fw-bold mb-0">
             Helpful Links
           </h2>
-          <button
-            type="button"
-            className={[
-              'legend-toggle',
-              'legend-toggle--floating',
-              open ? 'sidebar-collapse' : 'sidebar-toggle',
-              open ? null : 'btn',
-              open ? null : 'btn-sm',
-              open ? null : 'btn-outline-secondary',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            onClick={() => setOpen((value) => !value)}
-            aria-expanded={open}
-            aria-controls="helpful-links-body"
-            title={toggleLabel}
-          >
-            <i className={`bi ${open ? 'bi-chevron-left' : 'bi-chevron-right'} legend-toggle-icon`} aria-hidden="true"></i>
-            <span className="visually-hidden">{toggleLabel}</span>
-          </button>
+          
         </div>
         <div id="helpful-links-body" className="legend-body link-panel-body" hidden={!open}>
           {LINKS.map((link) => (
@@ -68,7 +62,7 @@ export default function Links({ className = '' }) {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="legend-item link-panel-button"
+              className="link-panel-button"
             >
               <span className="link-panel-button-secondary">For {link.label}</span>
               <span className="link-panel-button-primary">Click here</span>

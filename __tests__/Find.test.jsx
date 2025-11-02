@@ -20,7 +20,7 @@ beforeEach(() => {
 });
 
 async function typeAndFind(value) {
-  const input = screen.getByRole('textbox', { name: /find:/i });
+  const input = screen.getByPlaceholderText(/aec, gameroom, library/i);
   const btn = screen.getByRole('button', { name: /find/i });
   await userEvent.clear(input);
   await userEvent.type(input, value);

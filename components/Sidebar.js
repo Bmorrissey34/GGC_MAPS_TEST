@@ -34,7 +34,7 @@ const NAV_ITEMS = [
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const pathname = usePathname();
+  const pathname = String(usePathname() ?? '');
 
   const handleCollapse = () => {
     clearHoverEvents('sidebar:collapse');

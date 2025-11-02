@@ -8,7 +8,9 @@ import ZoomPan from './ZoomPan';
 import PageContainer from './PageContainer';
 import OverlayHUD from './OverlayHUD';
 import buildings from '../data/buildings.json';
-import { RESTRICTED_BUILDING_IDS, RESTRICTION_ERROR_MESSAGE } from '../lib/constants';
+import { RESTRICTED_BUILDING_IDS } from '../lib/constants';
+import { useLanguage } from './LanguageContext';
+import { getUIText } from '../lib/i18n';
 
 // CampusMapView component displays the campus map with interactive elements
 export default function CampusMapView({
@@ -18,6 +20,8 @@ export default function CampusMapView({
   const [selectedId, setSelectedId] = useState(null);
   const router = useRouter();
   const[error, setError] = useState('');
+  const { locale } = useLanguage();
+  const ui = getUIText(locale);
 
   // Create a set of known building IDs for quick lookup
   const known = useMemo(
@@ -31,7 +35,7 @@ export default function CampusMapView({
     setSelectedId(id);
     const code = String(id).toUpperCase();
     if (RESTRICTED_BUILDING_IDS.includes(code)) {
-      setError(RESTRICTION_ERROR_MESSAGE);
+      setError(ui.campusMapView.restrictionMessage);
       return;
     }
     if (known.has(code)) {
@@ -146,7 +150,7 @@ export default function CampusMapView({
 
       {selectedId && (
         <div className="map-selection-indicator">
-          Selected: <strong>{selectedId}</strong>
+          {ui.general.selectedPrefix}: <strong>{selectedId}</strong>
         </div>
       )}
 
@@ -155,7 +159,7 @@ export default function CampusMapView({
           <div className="campus-popup-error-inner">
             <div className="mb-3">{error}</div>
             <button className="link-panel-button" onClick={() => setError('')}>
-              OK
+              {ui.general.ok}
             </button>
           </div>
         </div>

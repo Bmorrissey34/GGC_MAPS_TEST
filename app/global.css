@@ -1719,6 +1719,48 @@ svg .label,
   pointer-events: auto;
 }
 
+.overlay-language-toggle {
+  position: absolute;
+  top: var(--spacing-unit);
+  right: calc(var(--spacing-unit) + 4rem);
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  color: #123524;
+  font-size: 0.85rem;
+}
+
+.overlay-language-toggle .form-check-input {
+  cursor: pointer;
+}
+
+.overlay-language-toggle .form-check-label {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .overlay-language-toggle {
+    top: auto;
+    bottom: calc(var(--footer-height) + 3.5rem);
+    right: clamp(0.35rem, 4vw, 1rem);
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .overlay-language-toggle {
+    bottom: calc(var(--footer-height) + 4.5rem);
+    right: clamp(0.25rem, 5vw, 0.75rem);
+  }
+}
+
 /* Ensure all panels start closed on first mount regardless of components' own persisted state */
 .overlay-hud-topleft {
   position: absolute;

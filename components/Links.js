@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLanguage } from './LanguageContext';
+import { getUIText } from '../lib/i18n';
 
 const STORAGE_KEY = 'helpfulLinksOpen';
 
@@ -8,22 +10,25 @@ const LINKS = [
   {
     id: 'tour',
     href: 'https://www.ggc.edu/about-ggc/maps-and-directions',
-    label: 'Virtual Tour',
+    labelKey: 'tour',
   },
   {
     id: 'homepage',
     href: 'https://www.ggc.edu/',
-    label: "GGC's Website",
+    labelKey: 'homepage',
   },
   {
     id: 'original-map',
     href: 'http://ggcmaps.com/#Campus',
-    label: "GGC's Original Map",
+    labelKey: 'original',
   },
 ];
 
 export default function Links({ className = '', forceOpen }) {
   const [open, setOpen] = useState(forceOpen ?? true);
+  const { locale } = useLanguage();
+  const copy = getUIText(locale);
+  const linkCopy = copy.links;
 
   useEffect(() => {
     if (forceOpen !== undefined) return; // don't apply persisted state when forced
@@ -44,14 +49,13 @@ export default function Links({ className = '', forceOpen }) {
   const panelClassName = ['legend-panel', 'link-panel', open ? '' : 'legend-panel--collapsed']
     .filter(Boolean)
     .join(' ');
-  const toggleLabel = open ? 'Hide helpful links' : 'Show helpful links';
 
   return (
     <aside className={slotClassName} aria-labelledby="helpful-links-title">
       <div className={panelClassName}>
         <div className="legend-header d-flex align-items-center gap-2">
           <h2 id="helpful-links-title" className="legend-title link-panel-title fw-bold mb-0">
-            Helpful Links
+            {linkCopy.title}
           </h2>
           
         </div>
@@ -64,8 +68,10 @@ export default function Links({ className = '', forceOpen }) {
               rel="noopener noreferrer"
               className="link-panel-button"
             >
-              <span className="link-panel-button-secondary">For {link.label}</span>
-              <span className="link-panel-button-primary">Click here</span>
+              <span className="link-panel-button-secondary">
+                {linkCopy.buttonSecondaryPrefix} {linkCopy.items[link.labelKey] ?? link.labelKey}
+              </span>
+              <span className="link-panel-button-primary">{linkCopy.buttonPrimary}</span>
             </a>
           ))}
         </div>

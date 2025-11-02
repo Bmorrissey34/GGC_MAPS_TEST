@@ -21,6 +21,7 @@ jest.mock('next/navigation', () => {
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CampusMapView from '../components/CampusMapView';
+import { LanguageProvider } from '../components/LanguageContext';
 
 beforeEach(() => {
   mockPush.mockClear();
@@ -47,8 +48,11 @@ afterEach(() => {
   delete global.fetch;
 });
 
+const renderWithProvider = (ui) =>
+  render(<LanguageProvider>{ui}</LanguageProvider>);
+
 test('loads campus SVG and clicking academic building navigates', async () => {
-  render(<CampusMapView />);
+  renderWithProvider(<CampusMapView />);
   await waitFor(() => expect(document.querySelector('svg')).toBeInTheDocument());
 
   const buildingBGroup = document.querySelector('g#B.building-group');
@@ -59,7 +63,7 @@ test('loads campus SVG and clicking academic building navigates', async () => {
 });
 
 test('clicking student housing shows error popup (blocked)', async () => {
-  render(<CampusMapView />);
+  renderWithProvider(<CampusMapView />);
   await waitFor(() => expect(document.querySelector('svg')).toBeInTheDocument());
 
   const housingRect = document.querySelector('g.student-housing .building');

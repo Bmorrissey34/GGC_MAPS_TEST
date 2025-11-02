@@ -3,9 +3,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useCallback } from 'react';
 import FloorMapView from '../FloorMapView';
 import { getBuildingById } from '../../lib/campus';
+import { useLanguage } from '../LanguageContext';
+import { getUIText } from '../../lib/i18n';
 
 // Inner component that uses useSearchParams
-function FloorViewerContent({ buildingId, floorId }) {
+function FloorViewerContent({ buildingId, floorId, locale }) {
   const router = useRouter(); // Router for navigation
   const searchParams = useSearchParams(); // Get URL search parameters
   const buildingData = getBuildingById(buildingId); // Fetch building data
@@ -13,6 +15,7 @@ function FloorViewerContent({ buildingId, floorId }) {
   const currentFloorIndex = floors.findIndex(floor => floor.id === floorId); // Find current floor index
   const currentFloor = floors[currentFloorIndex]; // Get current floor data
   const roomToHighlight = searchParams.get('room'); // Get room from query params
+  const ui = getUIText(locale);
 
   // Navigate to the upper floor
   const goToUpperFloor = () => {
@@ -119,7 +122,7 @@ function FloorViewerContent({ buildingId, floorId }) {
   }, []);
 
   if (!buildingData || !currentFloor) {
-    return <div>Floor not found</div>; // Display message if floor not found
+    return <div>{ui.general.notFound}</div>; // Display message if floor not found
   }
 
   return (
@@ -139,9 +142,11 @@ function FloorViewerContent({ buildingId, floorId }) {
 
 // Outer component that wraps with Suspense
 export default function FloorViewerPage({ buildingId, floorId }) {
+  const { locale } = useLanguage();
+  const ui = getUIText(locale);
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <FloorViewerContent buildingId={buildingId} floorId={floorId} />
+    <Suspense fallback={<div>{ui.general.loading}</div>}>
+      <FloorViewerContent buildingId={buildingId} floorId={floorId} locale={locale} />
     </Suspense>
   );
 }

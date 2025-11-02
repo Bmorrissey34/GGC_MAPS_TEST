@@ -1,10 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getAllBuildings } from '../lib/campus';
 import { RESTRICTED_BUILDING_IDS, RESTRICTED_HOVER_SELECTORS } from '../lib/constants';
 import { clearHoverEvents, createHoverHandlers } from '../lib/eventSystem';
+import { useLanguage } from './LanguageContext';
+import { getUIText, translateBuildingName } from '../lib/i18n';
 
 // Get building data and create navigation items
 const buildings = getAllBuildings();
@@ -18,23 +20,33 @@ const buildHoverDetail = (building) => {
   return { ids: [hoverId] };
 };
 
-const NAV_ITEMS = [
-  { key: 'campus', label: 'Campus', path: '/', hover: { selector: '.building-group' } },
-  ...buildings
-    .slice()
-    .filter(b => !RESTRICTED_BUILDING_IDS.includes((b.id))) // Exclude student housing buildings
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((building) => ({
-      key: building.id,
-      label: building.name,
-      path: `/building/${building.id}`,
-      hover: buildHoverDetail(building),
-    }))
-];
-
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = String(usePathname() ?? '');
+  const { locale } = useLanguage();
+  const copy = getUIText(locale);
+
+  const navItems = useMemo(() => {
+    const campusItem = {
+      key: 'campus',
+      label: copy.sidebar.campusLabel,
+      path: '/',
+      hover: { selector: '.building-group' },
+    };
+
+    const buildingItems = buildings
+      .slice()
+      .filter((b) => !RESTRICTED_BUILDING_IDS.includes(b.id))
+      .map((building) => ({
+        key: building.id,
+        label: translateBuildingName(building.name, locale),
+        path: `/building/${building.id}`,
+        hover: buildHoverDetail(building),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, locale === 'es' ? 'es' : 'en', { sensitivity: 'base' }));
+
+    return [campusItem, ...buildingItems];
+  }, [locale, copy.sidebar.campusLabel]);
 
   const handleCollapse = () => {
     clearHoverEvents('sidebar:collapse');
@@ -49,12 +61,12 @@ export default function Sidebar() {
   return (
     <div className={`sidebar-slot${collapsed ? ' is-collapsed' : ''}`}>
       {!collapsed ? (
-        <nav className="sidebar" aria-label="Campus navigation">
+        <nav className="sidebar" aria-label={copy.sidebar.navAria}>
           <div className="sidebar-header">
             
           </div>
           <ul className="sidebar-nav">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const handlers = createHandlers(item);
               const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
               const linkClass = `nav-link${isActive ? ' active' : ''}`;

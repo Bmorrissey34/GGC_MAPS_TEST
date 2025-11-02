@@ -6,6 +6,7 @@ import '../app/global.css';
 import Header from '../components/Header';
 import MapHeader from '../components/MapHeader';
 import HeaderSizer from '../components/HeaderSizer';
+import { LanguageProvider } from '../components/LanguageContext';
 
 // Load the Inter font from Google Fonts with Latin subset
 const inter = Inter({ subsets: ['latin'] });
@@ -20,10 +21,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${inter.className} app-layout`}>
-        <Header />
-        <HeaderSizer />
-        {children}
-        <MapHeader />
+        <LanguageProvider>
+          <Header />
+          <HeaderSizer />
+          {children}
+          <MapHeader />
+        </LanguageProvider>
       </body>
     </html>
   );

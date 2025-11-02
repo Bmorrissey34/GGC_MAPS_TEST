@@ -8,6 +8,7 @@ import Sidebar from '../components/Sidebar';
 import Legend from '../components/legend';
 import Links from '../components/Links';
 import Footer from '../components/Footer';
+import { LanguageProvider } from '../components/LanguageContext';
 
 // Mock Next router used by multiple components
 jest.mock('next/navigation', () => {
@@ -25,20 +26,22 @@ jest.mock('next/image', () => {
 
 function RenderLayout() {
   return (
-    <div>
-      <Header />
-      <div className="layout-columns">
-        <Sidebar />
-        <main role="main" className="layout-main">
-          <div>Mock Main Content</div>
-        </main>
-        <div className="layout-rail">
-          <Legend className="mb-4" />
-          <Links />
+    <LanguageProvider>
+      <div>
+        <Header />
+        <div className="layout-columns">
+          <Sidebar />
+          <main role="main" className="layout-main">
+            <div>Mock Main Content</div>
+          </main>
+          <div className="layout-rail">
+            <Legend className="mb-4" />
+            <Links />
+          </div>
         </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </LanguageProvider>
   );
 }
 

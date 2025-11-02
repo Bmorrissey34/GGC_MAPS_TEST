@@ -3,19 +3,23 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import buildings from '../data/buildings.json';
+import { useLanguage } from './LanguageContext';
+import { getUIText, translateBuildingName, translateFloorLabel } from '../lib/i18n';
 
 export default function MapHeader() {
   const pathname = usePathname();
   const [title, setTitle] = useState('GGC Maps');
   const [floorLabel, setFloorLabel] = useState('');
   const [showHelp, setShowHelp] = useState(false);
+  const { locale } = useLanguage();
+  const ui = getUIText(locale);
 
   useEffect(() => {
     // Only show help text on map pages
     setShowHelp(pathname === '/' || pathname.startsWith('/building/'));
 
     if (pathname === '/') {
-      setTitle('Campus Map');
+      setTitle(ui.mapHeader.campusMap);
       setFloorLabel('');
     } else if (pathname.startsWith('/building/')) {
       // Extract buildingId and floorId from URL
@@ -27,24 +31,24 @@ export default function MapHeader() {
       const building = buildings.find(b => b.id.toUpperCase() === buildingId);
       
       if (building) {
-        setTitle(building.name);
+        setTitle(translateBuildingName(building.name, locale));
         
         // If we have a floor ID, find its label
         if (floorId) {
           const floor = building.floors.find(f => f.id === floorId);
           if (floor) {
-            setFloorLabel(floor.label);
+            setFloorLabel(translateFloorLabel(floor.label, locale));
           }
         }
       } else {
-        setTitle('Building Map');
+        setTitle(ui.mapHeader.buildingFallback);
         setFloorLabel('');
       }
     } else {
       setTitle('GGC Maps');
       setFloorLabel('');
     }
-  }, [pathname]);
+  }, [pathname, locale, ui.mapHeader.campusMap, ui.mapHeader.buildingFallback]);
 
   return (
     <footer className="footer">
@@ -56,7 +60,7 @@ export default function MapHeader() {
           </h1>
           {showHelp && (
             <span className="text-muted small">
-              Use +/- buttons or scroll/pinch to zoom; drag to pan
+              {ui.mapHeader.helpHint}
             </span>
           )}
         </div>

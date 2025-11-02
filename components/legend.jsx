@@ -1,8 +1,10 @@
 // components/legend.jsx
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { dispatchHoverEvent, clearHoverEvents } from "../lib/eventSystem";
+import { useLanguage } from "./LanguageContext";
+import { normalizeLocale, SUPPORTED_LOCALES } from "../lib/i18n";
 
 const HOVER_TARGETS = {
   academicBuilding: { selector: ".building-group:not(.student-housing)" },
@@ -46,7 +48,6 @@ const TRANSLATIONS = {
 };
 
 const FALLBACK_LOCALE = "en";
-const SUPPORTED_LOCALES = ["en", "es"];
 
 const BASE_ITEMS = [
   { color: "#0f5132", labelKey: "academicBuilding" },
@@ -65,18 +66,6 @@ const FLOATING_CONTAINER_STYLE = {
   right: "clamp(40px, 6vw, 200px)",
   zIndex: 1000,
   pointerEvents: "auto",
-};
-
-const normalizeLocale = (value) => {
-  if (!value) return null;
-  const lower = value.toLowerCase();
-  if (SUPPORTED_LOCALES.includes(lower)) return lower;
-  return SUPPORTED_LOCALES.find((loc) => lower.startsWith(loc)) ?? null;
-};
-
-const getStoredLocale = () => {
-  if (typeof window === "undefined") return null;
-  return normalizeLocale(window.localStorage.getItem("legendLocale"));
 };
 
 /** Reusable row with color square + label */
@@ -101,14 +90,12 @@ function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
 export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, floating = false, className = "" }) {
   void mapScopeSelector;
 
-  const [userOverride, setUserOverride] = useState(false);
-  const [currentLocale, setCurrentLocale] = useState(
-    () => normalizeLocale(locale) ?? FALLBACK_LOCALE
-  );
+  const { locale: contextLocale, setLocale: setContextLocale } = useLanguage();
+  const activeLocale = normalizeLocale(contextLocale ?? locale) ?? FALLBACK_LOCALE;
 
   const messages = useMemo(
-    () => TRANSLATIONS[currentLocale] ?? TRANSLATIONS[FALLBACK_LOCALE],
-    [currentLocale]
+    () => TRANSLATIONS[activeLocale] ?? TRANSLATIONS[FALLBACK_LOCALE],
+    [activeLocale]
   );
   const fallbackMessages = TRANSLATIONS[FALLBACK_LOCALE];
   const t = (key) => messages[key] ?? fallbackMessages[key] ?? key;
@@ -133,36 +120,9 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
     };
   };
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedLocale = getStoredLocale();
-    if (storedLocale) {
-      setCurrentLocale(storedLocale);
-      setUserOverride(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (userOverride) {
-      window.localStorage.setItem("legendLocale", currentLocale);
-    } else {
-      window.localStorage.removeItem("legendLocale");
-    }
-  }, [currentLocale, userOverride]);
-
-  useEffect(() => {
-    if (userOverride) return;
-    const normalized = normalizeLocale(locale);
-    if (normalized && normalized !== currentLocale) {
-      setCurrentLocale(normalized);
-    }
-  }, [locale, currentLocale, userOverride]);
-
   const handleLocaleChange = (code) => {
-    if (code === currentLocale) return;
-    setCurrentLocale(code);
-    setUserOverride(true);
+    if (code === activeLocale) return;
+    setContextLocale(code);
   };
 
   const legendBody = (
@@ -180,9 +140,9 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
             <button
               key={code}
               type="button"
-              className={`btn btn-sm ${currentLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
+              className={`btn btn-sm ${activeLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
               onClick={() => handleLocaleChange(code)}
-              aria-pressed={currentLocale === code}
+              aria-pressed={activeLocale === code}
               aria-label={`${t(code === "en" ? "languageEnglish" : "languageSpanish")} (${code.toUpperCase()})`}
             >
               {code.toUpperCase()}

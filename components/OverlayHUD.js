@@ -6,6 +6,9 @@ import Sidebar from "./Sidebar";
 import Legend from "./legend";
 import Links from "./Links";
 import { canGoUp, canGoDown, getNextFloor, getPreviousFloor } from "../lib/floorNavigation";
+import { useLanguage } from "./LanguageContext";
+import LanguageToggle from "./LanguageToggle";
+import { getUIText, translateBuildingName, translateFloorLabel } from "../lib/i18n";
 
 /**
  * OverlayHUD renders three floating action buttons that hover over the map
@@ -19,6 +22,9 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
   const [openSidebar, setOpenSidebar] = useState(false);
   const [openLegend, setOpenLegend] = useState(false);
   const [openLinks, setOpenLinks] = useState(false);
+  const { locale } = useLanguage();
+  const ui = getUIText(locale);
+  const overlayCopy = ui.overlay;
 
   // Ensure all panels start closed on first mount regardless of components' own persisted state
   useEffect(() => {
@@ -44,17 +50,21 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
     });
   };
 
+  const currentFloor = buildingData?.floors.find((f) => f.id === currentFloorId);
+  const translatedBuildingName = translateBuildingName(buildingData?.name, locale);
+  const translatedFloorLabel = translateFloorLabel(currentFloor?.label, locale);
+
   return (
-    <div className="overlay-hud" aria-label="Map controls">
+    <div className="overlay-hud" aria-label={overlayCopy.mapControls}>
       {/* Back to Campus button (top-left, above sidebar) - only in floor view */}
       {isFloorView && (
-        <div className="overlay-hud-topleft-back" role="toolbar" aria-label="Navigation back">
+        <div className="overlay-hud-topleft-back" role="toolbar" aria-label={overlayCopy.backToolbar}>
           <button
             type="button"
             className="hud-btn"
             aria-label="Back to campus map"
             onClick={() => router.push("/")}
-            title="Back to campus map"
+            title={overlayCopy.backToCampus}
           >
             <i className="bi bi-house-door" aria-hidden="true" />
           </button>
@@ -62,28 +72,32 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
       )}
 
       {/* Sidebar toggle button (top-left) */}
-      <div className={`overlay-hud-topleft ${isFloorView ? 'has-back-button' : ''}`} role="toolbar" aria-label="Navigation toggle">
+      <div className={`overlay-hud-topleft ${isFloorView ? 'has-back-button' : ''}`} role="toolbar" aria-label={overlayCopy.navigationToolbar}>
         <button
           type="button"
           className="hud-btn"
           aria-pressed={openSidebar}
-          aria-label={openSidebar ? "Hide navigation" : "Show navigation"}
+          aria-label={openSidebar ? overlayCopy.hideNavigation : overlayCopy.showNavigation}
           onClick={() => setOpenSidebar((v) => !v)}
-          title={openSidebar ? "Hide navigation" : "Show navigation"}
+          title={openSidebar ? overlayCopy.hideNavigation : overlayCopy.showNavigation}
         >
           <i className="bi bi-list" aria-hidden="true" />
         </button>
       </div>
 
+      <div className="overlay-language-toggle">
+        <LanguageToggle />
+      </div>
+
       {/* Floating buttons cluster (bottom-right) */}
-      <div className="overlay-hud-buttons" role="toolbar" aria-label="Overlay control toggles">
+      <div className="overlay-hud-buttons" role="toolbar" aria-label={overlayCopy.legendToolbar}>
         <button
           type="button"
           className="hud-btn"
           aria-pressed={openLegend}
-          aria-label={openLegend ? "Hide legend" : "Show legend"}
+          aria-label={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
           onClick={toggleLegend}
-          title={openLegend ? "Hide legend" : "Show legend"}
+          title={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
         >
           <i className="bi bi-card-list" aria-hidden="true" />
         </button>
@@ -91,20 +105,20 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
           type="button"
           className="hud-btn"
           aria-pressed={openLinks}
-          aria-label={openLinks ? "Hide helpful links" : "Show helpful links"}
+          aria-label={openLinks ? overlayCopy.hideLinks : overlayCopy.showLinks}
           onClick={toggleLinks}
-          title={openLinks ? "Hide helpful links" : "Show helpful links"}
+          title={openLinks ? overlayCopy.hideLinks : overlayCopy.showLinks}
         >
           <i className="bi bi-link-45deg" aria-hidden="true" />
         </button>
       </div>
 
       {/* Sidebar panel (left side) */}
-      <div className={`overlay-panel overlay-left ${openSidebar ? "is-open" : ""}`} role="dialog" aria-label="Navigation panel" aria-hidden={!openSidebar}>
+      <div className={`overlay-panel overlay-left ${openSidebar ? "is-open" : ""}`} role="dialog" aria-label={overlayCopy.navigationPanelAria} aria-hidden={!openSidebar}>
         <div className="overlay-panel-inner">
           <div className="overlay-panel-header">
-            <span className="overlay-panel-title">Explore Campus</span>
-            <button type="button" className="overlay-close" onClick={() => setOpenSidebar(false)} aria-label="Close navigation">
+            <span className="overlay-panel-title">{overlayCopy.navigationPanelTitle}</span>
+            <button type="button" className="overlay-close" onClick={() => setOpenSidebar(false)} aria-label={overlayCopy.closeNavigation}>
               <i className="bi bi-x" aria-hidden="true" />
             </button>
           </div>
@@ -116,7 +130,7 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
 
       {/* Floor Navigation (bottom-left) */}
       {buildingData && (
-        <div className="overlay-hud-floor-nav" role="group" aria-label="Floor navigation">
+        <div className="overlay-hud-floor-nav" role="group" aria-label={overlayCopy.floorNavigation}>
           <button 
             onClick={() => {
               const next = getNextFloor(buildingData?.floors, currentFloorId);
@@ -124,15 +138,15 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
             }}
             disabled={!onFloorChange || !canGoUp(buildingData?.floors, currentFloorId)}
             className="hud-btn-arrow hud-btn-arrow-up"
-            title="Upper Floor"
-            aria-label="Go to upper floor"
+            title={overlayCopy.upperFloorTitle}
+            aria-label={overlayCopy.goUpperFloor}
           >
             <i className="bi bi-chevron-up" aria-hidden="true" />
           </button>
           
           <div className="floor-display-hud">
-            <span className="current-floor-hud">{buildingData.floors.find(f => f.id === currentFloorId)?.label}</span>
-            <span className="building-name-hud">{buildingData.name}</span>
+            <span className="current-floor-hud">{translatedFloorLabel || currentFloor?.label}</span>
+            <span className="building-name-hud">{translatedBuildingName || buildingData.name}</span>
           </div>
           
           <button 
@@ -142,8 +156,8 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
             }}
             disabled={!onFloorChange || !canGoDown(buildingData?.floors, currentFloorId)}
             className="hud-btn-arrow hud-btn-arrow-down"
-            title="Lower Floor"
-            aria-label="Go to lower floor"
+            title={overlayCopy.lowerFloorTitle}
+            aria-label={overlayCopy.goLowerFloor}
           >
             <i className="bi bi-chevron-down" aria-hidden="true" />
           </button>
@@ -151,11 +165,10 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
       )}
 
       {/* Legend panel (right side) */}
-      <div className={`overlay-panel overlay-right ${openLegend ? "is-open" : ""}`} role="dialog" aria-label="Legend panel" aria-hidden={!openLegend}>
+      <div className={`overlay-panel overlay-right ${openLegend ? "is-open" : ""}`} role="dialog" aria-label={overlayCopy.legendPanelAria} aria-hidden={!openLegend}>
         <div className="overlay-panel-inner">
           <div className="overlay-panel-header">
-            {/* <span className="overlay-panel-title">Legend</span> */}
-            <button type="button" className="overlay-close" onClick={() => setOpenLegend(false)} aria-label="Close legend">
+            <button type="button" className="overlay-close" onClick={() => setOpenLegend(false)} aria-label={overlayCopy.closeLegend}>
               <i className="bi bi-x" aria-hidden="true" />
             </button>
           </div>
@@ -166,11 +179,11 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
       </div>
 
       {/* Helpful Links panel (right side) */}
-      <div className={`overlay-panel overlay-right ${openLinks ? "is-open" : ""}`} role="dialog" aria-label="Helpful links panel" aria-hidden={!openLinks}>
+      <div className={`overlay-panel overlay-right ${openLinks ? "is-open" : ""}`} role="dialog" aria-label={overlayCopy.linksPanelAria} aria-hidden={!openLinks}>
         <div className="overlay-panel-inner">
           <div className="overlay-panel-header">
-            <span className="overlay-panel-title">Helpful Links</span>
-            <button type="button" className="overlay-close" onClick={() => setOpenLinks(false)} aria-label="Close helpful links">
+            <span className="overlay-panel-title">{overlayCopy.helpfulLinksTitle}</span>
+            <button type="button" className="overlay-close" onClick={() => setOpenLinks(false)} aria-label={overlayCopy.closeLinks}>
               <i className="bi bi-x" aria-hidden="true" />
             </button>
           </div>

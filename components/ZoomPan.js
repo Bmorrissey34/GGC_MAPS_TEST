@@ -1,8 +1,8 @@
 'use client';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // ZoomPan component allows for zooming and panning of its children
-export default function ZoomPan({
+const ZoomPan = forwardRef(function ZoomPan({
   children,
   className = '',
   minScale = 0.5,
@@ -15,8 +15,19 @@ export default function ZoomPan({
   autoFit = false,
   fitPadding = 24,
   fitScaleMultiplier = 1
-}) {
+}, forwardedRef) {
   const viewportRef = useRef(null);
+  const setViewportRef = useCallback(
+    (node) => {
+      viewportRef.current = node;
+      if (typeof forwardedRef === 'function') {
+        forwardedRef(node);
+      } else if (forwardedRef) {
+        forwardedRef.current = node;
+      }
+    },
+    [forwardedRef]
+  );
   const [scale, setScale] = useState(initialScale);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const initialPosRef = useRef(null);
@@ -427,7 +438,7 @@ export default function ZoomPan({
 
   return (
     <div
-      ref={viewportRef}
+      ref={setViewportRef}
       className={className}
       onDoubleClick={onDoubleClick}
       onPointerDown={onPointerDown}
@@ -496,4 +507,6 @@ export default function ZoomPan({
       )}
     </div>
   );
-}
+});
+
+export default ZoomPan;

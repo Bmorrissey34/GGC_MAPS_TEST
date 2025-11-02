@@ -3,22 +3,14 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Legend from '../components/legend';
 
-function getToggleBtn() {
-  return screen.getByTitle(/legend/i);
-}
-
 beforeEach(() => {
   window.localStorage.clear();
 });
 
-test('legend renders and collapses/expands', async () => {
+test('legend renders with language controls', async () => {
   render(<Legend />);
   expect(screen.getByText(/^legend$/i)).toBeInTheDocument();
-
-  const collapseBtn = getToggleBtn();
-  expect(collapseBtn).toHaveAttribute('aria-expanded', 'true');
-  await userEvent.click(collapseBtn);
-  expect(getToggleBtn()).toHaveAttribute('aria-expanded', 'false');
+  expect(screen.getByRole('group', { name: /language/i })).toBeInTheDocument();
 });
 
 test('language toggle switches to ES and persists', async () => {

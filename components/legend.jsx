@@ -17,8 +17,6 @@ const HOVER_TARGETS = {
 const TRANSLATIONS = {
   en: {
     legendTitle: "Legend",
-    toggleHide: "Hide legend",
-    toggleShow: "Show legend",
     languageLabel: "Language",
     languageEnglish: "English",
     languageSpanish: "Spanish",
@@ -33,8 +31,6 @@ const TRANSLATIONS = {
   },
   es: {
     legendTitle: "Leyenda",
-    toggleHide: "Ocultar leyenda",
-    toggleShow: "Mostrar leyenda",
     languageLabel: "Idioma",
     languageEnglish: "Ingl\u00e9s",
     languageSpanish: "Espa\u00f1ol",
@@ -105,7 +101,6 @@ function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
 export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, floating = false, className = "" }) {
   void mapScopeSelector;
 
-  const [open, setOpen] = useState(true);
   const [userOverride, setUserOverride] = useState(false);
   const [currentLocale, setCurrentLocale] = useState(
     () => normalizeLocale(locale) ?? FALLBACK_LOCALE
@@ -147,18 +142,6 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
     }
   }, []);
 
-  // remember panel open state between sessions
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem("legendOpen");
-    if (saved !== null) setOpen(saved === "1");
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem("legendOpen", open ? "1" : "0");
-  }, [open]);
-
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (userOverride) {
@@ -184,15 +167,15 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
 
   const legendBody = (
     <div
-      className={`legend-panel shadow rounded-4${open ? "" : " legend-panel--collapsed"}`}
+      className="legend-panel shadow rounded-4"
       role="region"
       aria-label={t("legendTitle")}
-    >
-      {/* Header row: title + EN/ES cluster close together, collapse button floats right */}
-      <div className="legend-header d-flex align-items-center gap-2 mb-2">
-        <div className="legend-title fw-bold">{t("legendTitle")}</div>
+      >
+        {/* Header row: title plus language toggle cluster */}
+        <div className="legend-header d-flex align-items-center gap-2 mb-2">
+          <div className="legend-title fw-bold">{t("legendTitle")}</div>
 
-        <div className="btn-group btn-group-sm ms-2" role="group" aria-label={t("languageLabel")}>
+          <div className="btn-group btn-group-sm ms-2" role="group" aria-label={t("languageLabel")}>
           {SUPPORTED_LOCALES.map((code) => (
             <button
               key={code}
@@ -200,17 +183,15 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
               className={`btn btn-sm ${currentLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
               onClick={() => handleLocaleChange(code)}
               aria-pressed={currentLocale === code}
-              aria-label={t(code === "en" ? "languageEnglish" : "languageSpanish")}
+              aria-label={`${t(code === "en" ? "languageEnglish" : "languageSpanish")} (${code.toUpperCase()})`}
             >
               {code.toUpperCase()}
             </button>
           ))}
         </div>
-
-        
       </div>
 
-      <div id="legend-body" className="legend-body pt-2" hidden={!open}>
+      <div id="legend-body" className="legend-body pt-2">
         <ul className="list-unstyled mb-0">
           {BASE_ITEMS.map((item) => (
             <SwatchItem
@@ -258,7 +239,7 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
     );
   }
 
-  const rootClassName = ["legend-slot", className, open ? "" : "is-collapsed"].filter(Boolean).join(" ");
+  const rootClassName = ["legend-slot", className].filter(Boolean).join(" ");
 
   return (
     <aside className={rootClassName} aria-label={t("legendTitle")}>

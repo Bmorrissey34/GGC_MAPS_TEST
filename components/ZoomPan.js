@@ -14,7 +14,9 @@ const ZoomPan = forwardRef(function ZoomPan({
   showControls = true,
   autoFit = false,
   fitPadding = 24,
-  fitScaleMultiplier = 1
+  fitScaleMultiplier = 1,
+  resetLabel = 'Reset',
+  resetAriaLabel = 'Reset view'
 }, forwardedRef) {
   const viewportRef = useRef(null);
   const setViewportRef = useCallback(
@@ -469,38 +471,19 @@ const ZoomPan = forwardRef(function ZoomPan({
       </div>
       {showControls && (
         <div
-          className="position-absolute top-0 end-0 p-2"
-          style={{ pointerEvents: 'none', zIndex: 5 }}
+          className="position-absolute top-0 p-2"
+          style={{ pointerEvents: 'none', zIndex: 5, right: '0.75rem' }}
         >
-          <div
-            className="btn-group btn-group-sm shadow"
-            role="group"
-            aria-label="Zoom controls"
-            style={{ pointerEvents: 'auto' }}
-          >
+          <div className="zoompan-controls" style={{ pointerEvents: 'auto' }}>
             <button
               type="button"
-              className="btn btn-light"
-              onClick={zoomIn}
-              aria-label="Zoom in"
+              className="zoom-reset-btn"
+              onClick={resetView}
+              aria-label={resetAriaLabel}
             >
               <span aria-hidden="true">+</span>
-            </button>
-            <button
-              type="button"
-              className="btn btn-light"
-              onClick={zoomOut}
-              aria-label="Zoom out"
-            >
+              <span className="mx-2" aria-hidden="true">{resetLabel}</span>
               <span aria-hidden="true">-</span>
-            </button>
-            <button
-              type="button"
-              className="btn btn-light"
-              onClick={resetView}
-              aria-label="Reset view"
-            >
-              <span aria-hidden="true">Reset</span>
             </button>
           </div>
         </div>

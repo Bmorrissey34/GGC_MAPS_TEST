@@ -8,32 +8,24 @@ beforeEach(() => {
   window.localStorage.clear();
 });
 
-test('legend renders with language controls', async () => {
+test('legend renders English labels by default', () => {
   render(
     <LanguageProvider>
       <Legend />
     </LanguageProvider>
   );
   expect(screen.getByText(/^legend$/i)).toBeInTheDocument();
-  expect(screen.getByRole('group', { name: /language/i })).toBeInTheDocument();
+  expect(screen.getByText(/academic building/i)).toBeInTheDocument();
 });
 
-test('language toggle switches to ES and persists', async () => {
+test('legend respects Spanish locale from provider', () => {
   render(
-    <LanguageProvider>
+    <LanguageProvider defaultLocale="es">
       <Legend />
     </LanguageProvider>
   );
-  const btnES = screen.getByRole('button', { name: /es/i });
-  await userEvent.click(btnES);
+  expect(screen.getByText(/leyenda/i)).toBeInTheDocument();
   expect(screen.getByText(/edificio acad/i)).toBeInTheDocument();
-
-  render(
-    <LanguageProvider>
-      <Legend />
-    </LanguageProvider>
-  );
- expect(screen.getAllByText(/edificio acad/i)[0]).toBeInTheDocument();
 });
 
 test('hover dispatches custom events', async () => {

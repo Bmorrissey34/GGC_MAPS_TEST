@@ -24,7 +24,7 @@ export default function LanguageToggle({ className = '' }) {
         onChange={(event) => setLocale(event.target.checked ? 'es' : 'en')}
         aria-label={copy.general.languageToggleAria}
       />
-      <label className="form-check-label ms-2" htmlFor={SWITCH_ID}>
+      <label className="form-check-label" htmlFor={SWITCH_ID}>
         {copy.general.languageToggleLabel}
       </label>
     </div>

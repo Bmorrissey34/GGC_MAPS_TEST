@@ -95,24 +95,13 @@ describe('Layout smoke test', () => {
     ).toBeInTheDocument();
   });
 
-  test('legend renders and language toggle works', async () => {
+  test('legend renders expected labels', () => {
     render(<RenderLayout />);
 
     // Legend region exists
     const legendRegion = screen.getByRole('region', { name: /legend/i });
     expect(legendRegion).toBeInTheDocument();
 
-    // Language buttons (EN pressed initially per your DOM dump)
-    const enBtn = screen.getByRole('button', { name: /english/i });
-    const esBtn = screen.getByRole('button', { name: /spanish/i });
-
-    expect(enBtn).toHaveAttribute('aria-pressed', 'true');
-    expect(esBtn).toHaveAttribute('aria-pressed', 'false');
-
-    // Toggle to ES
-    await userEvent.click(esBtn);
-    expect(esBtn).toHaveAttribute('aria-pressed', 'true');
-    // Optional: if your code flips EN off, uncomment next line
-    // expect(enBtn).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByText(/academic building/i)).toBeInTheDocument();
   });
 });

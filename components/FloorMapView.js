@@ -2,11 +2,12 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import ZoomPan from './ZoomPan';
-import PageContainer from './PageContainer';
 import OverlayHUD from './OverlayHUD';
 import { sanitizeSvgMarkup, escapeSelectorId } from '../lib/svgUtils';
 import { getNextFloor, getPreviousFloor } from '../lib/floorNavigation';
 import { useElementSelection } from '../hooks/useElementSelection';
+import { useLanguage } from './LanguageContext';
+import { getUIText } from '../lib/i18n';
 
 // FloorMapView component for rendering an interactive floor map
 export default function FloorMapView({ 
@@ -20,6 +21,8 @@ export default function FloorMapView({
   const [svgContent, setSvgContent] = useState('');
   const containerRef = useRef(null);
   const [selectedId, setSelectedId] = useElementSelection(containerRef.current, svgContent);
+  const { locale } = useLanguage();
+  const ui = getUIText(locale);
 
   // Find current floor index and data
   const floors = buildingData?.floors || [];
@@ -116,6 +119,8 @@ export default function FloorMapView({
         autoFit={false}
         fitPadding={0}
         fitScaleMultiplier={0.70}
+        resetLabel={ui.overlay.resetLabel}
+        resetAriaLabel={ui.overlay.resetAria}
       >
         <div
           className="w-100 h-100"

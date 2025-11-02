@@ -135,6 +135,8 @@ export default function CampusMapView({
         autoFit={false}
         fitPadding={0}
         fitScaleMultiplier={0.70}
+        resetLabel={ui.overlay.resetLabel}
+        resetAriaLabel={ui.overlay.resetAria}
       >
         <InlineSvg
           src={src}

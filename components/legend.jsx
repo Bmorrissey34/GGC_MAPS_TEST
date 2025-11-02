@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 import { dispatchHoverEvent, clearHoverEvents } from "../lib/eventSystem";
 import { useLanguage } from "./LanguageContext";
-import { normalizeLocale, SUPPORTED_LOCALES } from "../lib/i18n";
+import { normalizeLocale } from "../lib/i18n";
 
 const HOVER_TARGETS = {
   academicBuilding: { selector: ".building-group:not(.student-housing)" },
@@ -90,7 +90,7 @@ function SwatchItem({ color, label, className = "", onEnter, onLeave }) {
 export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, floating = false, className = "" }) {
   void mapScopeSelector;
 
-  const { locale: contextLocale, setLocale: setContextLocale } = useLanguage();
+  const { locale: contextLocale } = useLanguage();
   const activeLocale = normalizeLocale(contextLocale ?? locale) ?? FALLBACK_LOCALE;
 
   const messages = useMemo(
@@ -120,35 +120,16 @@ export default function Legend({ locale = FALLBACK_LOCALE, mapScopeSelector, flo
     };
   };
 
-  const handleLocaleChange = (code) => {
-    if (code === activeLocale) return;
-    setContextLocale(code);
-  };
-
   const legendBody = (
     <div
       className="legend-panel shadow rounded-4"
       role="region"
       aria-label={t("legendTitle")}
       >
-        {/* Header row: title plus language toggle cluster */}
+        {/* Header row: legend title */}
         <div className="legend-header d-flex align-items-center gap-2 mb-2">
           <div className="legend-title fw-bold">{t("legendTitle")}</div>
 
-          <div className="btn-group btn-group-sm ms-2" role="group" aria-label={t("languageLabel")}>
-          {SUPPORTED_LOCALES.map((code) => (
-            <button
-              key={code}
-              type="button"
-              className={`btn btn-sm ${activeLocale === code ? "btn-secondary" : "btn-outline-secondary"}`}
-              onClick={() => handleLocaleChange(code)}
-              aria-pressed={activeLocale === code}
-              aria-label={`${t(code === "en" ? "languageEnglish" : "languageSpanish")} (${code.toUpperCase()})`}
-            >
-              {code.toUpperCase()}
-            </button>
-          ))}
-        </div>
       </div>
 
       <div id="legend-body" className="legend-body pt-2">

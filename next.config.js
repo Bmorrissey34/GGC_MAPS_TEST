@@ -2,7 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'export',
-  basePath: '/ggcmaps-fall25',
+  basePath: process.env.NODE_ENV === 'production' ? '/ggcmaps-fall25' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/ggcmaps-fall25/' : '',
   images: {
     unoptimized: true
   }

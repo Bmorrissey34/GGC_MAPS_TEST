@@ -79,9 +79,9 @@
     "id": "W",
     "name": "Building W",
     "floors": [
+      { "id": "GL", "label": "Ground Level", "file": "/BuildingMaps/W/GL.svg" },
       { "id": "L1", "label": "Level 1", "file": "/BuildingMaps/W/L1.svg" },
-      { "id": "L2", "label": "Level 2", "file": "/BuildingMaps/W/L2.svg" },
-      { "id": "L3", "label": "Level 3", "file": "/BuildingMaps/W/L3.svg" }
+      { "id": "L2", "label": "Level 2", "file": "/BuildingMaps/W/L2.svg" }
     ]
   },
   {

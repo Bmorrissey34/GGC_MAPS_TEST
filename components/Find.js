@@ -134,6 +134,7 @@ export default function Find() {
         <div
           style={{
             color: "hotpink",
+            marginLeft: "10px",
             marginTop: "0.5rem",
             fontWeight: "bold",
             fontSize: "clamp(0.75rem, 1.5vw, 0.875rem)",

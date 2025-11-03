@@ -477,13 +477,32 @@ const ZoomPan = forwardRef(function ZoomPan({
           <div className="zoompan-controls" style={{ pointerEvents: 'auto' }}>
             <button
               type="button"
+              className="zoom-btn zoom-in"
+              onClick={zoomIn}
+              aria-label="Zoom in"
+              title="Zoom in"
+            >
+              <span aria-hidden="true">+</span>
+            </button>
+
+            <button
+              type="button"
               className="zoom-reset-btn"
               onClick={resetView}
               aria-label={resetAriaLabel}
+              title={resetAriaLabel}
             >
-              <span aria-hidden="true">+</span>
               <span className="mx-2" aria-hidden="true">{resetLabel}</span>
-              <span aria-hidden="true">-</span>
+            </button>
+
+            <button
+              type="button"
+              className="zoom-btn zoom-out"
+              onClick={zoomOut}
+              aria-label="Zoom out"
+              title="Zoom out"
+            >
+              <span aria-hidden="true">−</span>
             </button>
           </div>
         </div>

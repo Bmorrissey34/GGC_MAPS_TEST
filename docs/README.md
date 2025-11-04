@@ -1,10 +1,17 @@
-
 # GGCMaps - 8/25/2025
 
 ## Team Lost
 
 ### Description / Abstract
-  - The GGC Maps Project is a web-based tool that helps students, visitors, and staff navigate Georgia Gwinnett College’s campus. It rebuilds the legacy GGC Maps app using a modern framework to ensure responsiveness, accessibility, and easier maintenance. The new system will reuse existing SVG floorplans and JSON data while adding support for modular plug-ins, making it extensible for future features. The project’s primary objective is to deliver a clean, maintainable, and future-proof mapping solution for GGC.
+  - We have decided to work on the GGCMaps project. The original GGC campus map application is difficult to maintain and update because it is not built on a relevant framework. The primary objective of the GGCMaps Revamp project is to rebuild the application using modern technology with a modular structure to make it more maintainable in the future. Our plan is to use the existing SVG files as our campus layout and mix it with our created JSON files that will then be loaded by created scripts to make the data dynamic. We are using scripting created from python and JavaScript for dynamic data and using React and Next.js as our frameworks to make the project modular. Our goal is to have a modern campus map that is maintainable for any future developers an easy to navigate for any students.
+
+### Documentation
+
+- Helpful docs for contributors and users:
+
+- [Developer Guide](./DeveloperGuide.md)
+- [Installation & Development Setup](./Installation.md)
+- [User Tutorial](./UserTutorial.md)
 
 ### Links
  - The [legacy GGC Maps project](http://ggcmaps.com/#Campus) is available for reference, but this repository focuses on rebuilding it with modern frameworks and a modular design.
@@ -15,6 +22,11 @@
 - SVG for scalable building maps
 - JSON for room and building metadata
 - GitHub for version control and collaboration
+
+### Licensing
+- This project uses the official Georgia Gwinnett College campus map. 
+- Map and campus branding © Georgia Gwinnett College. 
+- Used for educational purposes only and not for commercial distribution.
 
 ### Working Features
 - Display of campus buildings and indoor maps (from SVG files)
@@ -60,6 +72,7 @@
 #### Justin McCabe
 - UI/UX Designer
 - Project Manager
+
 #### William Stein
 - Data Modeling
 - Documentation Lead
@@ -69,6 +82,8 @@
 - Client Liaison
 - Programmer
 
+### Brendan Morrissey
+- Lead Programmer
+- Programmer (x2)
+
 ### Project Flyer and video (at the end of the semester)
-
-

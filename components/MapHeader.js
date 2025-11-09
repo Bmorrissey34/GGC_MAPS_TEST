@@ -63,6 +63,10 @@ export default function MapHeader() {
               {ui.mapHeader.helpHint}
             </span>
           )}
+          {/* Ensure copyright is on a new row */}
+          <span className="text-muted small copyright">
+            {ui.mapHeader.copyright}
+          </span>
         </div>
       </div>
     </footer>

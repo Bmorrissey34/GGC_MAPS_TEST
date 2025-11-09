@@ -2172,3 +2172,8 @@ svg .label,
 
 /* Legend floating width already handled by component; ensure body scrolls as needed */
 .overlay-panel-body .legend-panel { max-height: none; }
+
+.copyright {
+    display: block; /* Ensures copyright is on a new line */
+    margin-top: 0.5rem; /* Optional: adds some space above the copyright */
+}

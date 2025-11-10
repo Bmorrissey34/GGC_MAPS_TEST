@@ -6,6 +6,7 @@ import '../app/global.css';
 import Header from '../components/Header';
 import MapHeader from '../components/MapHeader';
 import HeaderSizer from '../components/HeaderSizer';
+import FooterSizer from '../components/FooterSizer';
 import { LanguageProvider } from '../components/LanguageContext';
 
 // Load the Inter font from Google Fonts with Latin subset
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
           <HeaderSizer />
           {children}
           <MapHeader />
+          <FooterSizer />
         </LanguageProvider>
       </body>
     </html>

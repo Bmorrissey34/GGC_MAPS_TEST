@@ -49,8 +49,8 @@ describe('Layout smoke test', () => {
   test('renders header, sidebar, legend, links, footer', () => {
     render(<RenderLayout />);
 
-    // Header
-    expect(screen.getByText(/ggc maps/i)).toBeInTheDocument();
+  // Header (logo present; text removed)
+  expect(screen.getByAltText(/ggc logo/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/AEC, gameroom, library/i)).toBeInTheDocument();
 
     // Sidebar present (don’t assert "Explore Campus" text since it no longer exists)

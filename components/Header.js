@@ -12,11 +12,12 @@ export default function Header() {
           <Image
             src="/images/ggc-logo.png"
             alt="GGC Logo"
-            width={40}
-            height={40}
+            width={200}
+            height={113}
+            sizes="(max-width: 480px) 120px, (max-width: 768px) 160px, 200px"
+            className="ggc-logo"
             priority
           />
-          <span className="header-title">GGC Maps</span>
         </div>
         <div className="header-search">
           <Find />

@@ -85,10 +85,6 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
         </button>
       </div>
 
-      <div className="overlay-language-toggle">
-        <LanguageToggle />
-      </div>
-
       {/* Floating buttons cluster (bottom-right) */}
       <div className="overlay-hud-buttons" role="toolbar" aria-label={overlayCopy.legendToolbar}>
         <button
@@ -128,41 +124,49 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
         </div>
       </div>
 
-      {/* Floor Navigation (bottom-left) */}
-      {buildingData && (
-        <div className="overlay-hud-floor-nav" role="group" aria-label={overlayCopy.floorNavigation}>
-          <button 
-            onClick={() => {
-              const next = getNextFloor(buildingData?.floors, currentFloorId);
-              if (next && onFloorChange) onFloorChange(next.id);
-            }}
-            disabled={!onFloorChange || !canGoUp(buildingData?.floors, currentFloorId)}
-            className="hud-btn-arrow hud-btn-arrow-up"
-            title={overlayCopy.upperFloorTitle}
-            aria-label={overlayCopy.goUpperFloor}
-          >
-            <i className="bi bi-chevron-up" aria-hidden="true" />
-          </button>
-          
-          <div className="floor-display-hud">
-            <span className="current-floor-hud">{translatedFloorLabel || currentFloor?.label}</span>
-            <span className="building-name-hud">{translatedBuildingName || buildingData.name}</span>
+      {/* Bottom-left controls container */}
+      <div className="overlay-hud-bottomleft">
+        {/* Floor Navigation (appears in building view) */}
+        {buildingData && (
+          <div className="overlay-hud-floor-nav" role="group" aria-label={overlayCopy.floorNavigation}>
+            <button 
+              onClick={() => {
+                const next = getNextFloor(buildingData?.floors, currentFloorId);
+                if (next && onFloorChange) onFloorChange(next.id);
+              }}
+              disabled={!onFloorChange || !canGoUp(buildingData?.floors, currentFloorId)}
+              className="hud-btn-arrow hud-btn-arrow-up"
+              title={overlayCopy.upperFloorTitle}
+              aria-label={overlayCopy.goUpperFloor}
+            >
+              <i className="bi bi-chevron-up" aria-hidden="true" />
+            </button>
+            
+            <div className="floor-display-hud">
+              <span className="current-floor-hud">{translatedFloorLabel || currentFloor?.label}</span>
+              <span className="building-name-hud">{translatedBuildingName || buildingData.name}</span>
+            </div>
+            
+            <button 
+              onClick={() => {
+                const prev = getPreviousFloor(buildingData?.floors, currentFloorId);
+                if (prev && onFloorChange) onFloorChange(prev.id);
+              }}
+              disabled={!onFloorChange || !canGoDown(buildingData?.floors, currentFloorId)}
+              className="hud-btn-arrow hud-btn-arrow-down"
+              title={overlayCopy.lowerFloorTitle}
+              aria-label={overlayCopy.goLowerFloor}
+            >
+              <i className="bi bi-chevron-down" aria-hidden="true" />
+            </button>
           </div>
-          
-          <button 
-            onClick={() => {
-              const prev = getPreviousFloor(buildingData?.floors, currentFloorId);
-              if (prev && onFloorChange) onFloorChange(prev.id);
-            }}
-            disabled={!onFloorChange || !canGoDown(buildingData?.floors, currentFloorId)}
-            className="hud-btn-arrow hud-btn-arrow-down"
-            title={overlayCopy.lowerFloorTitle}
-            aria-label={overlayCopy.goLowerFloor}
-          >
-            <i className="bi bi-chevron-down" aria-hidden="true" />
-          </button>
+        )}
+
+        {/* Language Toggle (always bottom-left, below floor nav in building view) */}
+        <div className="overlay-language-toggle">
+          <LanguageToggle />
         </div>
-      )}
+      </div>
 
       {/* Legend panel (right side) */}
       <div className={`overlay-panel overlay-right ${openLegend ? "is-open" : ""}`} role="dialog" aria-label={overlayCopy.legendPanelAria} aria-hidden={!openLegend}>

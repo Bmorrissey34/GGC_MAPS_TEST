@@ -104,101 +104,102 @@ export default function Find() {
 
   return (
     <>
-      <div className="d-flex align-items-center" style={{ gap: "var(--justin-globe-gap)" }}>
-        <label htmlFor="findlabel" className="h4 mb-0" style={{ fontFamily: "var(--justin-globe1)", color: "white" }}>
-          Find:
-        </label>
-
-        <input
-          id="findInput"
-          type="text"
-          size={"50"}
-          className="form-control w-100"
-          placeholder="AEC, gameroom, library"
-          maxLength={maxCharsAllowed}
-          style={{ width: "var(--justin-globe-inputBarSize)" }}
-          value={findValue}
-          onChange={(e) => setFindValue(e.target.value)}
-          onKeyDown={onKeyDown}
-        />
-        <button id="findInputButton" className="btn btn-primary" onClick={onFindClickButton}>
-          Find
-        </button>
-
-        <button id="helpButton" className="btn btn-secondary" onClick={onHelpClick}>
-          Help
-        </button>
-      </div>
-
-      {error && (
-        <div
-          style={{
-            color: "hotpink",
-            marginLeft: "10px",
-            marginTop: "0.5rem",
-            fontWeight: "bold",
-            fontSize: "clamp(0.75rem, 1.5vw, 0.875rem)",
-            wordWrap: "break-word",
-            overflow: "hidden"
-          }}
-        >
-          {error}
-        </div>
-      )}
-      
-      
-
-      {showHelp && (
-        <div className="find-help-dialog">
-          <h5 style={{ color: "blue" }}>Help (not case sensitive)</h5>
-          <table className="table table-bordered table-striped" style={{ tableLayout: "fixed", width: "100%", wordWrap: "break-word", overflowWrap: "break-word" }}>
-            <thead>
-              <tr>
-                <th>What you search</th>
-                <th>What it does</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Valid building letter</td>
-                <td>Goes to building</td>
-              </tr>
-              <tr>
-                <td>Valid building letter and room #</td>
-                <td>Goes to building and highlights room</td>
-              </tr>
-              <tr>
-                <td>Valid building letter and floor #</td>
-                <td>Goes to floor entered in building</td>
-              </tr>
-              <tr>
-                <td>Room nicknames (aec, cisco, park, test, den)</td>
-                <td>Goes to room</td>
-              </tr>
-              <tr>
-                <td>Help</td>
-                <td>Shows this help dialog</td>
-              </tr>
-            </tbody>
-          </table>
-          <h4 style={{ color: "blue", marginTop: "1.5rem" }}>Searches that work</h4>
-          <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
-            <strong>b</strong> goes to building B
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%" }}>
+        <div className="d-flex align-items-center" style={{ gap: "var(--justin-globe-gap)" }}>
+          <label htmlFor="findlabel" className="h4 mb-0" style={{ fontFamily: "var(--justin-globe1)", color: "white" }}>
+            Find:
           </label>
-          <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
-            <strong>b2</strong> goes to building B floor 2
-          </label>
-          <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
-            <strong>b2210</strong> goes to building B room 2210 and highlights it
-          </label>
-          <label style={{ color: "blue", display: "block", marginBottom: "1rem" }}>
-            <strong>aec</strong> goes to AEC location
-          </label>
-          <button className="btn btn-primary" onClick={() => setShowHelp(false)}>
-            Close
+
+          <input
+            id="findInput"
+            type="text"
+            size={"50"}
+            className="form-control w-100"
+            placeholder="AEC, gameroom, library"
+            maxLength={maxCharsAllowed}
+            style={{ width: "var(--justin-globe-inputBarSize)" }}
+            value={findValue}
+            onChange={(e) => setFindValue(e.target.value)}
+            onKeyDown={onKeyDown}
+          />
+          <button id="findInputButton" className="btn btn-primary" onClick={onFindClickButton}>
+            Find
+          </button>
+
+          <button id="helpButton" className="btn btn-secondary" onClick={onHelpClick}>
+            Help
           </button>
         </div>
-      )}
+
+        {error && (
+          <div
+            style={{
+              color: "red",
+              marginLeft: "10px",
+              textAlign: "center",
+              marginTop: "0.5rem",
+              fontWeight: "bold",
+              fontSize: "clamp(0.75rem, 1.5vw, 0.875rem)",
+              wordWrap: "break-word",
+              overflow: "hidden"
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {showHelp && (
+          <div className="find-help-dialog" style={{ marginTop: "0.5rem", width: "100%" }}>
+            <h5 style={{ color: "blue" }}>Help (not case sensitive)</h5>
+            <table className="table table-bordered table-striped" style={{ tableLayout: "fixed", width: "100%", wordWrap: "break-word", overflowWrap: "break-word" }}>
+              <thead>
+                <tr>
+                  <th>What you search</th>
+                  <th>What it does</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Valid building letter</td>
+                  <td>Goes to building</td>
+                </tr>
+                <tr>
+                  <td>Valid building letter and room #</td>
+                  <td>Goes to building and highlights room</td>
+                </tr>
+                <tr>
+                  <td>Valid building letter and floor #</td>
+                  <td>Goes to floor entered in building</td>
+                </tr>
+                <tr>
+                  <td>Room nicknames (aec, cisco, park, test, den)</td>
+                  <td>Goes to room</td>
+                </tr>
+                <tr>
+                  <td>Help</td>
+                  <td>Shows this help dialog</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4 style={{ color: "blue", marginTop: "1.5rem" }}>Searches that work</h4>
+            <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
+              <strong>b</strong> goes to building B
+            </label>
+            <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
+              <strong>b2</strong> goes to building B floor 2
+            </label>
+            <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
+              <strong>b2210</strong> goes to building B room 2210 and highlights it
+            </label>
+            <label style={{ color: "blue", display: "block", marginBottom: "1rem" }}>
+              <strong>aec</strong> goes to AEC location
+            </label>
+            <button className="btn btn-primary" onClick={() => setShowHelp(false)}>
+              Close
+            </button>
+          </div>
+        )}
+      </div>
     </>
   );
 }

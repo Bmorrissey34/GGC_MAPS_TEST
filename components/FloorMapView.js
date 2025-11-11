@@ -132,12 +132,6 @@ export default function FloorMapView({
       </ZoomPan>
 
       <OverlayHUD buildingData={buildingData} currentFloorId={currentFloorId} onFloorChange={onFloorChange} isFloorView={true} />
-
-      {selectedId && (
-        <div className="map-selection-indicator">
-          Selected: <strong>{selectedId}</strong>
-        </div>
-      )}
     </div>
   );
 }

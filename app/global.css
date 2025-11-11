@@ -1400,19 +1400,6 @@ svg .label,
   font-size: 0.875rem;
 }
 
-.map-selection-indicator {
-  position: absolute;
-  bottom: calc(var(--footer-height) + 1rem);
-  left: 1rem;
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  color: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(8px);
-  z-index: 1600;
-}
 .page-container-inner {
   display: flex;
   flex-direction: column;
@@ -1573,13 +1560,6 @@ svg .label,
   .floor-display-hud {
     gap: 0px;
     padding: 1px 0;
-  }
-
-  .map-selection-indicator {
-    bottom: calc(var(--footer-height) + 0.35rem);
-    left: 0.35rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.7rem;
   }
 
   .overlay-hud-buttons {

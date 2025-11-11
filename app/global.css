@@ -1529,7 +1529,7 @@ svg .label,
 
 @media (max-width: 640px) {
   :root {
-    --footer-height: 2.5rem;
+    --footer-height: 6rem;
     --spacing-unit: 0.5rem;
   }
 
@@ -1635,7 +1635,7 @@ svg .label,
   }
 
   .footer {
-    padding: calc(var(--spacing-unit) * 0.5) var(--spacing-unit);
+    padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit);
     font-size: clamp(0.75rem, 2vw, 0.875rem);
   }
 }

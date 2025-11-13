@@ -106,9 +106,7 @@ export default function Find() {
     <>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%" }}>
         <div className="d-flex align-items-center" style={{ gap: "var(--justin-globe-gap)" }}>
-          <label htmlFor="findlabel" className="h4 mb-0" style={{ fontFamily: "var(--justin-globe1)", color: "white" }}>
-            Find:
-          </label>
+          
 
           <input
             id="findInput"
@@ -121,13 +119,28 @@ export default function Find() {
             value={findValue}
             onChange={(e) => setFindValue(e.target.value)}
             onKeyDown={onKeyDown}
+            aria-label="Search for buildings or rooms"
           />
-          <button id="findInputButton" className="btn btn-primary" onClick={onFindClickButton}>
-            Find
+          <button 
+            id="findInputButton" 
+            className="btn btn-primary find-btn" 
+            onClick={onFindClickButton}
+            title="Search for the entered term"
+            aria-label="Find"
+          >
+            <i className="bi bi-search"></i>
+            <span className="find-btn-text">Find</span>
           </button>
 
-          <button id="helpButton" className="btn btn-secondary" onClick={onHelpClick}>
-            Help
+          <button 
+            id="helpButton" 
+            className="btn btn-secondary help-btn" 
+            onClick={onHelpClick}
+            title="Show search help"
+            aria-label="Help"
+          >
+            <i className="bi bi-question-circle"></i>
+            <span className="help-btn-text">Help</span>
           </button>
         </div>
 
@@ -149,54 +162,60 @@ export default function Find() {
         )}
 
         {showHelp && (
-          <div className="find-help-dialog" style={{ marginTop: "0.5rem", width: "100%" }}>
-            <h5 style={{ color: "blue" }}>Help (not case sensitive)</h5>
-            <table className="table table-bordered table-striped" style={{ tableLayout: "fixed", width: "100%", wordWrap: "break-word", overflowWrap: "break-word" }}>
-              <thead>
-                <tr>
-                  <th>What you search</th>
-                  <th>What it does</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Valid building letter</td>
-                  <td>Goes to building</td>
-                </tr>
-                <tr>
-                  <td>Valid building letter and room #</td>
-                  <td>Goes to building and highlights room</td>
-                </tr>
-                <tr>
-                  <td>Valid building letter and floor #</td>
-                  <td>Goes to floor entered in building</td>
-                </tr>
-                <tr>
-                  <td>Room nicknames (aec, cisco, park, test, den)</td>
-                  <td>Goes to room</td>
-                </tr>
-                <tr>
-                  <td>Help</td>
-                  <td>Shows this help dialog</td>
-                </tr>
-              </tbody>
-            </table>
-            <h4 style={{ color: "blue", marginTop: "1.5rem" }}>Searches that work</h4>
-            <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
-              <strong>b</strong> goes to building B
-            </label>
-            <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
-              <strong>b2</strong> goes to building B floor 2
-            </label>
-            <label style={{ color: "blue", display: "block", marginBottom: "0.5rem" }}>
-              <strong>b2210</strong> goes to building B room 2210 and highlights it
-            </label>
-            <label style={{ color: "blue", display: "block", marginBottom: "1rem" }}>
-              <strong>aec</strong> goes to AEC location
-            </label>
-            <button className="btn btn-primary" onClick={() => setShowHelp(false)}>
-              Close
-            </button>
+          <div className="find-help-panel-overlay">
+            <div className="find-help-panel">
+              <div className="find-help-panel-header">
+                <h5 className="find-help-panel-title">Search Help</h5>
+                <button 
+                  className="find-help-panel-close" 
+                  onClick={() => setShowHelp(false)}
+                  aria-label="Close help panel"
+                  title="Close"
+                >
+                  <i className="bi bi-x" aria-hidden="true"></i>
+                </button>
+              </div>
+              
+              <div className="find-help-panel-content">
+                <div className="find-help-section">
+                  <h6 className="find-help-section-title">Search Formats (not case sensitive)</h6>
+                  <div className="find-help-compact-table">
+                    <div className="find-help-row">
+                      <span className="find-help-key">Building letter</span>
+                      <span className="find-help-value">e.g., <strong>b</strong> → Building B</span>
+                    </div>
+                    <div className="find-help-row">
+                      <span className="find-help-key">Letter + floor</span>
+                      <span className="find-help-value">e.g., <strong>b2</strong> → Building B, Floor 2</span>
+                    </div>
+                    <div className="find-help-row">
+                      <span className="find-help-key">Letter + room</span>
+                      <span className="find-help-value">e.g., <strong>b2210</strong> → Room 2210, highlighted</span>
+                    </div>
+                    <div className="find-help-row">
+                      <span className="find-help-key">Quick aliases</span>
+                      <span className="find-help-value"><strong>aec, cisco, park, test, den</strong></span>
+                    </div>
+                    <div className="find-help-row">
+                      <span className="find-help-key">Any text</span>
+                      <span className="find-help-value">e.g., <strong>gameroom, library</strong> → Search results</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="find-help-section">
+                  <h6 className="find-help-section-title">Quick Examples</h6>
+                  <ul className="find-help-examples">
+                    <li><strong>a</strong> → Building A</li>
+                    <li><strong>c3</strong> → Building C, Floor 3</li>
+                    <li><strong>a1510</strong> → Room 1510 in Building A</li>
+                    <li><strong>aec</strong> → AEC (quick link)</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="find-help-panel-footer"></div>
+            </div>
           </div>
         )}
       </div>

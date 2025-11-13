@@ -19,8 +19,8 @@ jest.mock('next/navigation', () => {
 // Mock next/image for JSDOM
 jest.mock('next/image', () => {
   const React = require('react');
-  return function Image(props) {
-    return React.createElement('img', props);
+  return function Image({ priority, placeholder, fill, loader, blurDataURL, quality, ...rest }) {
+    return React.createElement('img', rest);
   };
 });
 

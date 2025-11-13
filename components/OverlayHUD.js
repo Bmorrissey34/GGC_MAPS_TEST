@@ -137,17 +137,19 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
 
       {/* Floating buttons cluster (bottom-right) */}
       <div className="overlay-hud-buttons" role="toolbar" aria-label={overlayCopy.legendToolbar}>
-        <button
-          type="button"
-          className="hud-btn"
-          aria-pressed={openLegend}
-          aria-label={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
-          onClick={toggleLegend}
-          title={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
-        >
-          <i className="bi bi-card-list" aria-hidden="true" />
-          <span className="hud-btn-label">{overlayCopy.legendLabel}</span>
-        </button>
+        {!isFloorView && (
+          <button
+            type="button"
+            className="hud-btn"
+            aria-pressed={openLegend}
+            aria-label={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
+            onClick={toggleLegend}
+            title={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
+          >
+            <i className="bi bi-card-list" aria-hidden="true" />
+            <span className="hud-btn-label">{overlayCopy.legendLabel}</span>
+          </button>
+        )}
         <button
           type="button"
           className="hud-btn"

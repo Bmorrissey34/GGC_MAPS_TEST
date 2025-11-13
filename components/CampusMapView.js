@@ -150,12 +150,6 @@ export default function CampusMapView({
 
       <OverlayHUD />
 
-      {selectedId && (
-        <div className="map-selection-indicator">
-          {ui.general.selectedPrefix}: <strong>{selectedId}</strong>
-        </div>
-      )}
-
       {error && (
         <div className="campus-popup-error">
           <div className="campus-popup-error-inner">

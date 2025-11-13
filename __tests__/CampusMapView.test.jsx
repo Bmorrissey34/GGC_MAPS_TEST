@@ -29,11 +29,11 @@ beforeEach(() => {
   const svg = `
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" data-map-anchor>
       <g id="B" class="building-group">
-        <rect id="B" class="building" x="10" y="10" width="30" height="30" />
+        <rect class="building" x="10" y="10" width="30" height="30" />
         <text x="25" y="25">B</text>
       </g>
       <g id="1000" class="building-group student-housing">
-        <rect id="1000" class="building" x="60" y="10" width="30" height="30" />
+        <rect class="building" x="60" y="10" width="30" height="30" />
         <text x="75" y="25">Housing</text>
       </g>
     </svg>
@@ -75,4 +75,16 @@ test('clicking student housing shows error popup (blocked)', async () => {
   expect(screen.getByText(/student housing layouts/i)).toBeInTheDocument();
   await userEvent.click(screen.getByRole('button', { name: /ok/i }));
   expect(screen.queryByText(/student housing layouts/i)).not.toBeInTheDocument();
+});
+
+test('clicking building shape (not group) navigates correctly', async () => {
+  renderWithProvider(<CampusMapView />);
+  await waitFor(() => expect(document.querySelector('svg')).toBeInTheDocument());
+
+  // Click directly on the .building element (the rect), not the group
+  const buildingRect = document.querySelector('g#B .building');
+  expect(buildingRect).toBeTruthy();
+  
+  await userEvent.click(buildingRect);
+  expect(mockPush).toHaveBeenCalledWith('/building/B');
 });

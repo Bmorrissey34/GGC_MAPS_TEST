@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Legend from "./legend";
 import Links from "./Links";
+import LanguageToggle from "./LanguageToggle";
 import { canGoUp, canGoDown, getNextFloor, getPreviousFloor } from "../lib/floorNavigation";
 import { useLanguage } from "./LanguageContext";
-import LanguageToggle from "./LanguageToggle";
 import { getUIText, translateBuildingName, translateFloorLabel } from "../lib/i18n";
+import buildings from "../data/buildings.json";
 
 /**
  * OverlayHUD renders three floating action buttons that hover over the map
@@ -19,12 +20,51 @@ import { getUIText, translateBuildingName, translateFloorLabel } from "../lib/i1
  */
 export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange, isFloorView = false }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [openSidebar, setOpenSidebar] = useState(false);
   const [openLegend, setOpenLegend] = useState(false);
   const [openLinks, setOpenLinks] = useState(false);
+  const [mapTitle, setMapTitle] = useState('GGC Maps');
+  const [floorLabel, setFloorLabel] = useState('');
+  const [showMapInfo, setShowMapInfo] = useState(false);
   const { locale } = useLanguage();
   const ui = getUIText(locale);
   const overlayCopy = ui.overlay;
+
+  // Update map info based on pathname
+  useEffect(() => {
+    if (pathname === '/') {
+      setMapTitle(ui.mapHeader.campusMap);
+      setFloorLabel('');
+      setShowMapInfo(true);
+    } else if (pathname.startsWith('/building/')) {
+      const parts = pathname.split('/').filter(Boolean);
+      const buildingId = parts[1]?.toUpperCase();
+      const floorId = parts[2];
+
+      const building = buildings.find(b => b.id.toUpperCase() === buildingId);
+      
+      if (building) {
+        setMapTitle(translateBuildingName(building.name, locale));
+        
+        if (floorId) {
+          const floor = building.floors.find(f => f.id === floorId);
+          if (floor) {
+            setFloorLabel(translateFloorLabel(floor.label, locale));
+          }
+        }
+        setShowMapInfo(true);
+      } else {
+        setMapTitle(ui.mapHeader.buildingFallback);
+        setFloorLabel('');
+        setShowMapInfo(false);
+      }
+    } else {
+      setMapTitle('GGC Maps');
+      setFloorLabel('');
+      setShowMapInfo(false);
+    }
+  }, [pathname, locale, ui.mapHeader.campusMap, ui.mapHeader.buildingFallback]);
 
   // Ensure all panels start closed on first mount regardless of components' own persisted state
   useEffect(() => {
@@ -56,12 +96,21 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
 
   return (
     <div className="overlay-hud" aria-label={overlayCopy.mapControls}>
+      {/* Map header (top center) */}
+      {showMapInfo && (
+        <div className="overlay-hud-header-top">
+          <div className="overlay-map-header">
+            <h2 className="overlay-map-title">{mapTitle}</h2>
+          </div>
+        </div>
+      )}
+
       {/* Back to Campus button (top-left, above sidebar) - only in floor view */}
       {isFloorView && (
         <div className="overlay-hud-topleft-back" role="toolbar" aria-label={overlayCopy.backToolbar}>
           <button
             type="button"
-            className="hud-btn"
+            className="hud-btn hud-btn-static"
             aria-label="Back to campus map"
             onClick={() => router.push("/")}
             title={overlayCopy.backToCampus}
@@ -82,21 +131,25 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
           title={openSidebar ? overlayCopy.hideNavigation : overlayCopy.showNavigation}
         >
           <i className="bi bi-list" aria-hidden="true" />
+          <span className="hud-btn-label">{overlayCopy.menuLabel}</span>
         </button>
       </div>
 
       {/* Floating buttons cluster (bottom-right) */}
       <div className="overlay-hud-buttons" role="toolbar" aria-label={overlayCopy.legendToolbar}>
-        <button
-          type="button"
-          className="hud-btn"
-          aria-pressed={openLegend}
-          aria-label={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
-          onClick={toggleLegend}
-          title={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
-        >
-          <i className="bi bi-card-list" aria-hidden="true" />
-        </button>
+        {!isFloorView && (
+          <button
+            type="button"
+            className="hud-btn"
+            aria-pressed={openLegend}
+            aria-label={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
+            onClick={toggleLegend}
+            title={openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend}
+          >
+            <i className="bi bi-card-list" aria-hidden="true" />
+            <span className="hud-btn-label">{overlayCopy.legendLabel}</span>
+          </button>
+        )}
         <button
           type="button"
           className="hud-btn"
@@ -106,6 +159,7 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
           title={openLinks ? overlayCopy.hideLinks : overlayCopy.showLinks}
         >
           <i className="bi bi-link-45deg" aria-hidden="true" />
+          <span className="hud-btn-label">{overlayCopy.linksLabel}</span>
         </button>
       </div>
 
@@ -114,9 +168,12 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
         <div className="overlay-panel-inner">
           <div className="overlay-panel-header">
             <span className="overlay-panel-title">{overlayCopy.navigationPanelTitle}</span>
-            <button type="button" className="overlay-close" onClick={() => setOpenSidebar(false)} aria-label={overlayCopy.closeNavigation}>
-              <i className="bi bi-x" aria-hidden="true" />
-            </button>
+            <div className="overlay-panel-header-right">
+              <LanguageToggle className="overlay-language-toggle-compact" />
+              <button type="button" className="overlay-close" onClick={() => setOpenSidebar(false)} aria-label={overlayCopy.closeNavigation}>
+                <i className="bi bi-x" aria-hidden="true" />
+              </button>
+            </div>
           </div>
           <div className="overlay-panel-body">
             <Sidebar />
@@ -144,7 +201,6 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
             
             <div className="floor-display-hud">
               <span className="current-floor-hud">{translatedFloorLabel || currentFloor?.label}</span>
-              <span className="building-name-hud">{translatedBuildingName || buildingData.name}</span>
             </div>
             
             <button 
@@ -161,11 +217,6 @@ export default function OverlayHUD({ buildingData, currentFloorId, onFloorChange
             </button>
           </div>
         )}
-
-        {/* Language Toggle (always bottom-left, below floor nav in building view) */}
-        <div className="overlay-language-toggle">
-          <LanguageToggle />
-        </div>
       </div>
 
       {/* Legend panel (right side) */}

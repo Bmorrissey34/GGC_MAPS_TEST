@@ -47,7 +47,9 @@ export default function InlineSvg({
     const click = (e) => {
       const el = e.target.closest(interactiveSelector); // Find closest interactive element
       if (el) {
-        const normalizedId = el.id ? el.id.toLowerCase() : null; // Normalize the ID to lowercase
+        // If the clicked element doesn't have an ID, check its parent group
+        const group = el.closest('.building-group') || el.closest('.room-group') || el;
+        const normalizedId = (group.id || el.id) ? (group.id || el.id).toLowerCase() : null; // Normalize the ID to lowercase
         onSelect?.(normalizedId, el); // Call onSelect callback
       }
     };
@@ -57,8 +59,11 @@ export default function InlineSvg({
       const el = e.target.closest(interactiveSelector); // Find closest interactive element
       if (!el) return; // Exit if no element found
       if (e.key === 'Enter' || e.key === ' ') { 
-        e.preventDefault(); // Prevent default action
-        onSelect?.(el.id || null, el); // Call onSelect callback
+        e.preventDefault(); 
+        // If the focused element doesn't have an ID, check its parent group
+        const group = el.closest('.building-group') || el.closest('.room-group') || el;
+        const normalizedId = (group.id || el.id) ? (group.id || el.id).toLowerCase() : null;
+        onSelect?.(normalizedId, el); // Call onSelect callback
       }
     };
 

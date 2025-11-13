@@ -1430,31 +1430,8 @@ svg .label,
 /* ----- NEW Find Help Panel (Right-side sliding panel) ----- */
 .find-help-panel-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0);
-  z-index: 1040;
-  opacity: 1;
-  pointer-events: none;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding: var(--spacing-unit);
-  padding-top: calc(var(--header-height) + var(--spacing-unit));
-}
-
-.find-help-panel {
-  position: relative;
-  right: auto;
-  top: auto;
-  bottom: auto;
-  width: 100%;
-  max-width: 420px;
-  max-height: calc(100vh - var(--header-height) - var(--footer-height) - 2rem);
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  top: 45%;
+  left: 25%;
   z-index: 1050;
   display: flex;
   flex-direction: column;

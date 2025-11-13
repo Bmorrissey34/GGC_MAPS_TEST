@@ -1,10 +1,11 @@
-// jest.config.js
+/// jest.config.js
 module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/$1',
+    '^next/image$': '<rootDir>/__mocks__/next/image.js',  
   },
   transform: {
     '^.+\\.(js|jsx)$': [

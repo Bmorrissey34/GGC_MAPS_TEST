@@ -28,6 +28,6 @@ Open http://localhost:3000 in your browser by entering in the url or ctrl + clic
 ### Related documentation
 - [Project README](./README.md)
 - [Developer Guide](./DeveloperGuide.md)
-- [Installation & Development Setup](./Installation.md)
 - [User Tutorial](./UserTutorial.md)
+- [User Testing](./UserTesting.md)
 - [Licensing](./License.md)

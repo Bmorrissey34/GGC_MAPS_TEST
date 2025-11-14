@@ -35,7 +35,7 @@
 
 ### Related documentation
 - [Project README](./README.md)
-- [Developer Guide](./DeveloperGuide.md)
 - [Installation & Development Setup](./Installation.md)
 - [User Tutorial](./UserTutorial.md)
+- [User Testing](./UserTesting.md)
 - [Licensing](./License.md)

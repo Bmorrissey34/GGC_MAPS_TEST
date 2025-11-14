@@ -19,7 +19,6 @@
 - Finds elements and makes them accessible.
 - Listens for events (`ggcmap-hover`, `ggcmap-hover-clear`, `ggcmap-student-housing-click`) to toggle `hover-highlight` class SVGs (This allows highlighting from Sidebar and Legend as well).
 
-
 #### `components/CampusMapView.js`
 - Renders the campus SVG inside `InlineSvg` and `ZoomPan`.
 - `interactiveSelector` defaults to `.building-group, .building, .student-housing`.
@@ -33,3 +32,10 @@
 #### `components/Sidebar.js`
 - Renders navigation items dynamically via links from building data
 - Interacts with map by dispatching the `ggcmap-hover` event. This utilizes `InlineSvg` to highlight elements of the map.
+
+### Related documentation
+- [Project README](./README.md)
+- [Developer Guide](./DeveloperGuide.md)
+- [Installation & Development Setup](./Installation.md)
+- [User Tutorial](./UserTutorial.md)
+- [Licensing](./License.md)

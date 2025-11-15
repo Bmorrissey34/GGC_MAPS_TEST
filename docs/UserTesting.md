@@ -9,10 +9,10 @@
 **Tester:** [RA]
 
 #### Area Tested:
-- [e.g., Campus Map, Sidebar Navigation, Room Search, Accessibility, etc.]
+- [Map]
 
 #### Comments:
--[Multi-line notes, feedback, suggestions, or bug descriptions]
+- [Thought the page looked nice but thought the building indicator could be in better spot instead of center of page because she said it is distracting, really like the idea of it being language accessible, Found the lighting up from hovering over legend and sidebar super neat once she noticed it, Liked how the help menu made the search feature more user friendly ]
 
 ---
 

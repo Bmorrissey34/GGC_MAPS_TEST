@@ -6,23 +6,26 @@ a spanish mode setting that switches the language to spanish, additional buttons
 dynamic highlighting of buildings and areas when hovering over sidebar and legend, zooming feature
 1.Remains to be done:
 Addition/Removal of new/old buildings, parking lots, rooms etc through updates of the SVG's and json's
+More room nicknames could always be added
+Addition of more language modes
 2.Known Issues:
 Building w flooring is off because of the ground floor being considered lvl 1 when searching for w
 3.flyer
 4.screencast
 5.team and client
-Brendan Morrissey-
-Justin McCabe-
-Karen Armendariz-
-Will Stein-
-Cengiz Gunay-
+Brendan Morrissey-Code Architecture/Lead Programmer
+Justin McCabe-UI/UX Design/Project Manager
+Karen Armendariz-Testing Lead/Client liaison  
+Will Stein-Data Modeler/Documentation Lead
+Cengiz Gunay-Dr. Cengiz Gunay is the Associate Professor of Information Technology at GGC. After moving to the US from Turkey, he earned his doctorate in computer science at University of Louisiana at Lafeyette where he researched computational neuroscience. His academic interests include software engineering, digital media/games, artificial intelligence/machine learning, computational neuroscience and data science.
 6.Project Abstract-
 We have decided to work on the GGCMaps project. The original GGC campus map application is difficult to maintain and update because it is not built on a relevant framework. The primary objective of the GGCMaps Revamp project is to rebuild the application using modern technology with a modular structure to make it more maintainable in the future. Our plan is to use the existing SVG files as our campus layout and mix it with our created JSON files that will then be loaded by created scripts to make the data dynamic. We are using scripting created from python and JavaScript for dynamic data and using React and Next.js as our frameworks to make the project modular. Our goal is to have a modern campus map that is maintainable for any future developers an easy to navigate for any students.
 7.testing coverage, methods, and results-
 8.documentation - installation, usage, help page(s) for the user, code documentation deployed on Github Pages-
 https://bmorrissey34.github.io/GGC_MAPS_TEST/
 9.usability testing
-10.where to find installation, developer, and user documentation-on DevBranch in docs and/or in the README linked sections labeled at the bottom
+10.where to find installation, developer, and user documentation-
+on DevBranch in docs and/or in the README linked sections labeled at the bottom
 11.software usage license and intellectual property terms-
 12.Team's report on the velocity charts from the 3 sprints-
 our 1st sprint velocity chart was rough looking and we did not accomplish many of our user stories because they were too broad and there was alot of carrying over old stuff over so we couldn't get started with what we wanted to do until our 2nd sprint.

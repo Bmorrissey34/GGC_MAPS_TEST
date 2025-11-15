@@ -1,3 +1,30 @@
-1.Search bar to locate rooms,
-2.
-3.
+1.Implemented: 
+Modern Framework, modular and maintainable, updated UI with more features then the old version
+Search bar to locate rooms, floors, and buildings, help menu with instruction to support user
+Sidebar that takes you to buildings, button that returns you from inside building back to the campus
+a spanish mode setting that switches the language to spanish, additional buttons that contain links that take you to other important ggc pages, legend that indicates parts of the campus
+dynamic highlighting of buildings and areas when hovering over sidebar and legend, zooming feature
+1.Remains to be done:
+Addition/Removal of new/old buildings, parking lots, rooms etc through updates of the SVG's and json's
+2.Known Issues:
+Building w flooring is off because of the ground floor being considered lvl 1 when searching for w
+3.flyer
+4.screencast
+5.team and client
+Brendan Morrissey-
+Justin McCabe-
+Karen Armendariz-
+Will Stein-
+Cengiz Gunay-
+6.Project Abstract-
+We have decided to work on the GGCMaps project. The original GGC campus map application is difficult to maintain and update because it is not built on a relevant framework. The primary objective of the GGCMaps Revamp project is to rebuild the application using modern technology with a modular structure to make it more maintainable in the future. Our plan is to use the existing SVG files as our campus layout and mix it with our created JSON files that will then be loaded by created scripts to make the data dynamic. We are using scripting created from python and JavaScript for dynamic data and using React and Next.js as our frameworks to make the project modular. Our goal is to have a modern campus map that is maintainable for any future developers an easy to navigate for any students.
+7.testing coverage, methods, and results-
+8.documentation - installation, usage, help page(s) for the user, code documentation deployed on Github Pages-
+https://bmorrissey34.github.io/GGC_MAPS_TEST/
+9.usability testing
+10.where to find installation, developer, and user documentation-on DevBranch in docs and/or in the README linked sections labeled at the bottom
+11.software usage license and intellectual property terms-
+12.Team's report on the velocity charts from the 3 sprints-
+our 1st sprint velocity chart was rough looking and we did not accomplish many of our user stories because they were too broad and there was alot of carrying over old stuff over so we couldn't get started with what we wanted to do until our 2nd sprint.
+our 2nd sprint velocity chart was a lot better because now we were able to focus on our user stories and we started knocking those out our only issue was we kept adding new user stories due to client feedback throughout the sprint instead of just backlogging them and saving them for sprint 3.
+our 3rd sprint velocity chart looks probably the best because we knew what needed to be done, we remained focused, and we set ourselves up much better by taking the client feedback from the beginning which kept our user stories in scope.

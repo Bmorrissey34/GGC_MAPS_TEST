@@ -5,8 +5,8 @@
 
 ---
 
-### Date: [DD-MM-YYYY]
-**Tester:** [Name or initials]
+### Date: [11-11-2025]
+**Tester:** [RA]
 
 #### Area Tested:
 - [e.g., Campus Map, Sidebar Navigation, Room Search, Accessibility, etc.]
@@ -43,4 +43,4 @@
 - [Developer Guide](./DeveloperGuide.md)
 - [Installation & Development Setup](./Installation.md)
 - [User Tutorial](./UserTutorial.md)
-- [Licensing](./License.md)
+- [Licensing](./License2.md)

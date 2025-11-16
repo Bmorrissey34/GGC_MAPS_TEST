@@ -64,9 +64,9 @@ export default function OverlayHUD({
       const buildingId = parts[1]?.toUpperCase();
       const floorId = parts[2];
 
-      const building = buildings.find(
-        (b) => b.b_id.toUpperCase() === buildingId
-      );
+     const building = buildings.find(
+        (b) => String(b.id).toUpperCase() === buildingId
+     );
 
       if (building) {
         setMapTitle(translateBuildingName(building.name, locale));

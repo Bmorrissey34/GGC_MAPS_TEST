@@ -1,0 +1,8 @@
+Fix the find feature when it comes to building w as when you type just a letter it takes you to level 1 but w has a ground floor level
+add more room nicknames
+add the stores like chickfil-a moes etc into the find/rooms info so users can search for stores
+add more languages
+add the campus gps
+add the new buidlings/rooms/parking lots to the data files
+remove the old buidlings/rooms/parking lots from the data files
+contact the campus police to address whether or not to map out the living dorms 

@@ -22,4 +22,12 @@ Open http://localhost:3000 in your browser by entering in the url or ctrl + clic
 
 ### Notes
 - SVGs live in `public/BuildingMaps/`. When adding new SVG maps, keep consistent naming and test in both campus and building routes.
-- Data files live in `data/`. Run `scripts/extract-room-data.js` to regenerate `rooms.json` when needed by entering in `npm run extract-data`.
+- Data files live in `data/`. 
+- The script that reads the SVGs and extracts relevant room data into `rooms.json` is automatically ran upon entering in `npm run dev`. If you wish to run it manually, enter in `npm run extract-data`.
+
+### Related documentation
+- [Project README](./README.md)
+- [Developer Guide](./DeveloperGuide.md)
+- [User Tutorial](./UserTutorial.md)
+- [User Testing](./UserTesting.md)
+- [Licensing](./License.md)

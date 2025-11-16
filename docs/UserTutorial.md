@@ -38,3 +38,10 @@
 ### Tips
 - You can collapse and extend the sidebar, legend, and helpful links menu by clicking on their respective arrow buttons.
 - You may navigate back to the main campus by either clicking "Campus" on the sidebar or the "GGC Maps" header in the top left corner of the page.
+
+### Related documentation
+- [Project README](./README.md)
+- [Developer Guide](./DeveloperGuide.md)
+- [Installation & Development Setup](./Installation.md)
+- [User Testing](./UserTesting.md)
+- [Licensing](./License.md)

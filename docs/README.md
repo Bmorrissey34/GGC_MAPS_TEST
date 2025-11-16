@@ -12,7 +12,8 @@
 - [Developer Guide](./DeveloperGuide.md)
 - [Installation & Development Setup](./Installation.md)
 - [User Tutorial](./UserTutorial.md)
-- [Licensing](./License.md)
+- [User Testing](./UserTesting.md)
+- [Licensing](./License2.md)
 
 ### Links
  - The [legacy GGC Maps project](http://ggcmaps.com/#Campus) is available for reference, but this repository focuses on rebuilding it with modern frameworks and a modular design.

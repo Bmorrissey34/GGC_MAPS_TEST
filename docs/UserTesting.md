@@ -43,4 +43,4 @@
 - [Developer Guide](./DeveloperGuide.md)
 - [Installation & Development Setup](./Installation.md)
 - [User Tutorial](./UserTutorial.md)
-- [Licensing](./License2.md)
+- [Licensing](./License.md)

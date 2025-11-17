@@ -1,4 +1,4 @@
-# GGCMaps - 8/25/2025
+# GGCMaps - 11/16/2025
 
 ## Team Lost
 
@@ -6,8 +6,6 @@
   - We have decided to work on the GGCMaps project. The original GGC campus map application is difficult to maintain and update because it is not built on a relevant framework. The primary objective of the GGCMaps Revamp project is to rebuild the application using modern technology with a modular structure to make it more maintainable in the future. Our plan is to use the existing SVG files as our campus layout and mix it with our created JSON files that will then be loaded by created scripts to make the data dynamic. We are using scripting created from python and JavaScript for dynamic data and using React and Next.js as our frameworks to make the project modular. Our goal is to have a modern campus map that is maintainable for any future developers an easy to navigate for any students.
 
 ### Documentation
-
-- Helpful docs for contributors and users:
 
 - [Developer Guide](./DeveloperGuide.md)
 - [Installation & Development/Running Guide](./Installation.md)
@@ -51,15 +49,10 @@ Required technologies and tools to run this application:
 - Custom event system for interactive SVG highlighting (`InlineSvg.js`)
 
 **Technologies Removed:**
-- Legacy no‑framework web app and ad‑hoc client scripts — replaced by the Node.js/Next.js stack
+- Legacy no‑framework web app replaced by the Node.js/Next.js stack
 - Python scripts (legacy data extraction) — replaced with Node.js/Cheerio scripts
 - Standalone HTML files — all markup now lives inside React components (JSX) within JS files
 - Docker — removed; replaced by the local Next.js dev server and Node-based scripts
-
-### Licensing
-- This project uses the official Georgia Gwinnett College campus map. 
-- Map and campus branding © Georgia Gwinnett College. 
-- Used for educational purposes only and not for commercial distribution.
 
 ### Working Features
 - Display of campus buildings and indoor maps (from SVG files)
@@ -84,10 +77,10 @@ Required technologies and tools to run this application:
 
 | Photo | Name              | Roles & Responsibilities                                                                 | Contribution % |
 |-------|-------------------|-------------------------------------------------------------------------------------------|----------------|
-| ![Brendan](/images/BrendanM.jpg) | **Brendan Morrissey** | Code Architecture / Lead Programmer (60%) · Programmer (20% ×2)   | 100% |
-| ![William](/images/will.jpg)     | **William Stein**     | Data Modeling (60%) · Documentation Lead (20%) · Programmer (20%) | 100% |
-| ![Karen](/images/karen.jpg)      | **Karen Armendariz**  | Testing Lead (60%) · Client Liaison (20%) · Programmer (20%)      | 100% |
-| ![Justin](/images/justin.jpg)    | **Justin McCabe**     | UI/UX Designer (60%) · Project Manager (20%) · Programmer (20%)   | 100% |
+| ![Brendan](/public/images/BrendanM.jpg) | **Brendan Morrissey** | Code Architecture / Lead Programmer (60%) · Programmer (20% ×2)   | 100% |
+| ![William](/public/images/images/will.jpg)     | **William Stein**     | Data Modeling (60%) · Documentation Lead (20%) · Programmer (20%) | 100% |
+| ![Karen](/public/images/images/karen.jpg)      | **Karen Armendariz**  | Testing Lead (60%) · Client Liaison (20%) · Programmer (20%)      | 100% |
+| ![Justin](/public/images/justin.jpg)    | **Justin McCabe**     | UI/UX Designer (60%) · Project Manager (20%) · Programmer (20%)   | 100% |
 
 ### Team Roles 
 

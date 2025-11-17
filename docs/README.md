@@ -92,8 +92,8 @@ Required technologies and tools to run this application:
 | Photo | Name              | Roles & Responsibilities                                                                 | Contribution % |
 |-------|-------------------|-------------------------------------------------------------------------------------------|----------------|
 | ![Brendan](/public/images/BrendanM.jpg) | **Brendan Morrissey** | Code Architecture / Lead Programmer (60%) · Programmer (20% ×2)   | 100% |
-| ![William](/public/images/images/will.jpg)     | **William Stein**     | Data Modeling (60%) · Documentation Lead (20%) · Programmer (20%) | 100% |
-| ![Karen](/public/images/images/karen.jpg)      | **Karen Armendariz**  | Testing Lead (60%) · Client Liaison (20%) · Programmer (20%)      | 100% |
+| ![William](/public/images/will.jpg)     | **William Stein**     | Data Modeling (60%) · Documentation Lead (20%) · Programmer (20%) | 100% |
+| ![Karen](/public/images/karen.jpg)      | **Karen Armendariz**  | Testing Lead (60%) · Client Liaison (20%) · Programmer (20%)      | 100% |
 | ![Justin](/public/images/justin.jpg)    | **Justin McCabe**     | UI/UX Designer (60%) · Project Manager (20%) · Programmer (20%)   | 100% |
 
 ### Team Roles 

@@ -2,15 +2,6 @@
 
 ## This document explains how to set up the project locally and run it for development/testing.
 
-### Prerequisites
-- Node.js 18.x or newer (20.x LTS recommended)
-- npm (comes with Node)
-- Git
-
-### Clone
-`git clone <repo-url>`
-`cd ggcmaps-fall25`
-
 ### Installation
 Follow these steps in order to set up the project on your local machine:
 

@@ -19,11 +19,42 @@
  - The [legacy GGC Maps project](http://ggcmaps.com/#Campus) is available for reference, but this repository focuses on rebuilding it with modern frameworks and a modular design.
 
 ### Technologies
-- Next.js with TypeScript
-- HTML5 / CSS3 for layout and styling
-- SVG for scalable building maps
-- JSON for room and building metadata
-- GitHub for version control and collaboration
+
+Required technologies and tools to run this application:
+
+- **[Node.js](https://nodejs.org/)** - v18.17 or newer (v20.x LTS recommended)
+  - JavaScript runtime required for Next.js and npm
+  - **npm comes bundled with Node.js** - no separate installation needed
+- **[Next.js](https://nextjs.org/)** - v14.x (installed via npm)
+  - React framework with App Router for server-side rendering and routing
+- **[React](https://react.dev/)** - v18.x (installed via npm)
+  - UI library for building interactive components
+- **[Bootstrap](https://getbootstrap.com/)** - v5.x (installed via npm)
+  - CSS framework for responsive UI styling
+- **[Cheerio](https://cheerio.js.org/)** - (installed via npm)
+  - Server-side DOM parsing library for extracting room data from SVG files
+- **[DOMPurify](https://github.com/cure53/DOMPurify)** - (installed via npm)
+  - Library for sanitizing SVG content before injecting into the DOM
+- **[JSON](https://www.json.org/)** - data format for the app’s static data layer
+  - Room, building, and entity metadata live under `data/` (e.g., `data/rooms.json`, `data/buildings.json`, `data/entities.json`) and are loaded at build/dev time
+- **[Jest](https://jestjs.io/)** - (installed via npm)
+  - Testing framework for automated unit and integration tests
+- **[React Testing Library](https://testing-library.com/react)** - (installed via npm)
+  - Testing utilities for React components
+- **[Git](https://git-scm.com/)** - For version control and cloning the repository
+
+**Technologies Added by Team Lost:**
+- Node.js + Next.js (App Router) framework — rebuilt the prior non-framework site into a modern, maintainable app
+- Jest and React Testing Library for automated testing
+- Cheerio-based SVG room extraction pipeline (`scripts/extract-room-data.js`)
+- Internationalization system (`lib/i18n.js`) for English/Spanish support
+- Custom event system for interactive SVG highlighting (`InlineSvg.js`)
+
+**Technologies Removed:**
+- Legacy no‑framework web app and ad‑hoc client scripts — replaced by the Node.js/Next.js stack
+- Python scripts (legacy data extraction) — replaced with Node.js/Cheerio scripts
+- Standalone HTML files — all markup now lives inside React components (JSX) within JS files
+- Docker — removed; replaced by the local Next.js dev server and Node-based scripts
 
 ### Licensing
 - This project uses the official Georgia Gwinnett College campus map. 
@@ -36,26 +67,15 @@
 - Search by room number or building
 - Overlay features (e.g., fire escapes, elevators, vending machines)
 - Modular plugin system for future extensions (e.g., accessibility overlays, GPS integration)
-
-### Prerequisites
-- Node.js 18.17 or newer (20.x LTS recommended)
-- npm (comes with Node)
-
-### Installation Steps
-1. Clone the repository
-2. Run `npm install`
-
-### Running Steps
-1. Run `npm run dev`
-2. Open http://localhost:3000
+- English/Spanish language toggle
+- Interactive legend with hover highlighting
+- Collapsible sidebar, legend, and helpful links panels
 
 ### Other Project Explanations
-- Client: Dr. Cengiz Gunay, Georgia Gwinnett College
-- Goal: Rebuild the existing GGC Maps app in a modern, modular, and maintainable way
-- Future Enhancements (optional): multilingual support, GPS positioning, campus navigation between buildings, accessibility overlays
+- **Client:** Dr. Cengiz Gunay, Georgia Gwinnett College
+- **Goal:** Rebuild the existing GGC Maps app in a modern, modular, and maintainable way
+- **Future Enhancements (optional):** GPS positioning, campus navigation between buildings, accessibility overlays, real-time occupancy data
 
-
-### Team Members  
 **Fall-2025**
 
 **Team Name:** *Lost* 
@@ -84,7 +104,7 @@
 - Client Liaison
 - Programmer
 
-### Brendan Morrissey
+#### Brendan Morrissey
 - Lead Programmer
 - Programmer (x2)
 

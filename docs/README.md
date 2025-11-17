@@ -55,14 +55,28 @@ Required technologies and tools to run this application:
 - Docker — removed; replaced by the local Next.js dev server and Node-based scripts
 
 ### Working Features
-- Display of campus buildings and indoor maps (from SVG files)
-- Clickable rooms and spaces with highlights
+
+**Features rebuilt from the legacy application:**
+- Display of campus buildings and indoor floor maps (from SVG files)
+- Clickable rooms and spaces with visual highlights
 - Search by room number or building
-- Overlay features (e.g., fire escapes, elevators, vending machines)
-- Modular plugin system for future extensions (e.g., accessibility overlays, GPS integration)
-- English/Spanish language toggle
-- Interactive legend with hover highlighting
-- Collapsible sidebar, legend, and helpful links panels
+- Basic legend functionality
+- Collapsible sidebar for building navigation
+
+**Brand new features added by Team Lost:**
+- Search by building and floor (e.g., "B1" navigates to Building B, Level 1)
+- "Back to Campus" button for quick navigation to main campus view
+- English/Spanish language toggle with full UI translation
+- Enhanced legend with color-coded building types and parking information
+- Hover highlighting on sidebar and legend elements reflects on map
+- Sidebar can be expanded without blocking interaction with other UI elements
+- Helpful links menu with quick access to campus resources
+- Automated room extraction script runs on `npm run dev` and updates `data/rooms.json` based on SVG changes
+- Current page/building name displayed in header
+- Security error message when attempting to access student housing layouts
+- Overlay HUD for floor navigation with up/down arrows
+- Complete UI/UX redesign with modern styling and responsive layout
+- Rebuilt entire application using Next.js framework with modular architecture
 
 ### Other Project Explanations
 - **Client:** Dr. Cengiz Gunay, Georgia Gwinnett College

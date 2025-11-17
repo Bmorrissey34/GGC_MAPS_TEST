@@ -10,10 +10,10 @@ Follow these steps in order to set up the project on your local machine:
 - Download the **LTS version** (20.x recommended for long-term support)
 - Run the installer and follow the installation prompts (accept default settings)
 - Verify installation by opening **PowerShell** or **Command Prompt** and running:
-    ```
-    node --version
-    npm --version
-    ```
+```
+node --version
+npm --version
+```
 
 #### 2. Install Git
 - Visit **[https://git-scm.com/downloads](https://git-scm.com/downloads)**
@@ -24,17 +24,17 @@ Follow these steps in order to set up the project on your local machine:
 
 #### 3. Clone the Repository
 Open **PowerShell** or **Command Prompt**, navigate to your desired parent directory and run:
-    ```
-    git clone <repo-url>
-    cd ggcmaps-fall25
-    ```
+```
+git clone <repo-url>
+cd ggcmaps-fall25
+```
 
 Example:
-    ```
-    cd C:\Users\YourName\Desktop
-    git clone https://github.com/your-org/ggcmaps-fall25.git
-    cd ggcmaps-fall25
-    ```
+```
+cd C:\Users\YourName\Desktop
+git clone https://github.com/your-org/ggcmaps-fall25.git
+cd ggcmaps-fall25
+```
 
 #### 4. Install Project Dependencies
 From the root of the project directory (`ggcmaps-fall25`), run:

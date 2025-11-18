@@ -16,6 +16,17 @@
 
 ---
 
+### Date: [11-16-2025]
+**Tester:** [JA]
+
+#### Area Tested:
+- [MAP]
+
+#### Comments:
+-[Page had a very nice look and feel.  Map zoom out zooms to one side.  Spanish availability is nice feature.]
+
+---
+
 ### Date: [DD-MM-YYYY]
 **Tester:** [Name or initials]
 

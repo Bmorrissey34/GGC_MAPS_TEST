@@ -28,11 +28,16 @@ const ALIASES = {
   den: { building: "A", level: "L1", room: "1510" },
   library: { building: "L", level: "L1", room: "1000" },
   gameroom: { building: "E", level: "L1", room: "gameroom" },
+  food: { building: "A", level: "L1", room: "1800" },
+  dining: { building: "A", level: "L1", room: "1850" },
+  pod: { building: "A", level: "L1", room: "1825" },
   cfa: { building: "A", level: "L1", room: "chickfila" },
   "moes": { building: "A", level: "L1", room: "moes" },
   moes: { building: "A", level: "L1", room: "moes" },
   panda: { building: "A", level: "L1", room: "pandaexpress" },
-  bagel: {building: "B", level: "L1", room: "EINSTEINBROSBAGELS"},
+  bagel: {building: "B", level: "L1", room: "einsteinbrosbagels"},
+  multi: {building: "E", level: "L1", room: "multipurposeroom"},
+  pdining: {building: "E", level: "L1", room: "privatedining"},
   
 };
 

@@ -29,6 +29,11 @@ const ALIASES = {
   library: { building: "L", level: "L1", room: "1000" },
   gameroom: { building: "E", level: "L1", room: "gameroom" },
   cfa: { building: "A", level: "L1", room: "chickfila" },
+  "moes": { building: "A", level: "L1", room: "moes" },
+  moes: { building: "A", level: "L1", room: "moes" },
+  panda: { building: "A", level: "L1", room: "pandaexpress" },
+  bagel: {building: "B", level: "L1", room: "EINSTEINBROSBAGELS"},
+  
 };
 
 // Spanish translations of aliases
@@ -41,6 +46,8 @@ const ALIASES_ES = {
   biblioteca: { building: "L", level: "L1", room: "1000" }, // library
   "sala de juegos": { building: "E", level: "L1", room: "gameroom" }, // gameroom
   cfa: { building: "A", level: "L1", room: "chickfila" },
+  moes: { building: "A", level: "L1", room: "moes" },
+  pandaexpress: { building: "A", level: "L1", room: "pandaexpress" }
 };
 
 export default function Find() {

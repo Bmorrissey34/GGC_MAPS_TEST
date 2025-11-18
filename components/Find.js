@@ -5,6 +5,8 @@ import rooms from "../data/rooms.json";
 import buildings from "../data/buildings.json";
 import { useRouter } from "next/navigation";
 import { searchForRoom, validateSearchInput, parseFloorInput, formatNotFoundError, extractRoomNavInfo } from "../lib/searchUtils";
+import { useLanguage } from "./LanguageContext";
+import { getUIText } from "../lib/i18n";
 
 const maxCharsAllowed = 30;
 
@@ -19,11 +21,26 @@ const validBuildingFloors = buildings.flatMap(b =>
 
 // Room aliases for quick navigation to common locations
 const ALIASES = {
-  aec: { building: "W", level: "L1", room: "1160" },
+  aec: { building: "W", level: "GL", room: "1160" },
   cisco: { building: "C", level: "L1", room: "1260" },
   park: { building: "D", level: "L1", room: "1125" },
   test: { building: "D", level: "L1", room: "1301" },
   den: { building: "A", level: "L1", room: "1510" },
+  library: { building: "L", level: "L1", room: "1000" },
+  gameroom: { building: "E", level: "L1", room: "gameroom" },
+  cfa: { building: "A", level: "L1", room: "chickfila" },
+};
+
+// Spanish translations of aliases
+const ALIASES_ES = {
+  aec: { building: "W", level: "GL", room: "1160" },
+  cisco: { building: "C", level: "L1", room: "1260" },
+  park: { building: "D", level: "L1", room: "1125" },
+  test: { building: "D", level: "L1", room: "1301" },
+  den: { building: "A", level: "L1", room: "1510" },
+  biblioteca: { building: "L", level: "L1", room: "1000" }, // library
+  "sala de juegos": { building: "E", level: "L1", room: "gameroom" }, // gameroom
+  cfa: { building: "A", level: "L1", room: "chickfila" },
 };
 
 export default function Find() {
@@ -31,6 +48,8 @@ export default function Find() {
   const [error, setError] = useState("");
   const [findValue, setFindValue] = useState("");
   const router = useRouter();
+  const { locale } = useLanguage();
+  const ui = getUIText(locale);
 
   const onFindClickButton = () => {
     const userInput = findValue.trim().toLowerCase();
@@ -44,9 +63,12 @@ export default function Find() {
     // Clear previous errors
     setError("");
 
+    // Determine which aliases to use based on current language
+    const currentAliases = locale === 'es' ? { ...ALIASES, ...ALIASES_ES } : ALIASES;
+
     // 1. Check for room alias (quick navigation)
-    if (ALIASES[userInput]) {
-      const { building, level, room } = ALIASES[userInput];
+    if (currentAliases[userInput]) {
+      const { building, level, room } = currentAliases[userInput];
       router.push(`/building/${building}/${level}?room=${encodeURIComponent(room)}`);
       return;
     }
@@ -54,7 +76,8 @@ export default function Find() {
     // 2. Check for single building letter (e.g., "b")
     if (validBuildings.includes(userInput) && userInput.length === 1) {
       const building = userInput.toUpperCase();
-      router.push(`/building/${building}/L1`);
+      const level = building === "W" ? "GL" : "L1";
+      router.push(`/building/${building}/${level}`);
       return;
     }
 
@@ -113,7 +136,7 @@ export default function Find() {
             type="text"
             size={"50"}
             className="form-control w-100"
-            placeholder="AEC, gameroom, library"
+            placeholder={ui.find.searchPlaceholder}
             maxLength={maxCharsAllowed}
             style={{ width: "var(--justin-globe-inputBarSize)" }}
             value={findValue}
@@ -125,22 +148,22 @@ export default function Find() {
             id="findInputButton" 
             className="btn btn-primary find-btn" 
             onClick={onFindClickButton}
-            title="Search for the entered term"
+            title={ui.find.searchButtonLabel}
             aria-label="Find"
           >
             <i className="bi bi-search"></i>
-            <span className="find-btn-text">Find</span>
+            <span className="find-btn-text">{ui.find.searchButtonLabel}</span>
           </button>
 
           <button 
             id="helpButton" 
             className="btn btn-secondary help-btn" 
             onClick={onHelpClick}
-            title="Show search help"
+            title={ui.find.helpButtonLabel}
             aria-label="Help"
           >
             <i className="bi bi-question-circle"></i>
-            <span className="help-btn-text">Help</span>
+            <span className="help-btn-text">{ui.find.helpButtonLabel}</span>
           </button>
         </div>
 
@@ -165,7 +188,7 @@ export default function Find() {
           <div className="find-help-panel-overlay">
             <div className="find-help-panel">
               <div className="find-help-panel-header">
-                <h5 className="find-help-panel-title">Search Help</h5>
+                <h5 className="find-help-panel-title">{ui.find.helpPanelTitle}</h5>
                 <button 
                   className="find-help-panel-close" 
                   onClick={() => setShowHelp(false)}
@@ -178,33 +201,33 @@ export default function Find() {
               
               <div className="find-help-panel-content">
                 <div className="find-help-section">
-                  <h6 className="find-help-section-title">Search Formats (not case sensitive)</h6>
+                  <h6 className="find-help-section-title">{ui.find.searchFormatsTitle}</h6>
                   <div className="find-help-compact-table">
                     <div className="find-help-row">
-                      <span className="find-help-key">Building letter</span>
-                      <span className="find-help-value">e.g., <strong>b</strong> → Building B</span>
+                      <span className="find-help-key">{ui.find.buildingLetterKey}</span>
+                      <span className="find-help-value">{ui.find.buildingLetterValue}</span>
                     </div>
                     <div className="find-help-row">
-                      <span className="find-help-key">Letter + floor</span>
-                      <span className="find-help-value">e.g., <strong>b2</strong> → Building B, Floor 2</span>
+                      <span className="find-help-key">{ui.find.letterFloorKey}</span>
+                      <span className="find-help-value">{ui.find.letterFloorValue}</span>
                     </div>
                     <div className="find-help-row">
-                      <span className="find-help-key">Letter + room</span>
-                      <span className="find-help-value">e.g., <strong>b2210</strong> → Room 2210, highlighted</span>
+                      <span className="find-help-key">{ui.find.letterRoomKey}</span>
+                      <span className="find-help-value">{ui.find.letterRoomValue}</span>
                     </div>
                     <div className="find-help-row">
-                      <span className="find-help-key">Quick aliases</span>
-                      <span className="find-help-value"><strong>aec, cisco, park, test, den</strong></span>
+                      <span className="find-help-key">{ui.find.quickAliasesKey}</span>
+                      <span className="find-help-value"><strong>{ui.find.quickAliasesValue}</strong></span>
                     </div>
                     <div className="find-help-row">
-                      <span className="find-help-key">Any text</span>
-                      <span className="find-help-value">e.g., <strong>gameroom, library</strong> → Search results</span>
+                      <span className="find-help-key">{ui.find.anyTextKey}</span>
+                      <span className="find-help-value">{ui.find.anyTextValue}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="find-help-section">
-                  <h6 className="find-help-section-title">Quick Examples</h6>
+                  <h6 className="find-help-section-title">{ui.find.quickExamplesTitle}</h6>
                   <ul className="find-help-examples">
                     <li><strong>a</strong> → Building A</li>
                     <li><strong>c3</strong> → Building C, Floor 3</li>

@@ -129,12 +129,6 @@ export default function OverlayHUD({
         <div className="overlay-hud-header-top">
           <div className="overlay-map-header">
             <h2 className="overlay-map-title">{mapTitle}</h2>
-            {translatedBuildingName && (
-              <p className="overlay-map-subtitle">
-                {translatedBuildingName}
-                {translatedFloorLabel ? ` – ${translatedFloorLabel}` : ""}
-              </p>
-            )}
           </div>
         </div>
       )}

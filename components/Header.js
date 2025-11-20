@@ -3,6 +3,7 @@
 
 import Image from 'next/image';
 import Find from "../components/Find";
+import { assetPath } from '../lib/constants';
 
 export default function Header() {
   return (
@@ -10,7 +11,7 @@ export default function Header() {
       <nav className="header-nav">
         <div className="header-logo-link">
           <Image
-            src="/images/ggc-logo.png"
+            src={assetPath("/images/ggc-logo.png")}
             alt="GGC Logo"
             width={200}
             height={113}

@@ -8,7 +8,7 @@ import ZoomPan from './ZoomPan';
 import PageContainer from './PageContainer';
 import OverlayHUD from './OverlayHUD';
 import buildings from '../data/buildings.json';
-import { RESTRICTED_BUILDING_IDS } from '../lib/constants';
+import { RESTRICTED_BUILDING_IDS, assetPath } from '../lib/constants';
 import { useLanguage } from './LanguageContext';
 import { getUIText } from '../lib/i18n';
 

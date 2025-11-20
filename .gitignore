@@ -1,6 +1,7 @@
 node_modules/
 .next/
 *.log
+.github/
 .DS_Store
 .env.local
 .env.development.local

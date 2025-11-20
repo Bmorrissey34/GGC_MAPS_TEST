@@ -1,15 +1,13 @@
-/**
- * Mock for Next.js <Image> component
- * This prevents React warnings about unsupported attributes like `priority`
- * when running Jest tests.
- */
+const React = require('react');
 
-import React from 'react';
-
-export default function Image(props) {
-  // Destructure Next.js-specific props that shouldn't reach the DOM
-  const { priority, placeholder, fill, loader, blurDataURL, quality, ...rest } = props;
-  
-  // Return a plain <img> element with the remaining props
-  return <img {...rest} />;
-}
+module.exports = {
+  __esModule: true,
+  default: (props) => {
+    // Strip Next.js-only props like "priority" to avoid React warnings
+    const { priority, ...rest } = props;
+    return React.createElement('img', {
+      ...rest,
+      alt: rest.alt ?? '',
+    });
+  },
+};

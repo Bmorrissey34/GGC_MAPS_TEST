@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import ZoomPan from './ZoomPan';
 import OverlayHUD from './OverlayHUD';
 import { sanitizeSvgMarkup, escapeSelectorId } from '../lib/svgUtils';
+import { getAssetPath } from '../lib/assetUtils';
 import { getNextFloor, getPreviousFloor } from '../lib/floorNavigation';
 import { useElementSelection } from '../hooks/useElementSelection';
 import { useLanguage } from './LanguageContext';
@@ -54,7 +55,8 @@ export default function FloorMapView({
     let isMounted = true;
     (async () => {
       try {
-        const res = await fetch(src, { cache: 'no-cache' });
+        const assetSrc = getAssetPath(src);
+        const res = await fetch(assetSrc, { cache: 'no-cache' });
         const raw = await res.text();
         const sanitized = sanitizeSvgMarkup(raw);
         if (isMounted) setSvgContent(sanitized);

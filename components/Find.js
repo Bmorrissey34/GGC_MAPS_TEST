@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { searchForRoom, validateSearchInput, parseFloorInput, formatNotFoundError, extractRoomNavInfo } from "../lib/searchUtils";
 import { useLanguage } from "./LanguageContext";
 import { getUIText } from "../lib/i18n";
+import { requestRoomFocus } from "../lib/eventSystem";
 
 const maxCharsAllowed = 30;
 
@@ -63,6 +64,11 @@ export default function Find() {
   const { locale } = useLanguage();
   const ui = getUIText(locale);
 
+  const navigateToRoom = (building, floor, roomId) => {
+    router.push(`/building/${building}/${floor}?room=${encodeURIComponent(roomId)}`);
+    requestRoomFocus(building, floor, roomId);
+  };
+
   const onFindClickButton = () => {
     const userInput = findValue.trim().toLowerCase();
 
@@ -81,7 +87,7 @@ export default function Find() {
     // 1. Check for room alias (quick navigation)
     if (currentAliases[userInput]) {
       const { building, level, room } = currentAliases[userInput];
-      router.push(`/building/${building}/${level}?room=${encodeURIComponent(room)}`);
+      navigateToRoom(building, level, room);
       return;
     }
 
@@ -124,7 +130,7 @@ export default function Find() {
 
     // Navigate to the room and highlight it
     const { building, floor, roomNumber } = navInfo;
-    router.push(`/building/${building}/L${floor}?room=${encodeURIComponent(roomNumber)}`);
+    navigateToRoom(building, `L${floor}`, roomNumber);
   };
 
   const onHelpClick = () => {

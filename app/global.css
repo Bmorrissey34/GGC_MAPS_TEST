@@ -365,7 +365,6 @@ main {
   align-items: center;
   justify-content: center;
   transform-origin: 0 0;
-  will-change: transform;
 }
 
 /* Zoom controls positioned in top-right */
@@ -675,17 +674,17 @@ svg[data-map-anchor] {
 
 .sidebar .nav-link:hover:not(.active),
 .sidebar .nav-link:focus-visible:not(.active) {
-  background: linear-gradient(135deg, var(--ggc-green-primary) 0%, var(--ggc-green-light) 100%);
-  color: #ffffff;
-  box-shadow: 0 12px 24px rgba(0, 112, 74, 0.28);
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: #edf6f1;
+  color: var(--ggc-green-dark);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+  border-color: rgba(0, 112, 74, 0.18);
 }
 
 .sidebar .nav-link.active {
-  background: linear-gradient(135deg, rgba(0, 112, 74, 0.18) 0%, rgba(0, 112, 74, 0.08) 100%);
+  background: #e6f2eb;
   color: var(--ggc-green-dark);
-  box-shadow: 0 8px 20px rgba(0, 112, 74, 0.2);
+  box-shadow: inset 3px 0 0 var(--ggc-green-primary);
   border: 1px solid rgba(0, 112, 74, 0.3);
 }
 
@@ -1151,10 +1150,10 @@ svg[data-map-anchor] {
 
 .hud-btn-arrow:hover:not(:disabled),
 .hud-btn-arrow:focus-visible:not(:disabled) {
-  background: linear-gradient(135deg, var(--ggc-green-light) 0%, #00cc7a 100%);
+  background: var(--ggc-green-dark);
   color: #ffffff;
-  transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(0, 112, 74, 0.25);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .hud-btn-arrow:disabled {
@@ -2048,7 +2047,7 @@ svg .label,
 }
 
 .find-btn:hover {
-  background: linear-gradient(135deg, var(--ggc-green-light) 0%, #00cc7a 100%);
+  background: var(--ggc-green-dark);
   color: #ffffff;
   box-shadow: 0 6px 16px rgba(0, 112, 74, 0.25);
   transform: translateY(-1px);
@@ -2246,10 +2245,10 @@ svg .label,
 
 .zoom-btn:hover,
 .zoom-btn:focus-visible {
-  background: linear-gradient(135deg, var(--ggc-green-light) 0%, #00cc7a 100%);
+  background: var(--ggc-green-dark);
   color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0, 112, 74, 0.24);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
   outline: none;
 }
 
@@ -2282,10 +2281,10 @@ svg .label,
 
 .zoom-reset-btn:hover,
 .zoom-reset-btn:focus-visible {
-  background: linear-gradient(135deg, var(--ggc-green-light) 0%, #00cc7a 100%);
+  background: var(--ggc-green-dark);
   color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0, 112, 74, 0.24);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
   outline: none;
 }
 
@@ -2440,7 +2439,7 @@ svg .label,
   background: linear-gradient(135deg, var(--ggc-green-primary) 0%, var(--ggc-green-light) 100%);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 12px 28px rgba(0, 112, 74, 0.22);
+  box-shadow: 0 6px 16px rgba(0, 112, 74, 0.18);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   flex-shrink: 0;
@@ -2538,9 +2537,14 @@ svg .label,
 
 .hud-btn:hover,
 .hud-btn:focus-visible {
-  transform: translateY(-3px);
-  background: linear-gradient(135deg, var(--ggc-green-light) 0%, #00cc7a 100%);
-  box-shadow: 0 16px 32px rgba(0, 112, 74, 0.28);
+  transform: translateY(-1px);
+  background: var(--ggc-green-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.hud-btn[aria-pressed="true"] {
+  background: var(--ggc-green-dark);
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px rgba(0, 112, 74, 0.3);
 }
 
 .hud-btn i {
@@ -2570,12 +2574,13 @@ svg .label,
 
 /* Position panels off-screen initially */
 .overlay-left {
-  left: 12px;
+  /* Leave the home, menu, and floor controls reachable beside the panel. */
+  left: calc(var(--spacing-unit) + 5.5rem);
   transform: translateX(-120%);
 }
 
 .overlay-right {
-  right: 12px;
+  right: calc(var(--spacing-unit) + 3rem + 0.75rem);
   transform: translateX(120%);
 }
 
@@ -2586,6 +2591,10 @@ svg .label,
     width: min(70vw, 100%);
     max-width: none;
     border-radius: 10px;
+  }
+
+  .overlay-left {
+    left: calc(var(--spacing-unit) + 3rem + 0.75rem);
   }
 }
 
@@ -2600,14 +2609,16 @@ svg .label,
   }
 
   .overlay-left { 
-    left: 4px;
+    left: calc(var(--spacing-unit) + 3rem + 0.75rem);
     right: auto;
     width: auto;
+    /* A wide navigation menu must also clear the opposite corner's buttons. */
+    bottom: calc(var(--spacing-unit) + 7rem);
   }
   
   .overlay-right { 
     left: auto;
-    right: 4px;
+    right: calc(var(--spacing-unit) + 3rem + 0.75rem);
     width: auto;
   }
 
@@ -2745,6 +2756,8 @@ svg .label,
   gap: 0.5rem;
   padding: 0.75rem 0.75rem 0.25rem 0.75rem;
   justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 112, 74, 0.1);
+  margin-bottom: 0.5rem;
 }
 
 .overlay-panel-title {
@@ -2793,18 +2806,18 @@ svg .label,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(0, 112, 74, 0.15) 0%, rgba(0, 112, 74, 0.08) 100%);
+  background: #edf6f1;
   color: var(--ggc-green-primary);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 112, 74, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 112, 74, 0.1);
 }
 
 .overlay-close:hover,
 .overlay-close:focus-visible {
-  background: linear-gradient(135deg, var(--ggc-green-primary) 0%, var(--ggc-green-light) 100%);
+  background: var(--ggc-green-dark);
   color: #ffffff;
-  box-shadow: 0 8px 16px rgba(0, 112, 74, 0.18);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
@@ -2819,6 +2832,36 @@ svg .label,
 
 /* Legend floating width already handled by component; ensure body scrolls as needed */
 .overlay-panel-body .legend-panel { max-height: none; }
+
+/* Keep keyboard focus distinct from hover and selected states. */
+.hud-btn:focus-visible,
+.hud-btn-arrow:focus-visible,
+.zoom-btn:focus-visible,
+.zoom-reset-btn:focus-visible,
+.overlay-close:focus-visible,
+.sidebar .nav-link:focus-visible,
+.link-panel-button:focus-visible,
+.find-btn:focus-visible,
+.help-btn:focus-visible {
+  outline: 2px solid var(--ggc-green-dark);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-btn,
+  .hud-btn-label,
+  .hud-btn-arrow,
+  .zoom-btn,
+  .zoom-reset-btn,
+  .overlay-close,
+  .overlay-panel,
+  .sidebar .nav-link,
+  .link-panel-button,
+  .find-btn,
+  .help-btn {
+    transition: none;
+  }
+}
 
 .copyright {
     display: block; /* Ensures copyright is on a new line */

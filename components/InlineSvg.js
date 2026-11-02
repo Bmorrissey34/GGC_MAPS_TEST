@@ -1,116 +1,98 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { sanitizeSvgMarkup, escapeSelectorId, inferElementKind } from '../lib/svgUtils';
+import { sanitizeSvgMarkup, escapeSelectorId } from '../lib/svgUtils';
 import { useElementSelection } from '../hooks/useElementSelection';
 import { assetPath } from '../lib/constants';
 
-// InlineSvg component renders an SVG file and adds interactivity
 export default function InlineSvg({
-  src, // Path to the SVG file
-  className = '', // Additional CSS classes for styling
-  interactiveSelector = '.building-group, .building, .room-group', // Selector for interactive elements
-  selectedId = null, // ID of the currently selected element
-  onSelect, // Callback for when an element is selected
-  onReady, // Callback for when the SVG is ready
+  src,
+  className = '',
+  interactiveSelector = '.building-group, .building, .room-group',
+  selectedId = null,
+  onSelect,
+  onReady,
 }) {
-  const ref = useRef(null); // Reference to the SVG container
-  const [markup, setMarkup] = useState(null); // State to store the sanitized SVG markup
-  const [error, setError] = useState(null); // State to store any loading errors
-  const [internalSelectedId, setInternalSelectedId] = useElementSelection(ref.current, markup); // Internal selection state
+  const ref = useRef(null);
+  const [markup, setMarkup] = useState(null);
+  const [error, setError] = useState(null);
+  const [, setInternalSelectedId] = useElementSelection(ref.current, markup);
   const hoverRefs = useRef(new Map()); // Track hover highlight nodes by source
 
   // Sync external selectedId prop with internal state
   useEffect(() => {
-    if (selectedId) {
-      setInternalSelectedId(selectedId);
-    }
+    setInternalSelectedId(selectedId);
   }, [selectedId, setInternalSelectedId]);
-
 
   // Fetch and sanitize the SVG content when the source changes
   useEffect(() => {
-    let alive = true; // Flag to track component lifecycle
-      setMarkup(null); // Reset markup state
-      setError(null); // Reset error state
-      const fullPath = assetPath(src); // Get the full path with basePath prefix
-      fetch(fullPath, { cache: 'no-store' }) // Fetch the SVG file
-        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); }) // Check response status
-        .then(t => { if (alive) setMarkup(sanitizeSvgMarkup(t)); }) // Set sanitized markup
-        .catch(err => { if (alive) setError(err.message); }); // Handle errors
-    return () => { alive = false; }; // Cleanup function
+    let alive = true;
+    setMarkup(null);
+    setError(null);
+
+    fetch(assetPath(src), { cache: 'no-store' })
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.text();
+      })
+      .then(text => {
+        if (alive) setMarkup(sanitizeSvgMarkup(text));
+      })
+      .catch(err => {
+        if (alive) setError(err.message);
+      });
+
+    // Ignore responses from an old source or an unmounted component.
+    return () => { alive = false; };
   }, [src]);
 
   // Add interactivity and accessibility to the SVG elements
   useEffect(() => {
-    if (!markup || !ref.current) return; // Ensure markup and ref are available
-    const root = ref.current; // Reference to the SVG root element
+    if (!markup || !ref.current) return;
+    const root = ref.current;
 
-    // Handle click events on interactive elements
-    const click = (e) => {
-      const el = e.target.closest(interactiveSelector); // Find closest interactive element
-      if (el) {
-        // If the clicked element doesn't have an ID, check its parent group
-        const group = el.closest('.building-group') || el.closest('.room-group') || el;
-        const normalizedId = (group.id || el.id) ? (group.id || el.id).toLowerCase() : null; // Normalize the ID to lowercase
-        onSelect?.(normalizedId, el); // Call onSelect callback
-      }
+    // Shapes may inherit their identifier from a surrounding building or room group.
+    const selectElement = (element) => {
+      const group = element.closest('.building-group') || element.closest('.room-group') || element;
+      const id = group.id || element.id;
+      onSelect?.(id ? id.toLowerCase() : null, element);
     };
 
-    // Handle keyboard events for accessibility
+    const click = (e) => {
+      const element = e.target.closest(interactiveSelector);
+      if (element) selectElement(element);
+    };
+
     const key = (e) => {
-      const el = e.target.closest(interactiveSelector); // Find closest interactive element
-      if (!el) return; // Exit if no element found
-      if (e.key === 'Enter' || e.key === ' ') { 
-        e.preventDefault(); 
-        // If the focused element doesn't have an ID, check its parent group
-        const group = el.closest('.building-group') || el.closest('.room-group') || el;
-        const normalizedId = (group.id || el.id) ? (group.id || el.id).toLowerCase() : null;
-        onSelect?.(normalizedId, el); // Call onSelect callback
-      }
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const element = e.target.closest(interactiveSelector);
+      if (!element) return;
+      e.preventDefault();
+      selectElement(element);
     };
 
     // Enhance accessibility by adding attributes to interactive elements
     root.querySelectorAll(interactiveSelector).forEach(el => {
-      el.hasAttribute('tabindex') || el.setAttribute('tabindex', '0'); // Make elements focusable
-      el.hasAttribute('role') || el.setAttribute('role', 'button'); // Add a button role
+      if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+      if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
       if (!el.hasAttribute('aria-label')) {
-        const t = el.querySelector('text'); // Get text content for aria-label
-        el.setAttribute('aria-label', (t && t.textContent.trim()) || el.id || 'map element'); // Set aria-label
+        const label = el.querySelector('text')?.textContent.trim();
+        el.setAttribute('aria-label', label || el.id || 'map element');
       }
     });
 
-    root.addEventListener('click', click); // Add click event listener
-    root.addEventListener('keydown', key); // Add keydown event listener
+    root.addEventListener('click', click);
+    root.addEventListener('keydown', key);
 
-    // Report the IDs of interactive elements to the parent component
-    if (onReady) {
-      const items = Array.from(root.querySelectorAll(interactiveSelector))
-        .filter(el => el.id && String(el.id).trim().length > 0) // Filter elements with valid IDs
-        .map(el => {
-          const label = el.querySelector('text')?.textContent?.trim() || ''; // Get label text
-          return {
-            id: el.id, // Element ID
-            kind: inferElementKind(el), // Inferred type of the element
-            name: label, // Label text (if available)
-            svg: src, // Source of the SVG
-          };
-        });
-      onReady(items); // Call onReady callback with items
-    }
+    onReady?.();
 
     return () => {
-      root.removeEventListener('click', click); // Cleanup click event listener
-      root.removeEventListener('keydown', key); // Cleanup keydown event listener
+      root.removeEventListener('click', click);
+      root.removeEventListener('keydown', key);
     };
-  }, [markup, interactiveSelector, onSelect, onReady, src]);
+  }, [markup, interactiveSelector, onSelect, onReady]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    const escapeSelector = (value) => {
-      if (value === null || value === undefined) return '';
-      return escapeSelectorId(value);
-    };
 
     const clearSource = (source) => {
       const nodes = hoverRefs.current.get(source);
@@ -137,7 +119,7 @@ export default function InlineSvg({
       if (Array.isArray(ids)) {
         ids.forEach((id) => {
           if (!id) return;
-          const escaped = escapeSelector(id);
+          const escaped = escapeSelectorId(id);
           if (!escaped) return;
           const found = rootEl.querySelector(`#${escaped}`);
           if (found) {
@@ -185,18 +167,17 @@ export default function InlineSvg({
     hoverRefs.current.clear();
   }, [markup]);
 
-  // Error handling: log the error and display a fallback UI
   if (error) {
-    console.error('Error loading SVG:', error); // Log error
-    return <div className="svg-error">Error loading SVG: {error}</div>; // Display error message
+    console.error('Error loading SVG:', error);
+    return <div className="svg-error">Error loading SVG: {error}</div>;
   }
 
   return (
     <div
-      ref={ref} // Reference to the SVG container
-      className={`inline-svg ${className}`} // Apply class names
-      dangerouslySetInnerHTML={{ __html: markup }} // Set inner HTML to sanitized markup
-      style={{ isolation: 'isolate' }} // Contain the shadow DOM
+      ref={ref}
+      className={`inline-svg ${className}`}
+      dangerouslySetInnerHTML={{ __html: markup }}
+      style={{ isolation: 'isolate' }}
     />
   );
 }

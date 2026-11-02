@@ -1,14 +1,13 @@
 // components/CampusMapView.js
 'use client';
 
-import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import InlineSvg from './InlineSvg';
 import ZoomPan from './ZoomPan';
-import PageContainer from './PageContainer';
 import OverlayHUD from './OverlayHUD';
 import buildings from '../data/buildings.json';
-import { RESTRICTED_BUILDING_IDS, assetPath } from '../lib/constants';
+import { RESTRICTED_BUILDING_IDS } from '../lib/constants';
 import { useLanguage } from './LanguageContext';
 import { getUIText } from '../lib/i18n';
 
@@ -76,9 +75,6 @@ export default function CampusMapView({
     ensureStudentHousingClasses();
   }, [ensureStudentHousingClasses, src]);
 
-  // Optional: call imperative fit if your ZoomPan forwards a ref
-  const zoomRef = useRef(null);
-
   // Runs once the SVG markup is injected
   const handleSvgReady = useCallback(() => {
     ensureStudentHousingClasses();
@@ -100,33 +96,11 @@ export default function CampusMapView({
     if (mainGroup) {
       mainGroup.removeAttribute('transform');
     }
-
-    if (zoomRef.current && typeof zoomRef.current.fitToElement === 'function') {
-      try {
-        zoomRef.current.fitToElement(svgRoot, {
-          padding: 0,
-          scaleMultiplier: 0.15
-        });
-      } catch {
-        // ignore if not supported
-      }
-    }
-    if (zoomRef.current && typeof zoomRef.current.centerOn === 'function') {
-      try {
-        const bbox = svgRoot.getBBox(); // get map bounding box
-        const centerX = bbox.x + bbox.width / 2;
-        const centerY = bbox.y + bbox.height / 2;
-        zoomRef.current.centerOn(centerX, centerY);
-      } catch {
-        // ignore if not supported
-      }
-    }
   }, [ensureStudentHousingClasses]);
 
   return (
     <div className="map-wrap">
       <ZoomPan
-        ref={zoomRef}
         initialScale={1}
         minScale={0.1}
         maxScale={6}

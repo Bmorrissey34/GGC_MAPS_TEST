@@ -26,3 +26,15 @@ test('loads floor svg and activates room on click', async () => {
   await userEvent.click(room);
   expect(room).toHaveClass('active-room');
 });
+
+test('production map requests include the GitHub Pages base path exactly once', async () => {
+  const previousEnvironment = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    render(<FloorMapView src="/BuildingMaps/A/L1.svg" />);
+    await waitFor(() => expect(document.querySelector('svg')).toBeInTheDocument());
+    expect(global.fetch).toHaveBeenCalledWith('/GGC_MAPS_TEST/BuildingMaps/A/L1.svg', { cache: 'no-cache' });
+  } finally {
+    process.env.NODE_ENV = previousEnvironment;
+  }
+});

@@ -1,9 +1,10 @@
 'use client';
-import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 
 // ZoomPan component allows for zooming and panning of its children
 const ZoomPan = forwardRef(function ZoomPan({
   children,
+  controlsRef,
   className = '',
   minScale = 0.5,
   maxScale = 4,
@@ -83,22 +84,13 @@ const ZoomPan = forwardRef(function ZoomPan({
 
   // Set scale at a specific point
   const setScaleAt = useCallback(
-    (next, cx, cy, isAutoFit = false) => {
+    (next, cx, cy) => {
       const vp = viewportRef.current;
       if (!vp) return;
       const rect = vp.getBoundingClientRect();
 
       const prev = scale;
       next = clamp(next, minScale, maxScale);
-
-      const bounds = getAnchorBounds();
-      if (bounds && isAutoFit && !userHasDragged.current) {
-        const desiredX = rect.width / 2 - next * (bounds.x + bounds.width / 2);
-        const desiredY = rect.height / 2 - next * (bounds.y + bounds.height / 2);
-        setPos({ x: desiredX, y: desiredY });
-        setScale(next);
-        return;
-      }
 
       if (!Number.isFinite(cx) || !Number.isFinite(cy)) {
         cx = rect.left + rect.width / 2;
@@ -109,17 +101,17 @@ const ZoomPan = forwardRef(function ZoomPan({
       const py = cy - rect.top;
 
       // The point on the content that is under the cursor
-      const contentX = px / prev - pos.x;
-      const contentY = py / prev - pos.y;
+      const contentX = (px - pos.x) / prev;
+      const contentY = (py - pos.y) / prev;
 
       // The new position of that point after scaling
-      const newPosX = px / next - contentX;
-      const newPosY = py / next - contentY;
+      const newPosX = px - next * contentX;
+      const newPosY = py - next * contentY;
 
       setPos({ x: newPosX, y: newPosY });
       setScale(next);
     },
-    [scale, pos.x, pos.y, minScale, maxScale, getAnchorBounds]
+    [scale, pos.x, pos.y, minScale, maxScale]
   );
 
   const getViewportCenter = useCallback(() => {
@@ -140,6 +132,48 @@ const ZoomPan = forwardRef(function ZoomPan({
     },
     [getViewportCenter, scale, setScaleAt]
   );
+
+  // Coordinates here are pixels in the untransformed stage, not SVG viewBox units.
+  const centerOn = useCallback((x, y, nextScale = scale) => {
+    const viewport = viewportRef.current?.getBoundingClientRect();
+    if (!viewport || viewport.width <= 0 || viewport.height <= 0 ||
+        ![x, y, nextScale].every(Number.isFinite) || nextScale <= 0) return false;
+
+    const boundedScale = clamp(nextScale, minScale, maxScale);
+    setScale(boundedScale);
+    setPos({
+      x: viewport.width / 2 - boundedScale * x,
+      y: viewport.height / 2 - boundedScale * y,
+    });
+    userHasDragged.current = true; // Keep automatic fitting from undoing a requested focus.
+    return true;
+  }, [scale, minScale, maxScale]);
+
+  const fitToElement = useCallback((element, { padding = 48, scaleMultiplier = 0.5 } = {}) => {
+    const viewport = viewportRef.current;
+    const stage = viewport?.firstElementChild;
+    if (!stage || !stage.contains(element)) return false;
+
+    // Browser rectangles account for SVG transforms, responsive sizing, and viewBox offsets.
+    const target = element.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const viewportRect = viewport.getBoundingClientRect();
+    const safePadding = Math.max(0, Number.isFinite(padding) ? padding : 48);
+    const width = viewportRect.width - safePadding * 2;
+    const height = viewportRect.height - safePadding * 2;
+    if (target.width <= 0 || target.height <= 0 || width <= 0 || height <= 0 ||
+        !Number.isFinite(scaleMultiplier) || scaleMultiplier <= 0) return false;
+
+    const nextScale = Math.min(width / target.width, height / target.height) * scale * scaleMultiplier;
+    return centerOn(
+      (target.left + target.width / 2 - stageRect.left) / scale,
+      (target.top + target.height / 2 - stageRect.top) / scale,
+      nextScale,
+    );
+  }, [scale, centerOn]);
+
+  // Preserve the existing DOM ref for map selection; expose controls separately.
+  useImperativeHandle(controlsRef, () => ({ fitToElement, centerOn }), [fitToElement, centerOn]);
 
   const fitToBounds = useCallback(
     ({ force = false, padding = fitPadding } = {}) => {
@@ -268,8 +302,8 @@ const ZoomPan = forwardRef(function ZoomPan({
 
     if (drag.current.captured) {
       setPos({
-        x: drag.current.origX + dx / scale,
-        y: drag.current.origY + dy / scale
+        x: drag.current.origX + dx,
+        y: drag.current.origY + dy
       });
     }
   };
@@ -350,41 +384,35 @@ const ZoomPan = forwardRef(function ZoomPan({
     const onKey = (e) => {
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
       if (e.key === '+' || e.key === '=') {
-        const centerPoint = getViewportCenter();
-        const anchorCx = centerPoint?.cx ?? innerWidth / 2;
-        const anchorCy = centerPoint?.cy ?? innerHeight / 2;
-        setScaleAt(scale * 1.1, anchorCx, anchorCy);
+        zoomByMultiplier(1.1);
       }
       if (e.key === '-' || e.key === '_') {
-        const centerPoint = getViewportCenter();
-        const anchorCx = centerPoint?.cx ?? innerWidth / 2;
-        const anchorCy = centerPoint?.cy ?? innerHeight / 2;
-        setScaleAt(scale / 1.1, anchorCx, anchorCy);
+        zoomByMultiplier(1 / 1.1);
       }
       if (e.key === '0') {
         resetView();
       }
       if (e.key === 'ArrowLeft') {
         userHasDragged.current = true;
-        setPos((p) => ({ ...p, x: p.x + 30 / scale }));
+        setPos((p) => ({ ...p, x: p.x + 30 }));
       }
       if (e.key === 'ArrowRight') {
         userHasDragged.current = true;
-        setPos((p) => ({ ...p, x: p.x - 30 / scale }));
+        setPos((p) => ({ ...p, x: p.x - 30 }));
       }
       if (e.key === 'ArrowUp') {
         userHasDragged.current = true;
-        setPos((p) => ({ ...p, y: p.y + 30 / scale }));
+        setPos((p) => ({ ...p, y: p.y + 30 }));
       }
       if (e.key === 'ArrowDown') {
         userHasDragged.current = true;
-        setPos((p) => ({ ...p, y: p.y - 30 / scale }));
+        setPos((p) => ({ ...p, y: p.y - 30 }));
       }
     };
 
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
-  }, [scale, setScaleAt, resetView, getViewportCenter]);
+  }, [zoomByMultiplier, resetView]);
 
   const zoomIn = useCallback(() => zoomByMultiplier(1.15), [zoomByMultiplier]);
   const zoomOut = useCallback(() => zoomByMultiplier(1 / 1.15), [zoomByMultiplier]);
@@ -463,8 +491,7 @@ const ZoomPan = forwardRef(function ZoomPan({
           width: '100%',
           height: '100%',
           transform: `translate(${pos.x}px, ${pos.y}px) scale(${scale})`,
-          transformOrigin: '0 0',
-          willChange: 'transform'
+          transformOrigin: '0 0'
         }}
       >
         {children}

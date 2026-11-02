@@ -1,11 +1,10 @@
 // components/FloorMapView.js
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import ZoomPan from './ZoomPan';
 import OverlayHUD from './OverlayHUD';
-import { sanitizeSvgMarkup, escapeSelectorId } from '../lib/svgUtils';
-import { getAssetPath } from '../lib/assetUtils';
-import { getNextFloor, getPreviousFloor } from '../lib/floorNavigation';
+import { sanitizeSvgMarkup } from '../lib/svgUtils';
+import { assetPath } from '../lib/constants';
 import { useElementSelection } from '../hooks/useElementSelection';
 import { useLanguage } from './LanguageContext';
 import { getUIText } from '../lib/i18n';
@@ -17,55 +16,50 @@ export default function FloorMapView({
   buildingData,
   currentFloorId,
   onFloorChange,
-  onRoomSelect
+  onRoomSelect,
+  focusRoomId = null,
 }) {
   const [svgContent, setSvgContent] = useState('');
   const containerRef = useRef(null);
-  const [selectedId, setSelectedId] = useElementSelection(containerRef.current, svgContent);
+  const controlsRef = useRef(null);
+  const loadedSrcRef = useRef(null);
+  const [, setSelectedId] = useElementSelection(containerRef.current, svgContent);
   const { locale } = useLanguage();
   const ui = getUIText(locale);
 
-  // Find current floor index and data
-  const floors = buildingData?.floors || [];
-  const currentFloorIndex = floors.findIndex(floor => floor.id === currentFloorId);
-
-  // Floor navigation handlers
-  const goToUpperFloor = () => {
-    const next = getNextFloor(floors, currentFloorId);
-    if (next) onFloorChange(next.id);
-  };
-
-  const goToLowerFloor = () => {
-    const prev = getPreviousFloor(floors, currentFloorId);
-    if (prev) onFloorChange(prev.id);
-  };
-
   // Handles the selection of a room or area on the map
-  const handleSelect = (id) => {
+  const handleSelect = useCallback((id) => {
     if (id) {
       setSelectedId(String(id).trim()); // Update the selected ID state
       if (onRoomSelect) {
         onRoomSelect(String(id).trim()); // Notify parent of room selection
       }
     }
-  };
+  }, [onRoomSelect, setSelectedId]);
 
   // Load SVG as text so events bubble to ZoomPan
   useEffect(() => {
     let isMounted = true;
+    loadedSrcRef.current = null;
+    setSvgContent('');
+    setSelectedId(null);
     (async () => {
       try {
-        const assetSrc = getAssetPath(src);
+        const assetSrc = assetPath(src);
         const res = await fetch(assetSrc, { cache: 'no-cache' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const raw = await res.text();
         const sanitized = sanitizeSvgMarkup(raw);
-        if (isMounted) setSvgContent(sanitized);
+        if (isMounted) {
+          loadedSrcRef.current = src;
+          setSvgContent(sanitized);
+        }
       } catch {
         if (isMounted) setSvgContent('<svg xmlns="http://www.w3.org/2000/svg"><text x="10" y="20">Failed to load map</text></svg>');
       }
     })();
     return () => { isMounted = false; };
-  }, [src]);
+  }, [src, setSelectedId]);
 
   // Post-process injected SVG: sizing, disable links, and click selection
   useEffect(() => {
@@ -107,12 +101,42 @@ export default function FloorMapView({
 
     container.addEventListener('click', onClick);
     return () => container.removeEventListener('click', onClick);
-  }, [svgContent, interactiveSelector]);
+  }, [svgContent, interactiveSelector, handleSelect]);
+
+  const focusRoom = useCallback((roomId) => {
+    if (!roomId || loadedSrcRef.current !== src) return false;
+    const svg = containerRef.current?.querySelector('svg');
+    // Exact ID comparison also handles numeric room IDs without CSS escaping.
+    const target = Array.from(svg?.querySelectorAll('[id]') || [])
+      .find(element => element.id === String(roomId));
+    if (!target) return false;
+
+    setSelectedId(target.id);
+    const shape = target.querySelector('.room') || target;
+    return controlsRef.current?.fitToElement(shape, { padding: 48, scaleMultiplier: 0.5 }) ?? false;
+  }, [src, setSelectedId]);
+
+  useEffect(() => {
+    if (!svgContent || !focusRoomId) return;
+    // Measure after the injected SVG has been sized and laid out.
+    const frame = requestAnimationFrame(() => focusRoom(focusRoomId));
+    return () => cancelAnimationFrame(frame);
+  }, [svgContent, focusRoomId, focusRoom]);
+
+  useEffect(() => {
+    const refocus = ({ detail }) => {
+      if (detail?.building === buildingData?.id && detail?.floor === currentFloorId &&
+          detail?.roomId === focusRoomId) focusRoom(detail.roomId);
+    };
+    window.addEventListener('ggcmap-focus-room', refocus);
+    return () => window.removeEventListener('ggcmap-focus-room', refocus);
+  }, [buildingData?.id, currentFloorId, focusRoomId, focusRoom]);
 
   return (
     <div className="map-wrap" data-building={buildingData?.id}>
       <ZoomPan
         ref={containerRef}
+        controlsRef={controlsRef}
         initialScale={1}
         minScale={0.1}
         maxScale={6}

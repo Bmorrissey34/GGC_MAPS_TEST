@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Legend from "./legend";
@@ -36,96 +36,34 @@ export default function OverlayHUD({
   const router = useRouter();
   const pathname = usePathname();
   const [openSidebar, setOpenSidebar] = useState(false);
-  const [openLegend, setOpenLegend] = useState(false);
-  const [openLinks, setOpenLinks] = useState(false);
-  const [mapTitle, setMapTitle] = useState("GGC Maps");
-  const [floorLabel, setFloorLabel] = useState("");
-  const [showMapInfo, setShowMapInfo] = useState(false);
+  const [rightPanel, setRightPanel] = useState(null);
+  const openLegend = rightPanel === "legend";
+  const openLinks = rightPanel === "links";
   const { locale } = useLanguage();
   const ui = getUIText(locale);
   const overlayCopy = ui.overlay;
 
-  // Update map info based on pathname
-  useEffect(() => {
-    // Guard: in tests (and sometimes first render) pathname can be null
-    if (!pathname) {
-      setMapTitle(ui.mapHeader.campusMap);
-      setFloorLabel("");
-      setShowMapInfo(true);
-      return;
-    }
+  const isCampusView = !pathname || pathname === "/" || pathname === "/campus";
+  const buildingId = pathname?.startsWith("/building/")
+    ? pathname.split("/").filter(Boolean)[1]?.toUpperCase()
+    : null;
+  const currentBuilding = buildings.find(b => String(b.id).toUpperCase() === buildingId);
+  const mapTitle = isCampusView
+    ? ui.mapHeader.campusMap
+    : currentBuilding ? translateBuildingName(currentBuilding.name, locale) : null;
 
-    if (pathname === "/" || pathname === "/campus") {
-      setMapTitle(ui.mapHeader.campusMap);
-      setFloorLabel("");
-      setShowMapInfo(true);
-    } else if (pathname.startsWith("/building/")) {
-      const parts = pathname.split("/").filter(Boolean);
-      const buildingId = parts[1]?.toUpperCase();
-      const floorId = parts[2];
-
-     const building = buildings.find(
-        (b) => String(b.id).toUpperCase() === buildingId
-     );
-
-      if (building) {
-        setMapTitle(translateBuildingName(building.name, locale));
-
-        if (floorId) {
-          const floor = building.floors.find((f) => f.id === floorId);
-          if (floor) {
-            setFloorLabel(translateFloorLabel(floor.label, locale));
-          }
-        }
-
-        setShowMapInfo(true);
-      } else {
-        setMapTitle(ui.mapHeader.buildingFallback);
-        setFloorLabel("");
-        setShowMapInfo(false);
-      }
-    } else {
-      setMapTitle("GGC Maps");
-      setFloorLabel("");
-      setShowMapInfo(false);
-    }
-  }, [pathname, locale, ui.mapHeader.campusMap, ui.mapHeader.buildingFallback, ui.mapHeader]); // deps kept safe
-
-  // Ensure all panels start closed on first mount regardless of components' own persisted state
-  useEffect(() => {
-    setOpenSidebar(false);
-    setOpenLegend(false);
-    setOpenLinks(false);
-  }, []);
-
-  // Close other right-side panel when opening one (avoid overlap)
-  const toggleLegend = () => {
-    setOpenLegend((v) => {
-      const next = !v;
-      if (next) setOpenLinks(false);
-      return next;
-    });
-  };
-
-  const toggleLinks = () => {
-    setOpenLinks((v) => {
-      const next = !v;
-      if (next) setOpenLegend(false);
-      return next;
-    });
+  // One value keeps the two right-side panels mutually exclusive.
+  const toggleRightPanel = (panel) => {
+    setRightPanel(current => current === panel ? null : panel);
   };
 
   const currentFloor = buildingData?.floors.find((f) => f.id === currentFloorId);
-  const translatedBuildingName = translateBuildingName(
-    buildingData?.name,
-    locale
-  );
   const translatedFloorLabel = translateFloorLabel(currentFloor?.label, locale);
 
   return (
     <div className="overlay-hud" aria-label={overlayCopy.mapControls}>
       {/* Map header (top center) */}
-      {showMapInfo && (
+      {mapTitle && (
         <div className="overlay-hud-header-top">
           <div className="overlay-map-header">
             <h2 className="overlay-map-title">{mapTitle}</h2>
@@ -195,7 +133,7 @@ export default function OverlayHUD({
             aria-label={
               openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend
             }
-            onClick={toggleLegend}
+            onClick={() => toggleRightPanel("legend")}
             title={
               openLegend ? overlayCopy.hideLegend : overlayCopy.showLegend
             }
@@ -211,7 +149,7 @@ export default function OverlayHUD({
           aria-label={
             openLinks ? overlayCopy.hideLinks : overlayCopy.showLinks
           }
-          onClick={toggleLinks}
+          onClick={() => toggleRightPanel("links")}
           title={openLinks ? overlayCopy.hideLinks : overlayCopy.showLinks}
         >
           <i className="bi bi-link-45deg" aria-hidden="true" />
@@ -318,7 +256,7 @@ export default function OverlayHUD({
             <button
               type="button"
               className="overlay-close"
-              onClick={() => setOpenLegend(false)}
+              onClick={() => setRightPanel(null)}
               aria-label={overlayCopy.closeLegend}
             >
               <i className="bi bi-x" aria-hidden="true" />
@@ -347,7 +285,7 @@ export default function OverlayHUD({
             <button
               type="button"
               className="overlay-close"
-              onClick={() => setOpenLinks(false)}
+              onClick={() => setRightPanel(null)}
               aria-label={overlayCopy.closeLinks}
             >
               <i className="bi bi-x" aria-hidden="true" />

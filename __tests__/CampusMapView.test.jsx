@@ -18,7 +18,7 @@ jest.mock('next/navigation', () => {
   };
 });
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CampusMapView from '../components/CampusMapView';
 import { LanguageProvider } from '../components/LanguageContext';
@@ -87,4 +87,17 @@ test('clicking building shape (not group) navigates correctly', async () => {
   
   await userEvent.click(buildingRect);
   expect(mockPush).toHaveBeenCalledWith('/building/B');
+});
+
+test.each(['Enter', ' '])('keyboard activation with %j uses the surrounding building ID', async (key) => {
+  renderWithProvider(<CampusMapView />);
+  await waitFor(() => expect(document.querySelector('svg')).toBeInTheDocument());
+
+  const shape = document.querySelector('g#B .building');
+  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+  fireEvent(shape, event);
+
+  expect(mockPush).toHaveBeenCalledTimes(1);
+  expect(mockPush).toHaveBeenCalledWith('/building/B');
+  expect(event.defaultPrevented).toBe(true);
 });

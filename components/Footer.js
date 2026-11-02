@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="footer">
       <div className="container">
-        <p>&copy; {currentYear} Team Lost - Georgia Gwinnett College. All Rights Reserved.</p>
+        <p>&copy; {currentYear} Team Lost. All Rights Reserved.</p>
       </div>
     </footer>
   );
